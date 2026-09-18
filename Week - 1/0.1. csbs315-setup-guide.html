@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Development Environment Setup — C, C#, and Python</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#F4F6FC;--surface:#FFFFFF;--border:#D0DAF0;--code-bg:#EEF1FA;
+  --navy:#1A2B5E;--blue:#2E5BFF;--accent:#4F8EF7;--text:#1E2A3A;--muted:#5A6A82;
+  --pill-c:#E8F0FE;--pill-c-text:#2E5BFF;
+  --pill-py:#FEF3E8;--pill-py-text:#C05E00;
+  --pill-cs:#F3E8FE;--pill-cs-text:#7B2FBE;
+  --green:#1A7A3C;--green-bg:#EAF7EE;
+  --red:#9B1C1C;--red-bg:#FEF2F2;
+  --yellow-bg:#FFFBEB;--yellow-border:#FCD34D;
+  --win:#0078D4;--win-bg:#EFF6FF;
+  --mac:#555555;--mac-bg:#F5F5F5;
+  --lin:#E95420;--lin-bg:#FFF0EC;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.75;}
+
+/* HERO */
+.hero-wrap{padding:44px 24px 0;max-width:960px;margin:0 auto;}
+.hero{background:linear-gradient(135deg,#1A2B5E 0%,#2E5BFF 100%);border-radius:18px;padding:44px 48px;color:#fff;position:relative;overflow:hidden;}
+.hero::after{content:'';position:absolute;bottom:-80px;right:-60px;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,0.05);}
+.hero-chip{display:inline-block;background:rgba(255,255,255,0.15);border-radius:20px;padding:3px 14px;font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,0.85);margin-bottom:14px;letter-spacing:.04em;}
+.hero h1{font-size:27px;font-weight:700;line-height:1.25;margin-bottom:10px;}
+.hero p{font-size:15px;color:rgba(255,255,255,0.75);max-width:560px;}
+.hero-langs{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap;}
+.lang-badge{padding:4px 14px;border-radius:20px;font-family:'DM Mono',monospace;font-size:12px;font-weight:500;}
+.badge-c{background:var(--pill-c);color:var(--pill-c-text);}
+.badge-cs{background:var(--pill-cs);color:var(--pill-cs-text);}
+.badge-py{background:var(--pill-py);color:var(--pill-py-text);}
+.hero-meta{display:flex;gap:28px;margin-top:22px;flex-wrap:wrap;}
+.hero-stat{display:flex;flex-direction:column;gap:2px;}
+.hero-stat-num{font-size:20px;font-weight:700;}
+.hero-stat-lbl{font-size:11px;color:rgba(255,255,255,0.5);font-family:'DM Mono',monospace;}
+
+/* STICKY NAV */
+.sticky-nav{position:sticky;top:0;z-index:100;background:rgba(244,246,252,0.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:0 24px;}
+.nav-inner{max-width:960px;margin:0 auto;display:flex;gap:4px;overflow-x:auto;padding:9px 0;scrollbar-width:none;}
+.nav-inner::-webkit-scrollbar{display:none;}
+.nav-btn{background:none;border:1px solid transparent;border-radius:6px;padding:4px 12px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .15s;}
+.nav-btn:hover{background:var(--code-bg);color:var(--blue);border-color:var(--border);}
+.nav-btn.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+
+/* PROGRESS */
+.progress-wrap{max-width:960px;margin:22px auto 0;padding:0 24px;}
+.prog-top{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:5px;}
+.prog-bar{height:4px;background:var(--border);border-radius:4px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--navy),var(--blue));border-radius:4px;width:0;transition:width .5s ease;}
+
+/* OS TABS */
+.os-tabs-wrap{max-width:960px;margin:28px auto 0;padding:0 24px;}
+.os-tabs{display:flex;gap:6px;margin-bottom:0;}
+.os-tab{display:flex;align-items:center;gap:8px;padding:9px 18px;border:2px solid var(--border);border-radius:10px 10px 0 0;background:var(--bg);cursor:pointer;font-size:13px;font-weight:600;transition:all .15s;border-bottom:none;}
+.os-tab.active-win{border-color:var(--win);background:var(--win-bg);color:var(--win);}
+.os-tab.active-mac{border-color:#555;background:var(--mac-bg);color:#333;}
+.os-tab.active-lin{border-color:var(--lin);background:var(--lin-bg);color:var(--lin);}
+.os-tab:not(.active-win):not(.active-mac):not(.active-lin){color:var(--muted);}
+.os-icon{font-size:16px;}
+.os-content{border:2px solid var(--border);border-radius:0 10px 10px 10px;background:var(--surface);padding:0;}
+.os-panel{display:none;padding:24px;}
+.os-panel.active{display:block;}
+.os-panel.win-panel .os-accent{color:var(--win);}
+.os-panel.mac-panel .os-accent{color:#555;}
+.os-panel.lin-panel .os-accent{color:var(--lin);}
+
+/* CONTENT */
+.content{max-width:960px;margin:0 auto 80px;padding:0 24px;}
+
+/* SECTION */
+.section{scroll-margin-top:64px;margin-top:36px;}
+.section-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+.section h2{font-size:21px;font-weight:700;color:var(--navy);margin-bottom:14px;line-height:1.3;}
+.section h3{font-size:16px;font-weight:600;color:var(--text);margin:22px 0 10px;}
+.section p{margin-bottom:12px;}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:14px;}
+
+/* STEP CARD */
+.step-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden;}
+.step-header{display:flex;align-items:flex-start;gap:14px;padding:16px 20px;}
+.step-num{min-width:32px;height:32px;border-radius:50%;background:var(--navy);color:#fff;font-family:'DM Mono',monospace;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.step-body{flex:1;}
+.step-title{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:4px;}
+.step-desc{font-size:14px;color:var(--text);line-height:1.6;}
+.step-content{padding:0 20px 16px 66px;}
+
+/* CODE */
+.code-wrap{margin:10px 0;}
+.code-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:4px;display:flex;align-items:center;justify-content:space-between;}
+.copy-btn{background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:2px 8px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);cursor:pointer;transition:all .15s;}
+.copy-btn:hover{background:var(--blue);color:#fff;border-color:var(--blue);}
+.code-block{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;}
+.code-block pre{font-family:'DM Mono',monospace;font-size:13px;color:var(--navy);line-height:1.65;white-space:pre;}
+.cc{color:#7A90B8;}
+.cs{color:#1A7A3C;}
+.inline-code{font-family:'DM Mono',monospace;background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:13px;}
+
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:12px 0;}
+
+/* BOXES */
+.info-box{background:#EFF6FF;border:1px solid #BFDBFE;border-left:4px solid var(--blue);border-radius:8px;padding:14px 16px;margin:12px 0;}
+.info-box p{font-size:14px;color:#1E3A8A;margin:0;}
+.warn-box{background:var(--yellow-bg);border:1px solid var(--yellow-border);border-left:4px solid #F59E0B;border-radius:8px;padding:14px 16px;margin:12px 0;}
+.warn-box p{font-size:14px;color:#92400E;margin:0;}
+.success-box{background:var(--green-bg);border:1px solid #6EE7B7;border-left:4px solid #10B981;border-radius:8px;padding:14px 16px;margin:12px 0;}
+.success-box p{font-size:14px;color:var(--green);margin:0;}
+.tip-box{background:var(--pill-cs);border:1px solid #D8B8F8;border-left:4px solid #8B5CF6;border-radius:8px;padding:14px 16px;margin:12px 0;}
+.tip-box p{font-size:14px;color:#4C1D95;margin:0;}
+
+/* PILL */
+.pill{display:inline-block;padding:2px 9px;border-radius:20px;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;}
+.pill-c{background:var(--pill-c);color:var(--pill-c-text);}
+.pill-cs{background:var(--pill-cs);color:var(--pill-cs-text);}
+.pill-py{background:var(--pill-py);color:var(--pill-py-text);}
+.pill-win{background:var(--win-bg);color:var(--win);}
+.pill-mac{background:var(--mac-bg);color:#333;}
+.pill-lin{background:var(--lin-bg);color:var(--lin);}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;margin:12px 0;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th{background:var(--navy);color:#fff;padding:10px 14px;text-align:left;font-weight:600;font-size:12px;}
+td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+tr:nth-child(even) td{background:var(--bg);}
+
+/* CHECKLIST */
+.checklist{list-style:none;display:flex;flex-direction:column;gap:8px;margin:12px 0;}
+.checklist li{display:flex;align-items:flex-start;gap:10px;font-size:14px;cursor:pointer;}
+.check-box{width:18px;height:18px;border:2px solid var(--border);border-radius:4px;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all .15s;background:var(--surface);}
+.check-box.done{background:var(--green);border-color:var(--green);}
+.check-box.done::after{content:'✓';color:#fff;font-size:11px;font-weight:700;}
+.check-text{line-height:1.5;}
+.check-text.done{text-decoration:line-through;color:var(--muted);}
+
+/* LANG SECTION HEADER */
+.lang-header{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:10px;margin:20px 0 12px;}
+.lang-header-c{background:var(--pill-c);border:1px solid #B8D0F8;}
+.lang-header-cs{background:var(--pill-cs);border:1px solid #D8B8F8;}
+.lang-header-py{background:var(--pill-py);border:1px solid #F8D8B8;}
+.lang-header-icon{font-size:22px;}
+.lang-header-name{font-size:16px;font-weight:700;}
+.lang-header-c .lang-header-name{color:var(--pill-c-text);}
+.lang-header-cs .lang-header-name{color:var(--pill-cs-text);}
+.lang-header-py .lang-header-name{color:var(--pill-py-text);}
+.lang-header-desc{font-size:13px;color:var(--muted);}
+
+/* VERIFY BOX */
+.verify-box{background:var(--green-bg);border:1px solid #6EE7B7;border-radius:10px;padding:16px 18px;margin:14px 0;}
+.verify-title{font-family:'DM Mono',monospace;font-size:11px;color:var(--green);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
+
+/* EXT CARD */
+.ext-card{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:8px;}
+.ext-icon{font-size:22px;flex-shrink:0;}
+.ext-name{font-size:14px;font-weight:700;color:var(--navy);}
+.ext-desc{font-size:13px;color:var(--muted);margin-top:2px;}
+.ext-tag{font-family:'DM Mono',monospace;font-size:10px;background:var(--code-bg);padding:2px 7px;border-radius:4px;color:var(--muted);margin-top:4px;display:inline-block;}
+
+/* TROUBLESHOOT */
+.trouble-item{border:1px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden;}
+.trouble-q{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;background:var(--surface);font-size:14px;font-weight:600;color:var(--navy);}
+.trouble-q:hover{background:var(--bg);}
+.trouble-chevron{color:var(--muted);transition:transform .2s;font-size:12px;}
+.trouble-item.open .trouble-chevron{transform:rotate(180deg);}
+.trouble-a{display:none;padding:12px 16px;border-top:1px solid var(--border);font-size:14px;color:var(--text);line-height:1.6;background:var(--bg);}
+.trouble-item.open .trouble-a{display:block;}
+
+@media(max-width:680px){
+  .hero{padding:32px 24px;}
+  .hero h1{font-size:21px;}
+  .g2,.g3{grid-template-columns:1fr;}
+  .os-tabs{flex-direction:column;}
+  .os-tab{border-radius:8px;border:2px solid var(--border);}
+  .os-content{border-radius:10px;}
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero-wrap">
+  <div class="hero">
+    <div class="hero-chip">CSBS 315 · Setup Guide</div>
+    <h1>Setting Up Your Development Environment</h1>
+    <p>Install everything you need to write and run C, C#, and Python programs — step by step for Windows, macOS, and Linux.</p>
+    <div class="hero-langs">
+      <span class="lang-badge badge-c">C · GCC</span>
+      <span class="lang-badge badge-cs">C# · .NET</span>
+      <span class="lang-badge badge-py">Python 3</span>
+    </div>
+    <div class="hero-meta">
+      <div class="hero-stat"><span class="hero-stat-num">3</span><span class="hero-stat-lbl">Languages</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">3</span><span class="hero-stat-lbl">Operating Systems</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">~30</span><span class="hero-stat-lbl">Min setup</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="sticky-nav">
+  <div class="nav-inner">
+    <button class="nav-btn active" onclick="goTo('s0',this)">0 · Overview</button>
+    <button class="nav-btn" onclick="goTo('s1',this)">1 · VS Code</button>
+    <button class="nav-btn" onclick="goTo('s2',this)">2 · Python</button>
+    <button class="nav-btn" onclick="goTo('s3',this)">3 · C</button>
+    <button class="nav-btn" onclick="goTo('s4',this)">4 · C#</button>
+    <button class="nav-btn" onclick="goTo('s5',this)">5 · VS Code Extensions</button>
+    <button class="nav-btn" onclick="goTo('s6',this)">6 · Verify Everything</button>
+    <button class="nav-btn" onclick="goTo('s7',this)">7 · First Programs</button>
+    <button class="nav-btn" onclick="goTo('s8',this)">8 · Troubleshooting</button>
+  </div>
+</nav>
+
+<!-- PROGRESS -->
+<div class="progress-wrap">
+  <div class="prog-top"><span id="prog-label">Setup progress</span><span id="prog-pct">0%</span></div>
+  <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+<!-- ══════════════════════ SECTION 0 — OVERVIEW ══════════════════════ -->
+<div class="section" id="s0">
+  <div class="section-label">Before You Start</div>
+  <h2>What You Are Installing and Why</h2>
+
+  <p>To write and run programs in C, C#, and Python, you need two things for each language: a <strong>compiler or interpreter</strong> (the software that actually runs your code) and an <strong>editor</strong> (where you write it). This guide sets up all three languages and one editor — Visual Studio Code — that works well for all of them.</p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Language</th><th>What runs your code</th><th>What you install</th><th>Approximate size</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="pill pill-py">Python</span></td>
+          <td>CPython interpreter</td>
+          <td>Python 3 (from python.org)</td>
+          <td>~30 MB</td>
+        </tr>
+        <tr>
+          <td><span class="pill pill-c">C</span></td>
+          <td>GCC compiler</td>
+          <td>GCC via MinGW (Windows) / Xcode Tools (Mac) / apt (Linux)</td>
+          <td>~200–500 MB</td>
+        </tr>
+        <tr>
+          <td><span class="pill pill-cs">C#</span></td>
+          <td>.NET Runtime + C# compiler (Roslyn)</td>
+          <td>.NET SDK (from microsoft.com)</td>
+          <td>~200 MB</td>
+        </tr>
+        <tr>
+          <td>Editor</td>
+          <td>—</td>
+          <td>Visual Studio Code (from code.visualstudio.com)</td>
+          <td>~80 MB</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="info-box">
+    <p><strong>Recommended order:</strong> Install VS Code first, then Python, then C (GCC), then C# (.NET SDK). Follow the steps for your operating system throughout each section.</p>
+  </div>
+
+  <h3>Select your operating system</h3>
+  <p>Click your operating system below. All instructions in every section will update to match your platform.</p>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0;">
+    <button class="os-tab active-win" id="btn-win" onclick="switchOS('win')"><span class="os-icon">🪟</span> Windows</button>
+    <button class="os-tab" id="btn-mac" onclick="switchOS('mac')"><span class="os-icon">🍎</span> macOS</button>
+    <button class="os-tab" id="btn-lin" onclick="switchOS('lin')"><span class="os-icon">🐧</span> Linux</button>
+  </div>
+
+  <div class="info-box">
+    <p id="os-note"><strong>Windows selected.</strong> All steps below are for Windows 10 or Windows 11. If your computer is running a different OS, click the button above to switch.</p>
+  </div>
+
+  <h3>Your setup checklist</h3>
+  <p>Check off each item as you complete it. Your progress is saved in this browser session.</p>
+  <ul class="checklist" id="master-checklist">
+    <li onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">VS Code installed and opens successfully</span></li>
+    <li onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">Python 3 installed — <span class="inline-code">python --version</span> shows 3.x</span></li>
+    <li onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">GCC installed — <span class="inline-code">gcc --version</span> works in terminal</span></li>
+    <li onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">.NET SDK installed — <span class="inline-code">dotnet --version</span> works in terminal</span></li>
+    <li onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">VS Code extensions installed (Python, C/C++, C#)</span></li>
+    <li onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">Hello World runs in all three languages</span></li>
+  </ul>
+</div>
+
+<!-- ══════════════════════ SECTION 1 — VS CODE ══════════════════════ -->
+<div class="section" id="s1">
+  <div class="section-label">Section 1</div>
+  <h2>Installing Visual Studio Code</h2>
+
+  <p>Visual Studio Code (VS Code) is a free, lightweight code editor made by Microsoft. It works on Windows, macOS, and Linux and supports all three languages through extensions. Install it first — before any language tools.</p>
+
+  <div class="warn-box">
+    <p><strong>VS Code vs Visual Studio:</strong> These are two different programs. <strong>Visual Studio Code</strong> (what we install here) is a lightweight editor. <strong>Visual Studio</strong> is a full IDE that is Windows-only and much larger. Make sure you download VS Code, not Visual Studio.</p>
+  </div>
+
+  <!-- WINDOWS -->
+  <div class="step-card" id="vscode-win">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title"><span class="pill pill-win">Windows</span> &nbsp;Download VS Code</div>
+        <div class="step-desc">Go to <strong>code.visualstudio.com</strong> and click the big blue <strong>"Download for Windows"</strong> button. This downloads a <span class="inline-code">.exe</span> installer file (about 80 MB).</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card" id="vscode-win2">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title"><span class="pill pill-win">Windows</span> &nbsp;Run the installer</div>
+        <div class="step-desc">Double-click the downloaded <span class="inline-code">VSCodeSetup-x64.exe</span> file. Accept the license agreement. On the <strong>"Select Additional Tasks"</strong> screen, check all four boxes — especially <strong>"Add to PATH"</strong> and <strong>"Open with Code"</strong>. Click Install.</div>
+      </div>
+    </div>
+    <div class="step-content">
+      <div class="tip-box"><p><strong>Tip:</strong> Checking "Add to PATH" lets you type <span class="inline-code">code .</span> in any terminal to open VS Code in the current folder. This is very useful throughout the course.</p></div>
+    </div>
+  </div>
+
+  <div class="step-card" id="vscode-win3">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title"><span class="pill pill-win">Windows</span> &nbsp;Launch VS Code</div>
+        <div class="step-desc">Click <strong>Finish</strong> with "Launch VS Code" checked, or find it in the Start menu. VS Code should open showing a Welcome tab. If it opens, this step is complete.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MACOS -->
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title"><span class="pill pill-mac">macOS</span> &nbsp;Download VS Code</div>
+        <div class="step-desc">Go to <strong>code.visualstudio.com</strong> and click <strong>"Download for Mac"</strong>. This downloads a <span class="inline-code">.zip</span> file. Double-click it to extract <span class="inline-code">Visual Studio Code.app</span>.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title"><span class="pill pill-mac">macOS</span> &nbsp;Move to Applications</div>
+        <div class="step-desc">Drag <span class="inline-code">Visual Studio Code.app</span> into your <strong>Applications</strong> folder. Then open it from Applications or Spotlight (⌘ Space → type "code").</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title"><span class="pill pill-mac">macOS</span> &nbsp;Add "code" command to Terminal</div>
+        <div class="step-desc">Inside VS Code, press <strong>⌘ Shift P</strong> to open the Command Palette. Type <strong>"shell command"</strong> and select <strong>"Shell Command: Install 'code' command in PATH"</strong>. Enter your password if prompted. Now you can type <span class="inline-code">code .</span> in any Terminal window.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LINUX -->
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title"><span class="pill pill-lin">Linux</span> &nbsp;Install via package manager (recommended)</div>
+        <div class="step-desc">Open a terminal and run the commands below. This adds Microsoft's repository and installs VS Code through your package manager, making future updates automatic.</div>
+      </div>
+    </div>
+    <div class="step-content">
+      <div class="code-wrap">
+        <div class="code-label"><span>Terminal — Ubuntu / Debian</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-block"><pre>sudo apt update
+sudo apt install wget gpg
+
+wget -qO- https://packages.microsoft.com/keys/microsoft.asc \
+  | gpg --dearmor > packages.microsoft.gpg
+
+sudo install -D -o root -g root -m 644 packages.microsoft.gpg \
+  /etc/apt/keyrings/packages.microsoft.gpg
+
+echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/packages.microsoft.gpg] \
+  https://packages.microsoft.com/repos/code stable main" \
+  | sudo tee /etc/apt/sources.list.d/vscode.list
+
+sudo apt update
+sudo apt install code</pre></div>
+      </div>
+      <div class="info-box"><p>For <strong>Fedora / RHEL</strong>: visit <strong>code.visualstudio.com</strong> and download the <span class="inline-code">.rpm</span> file, then run <span class="inline-code">sudo rpm -i code-*.rpm</span>. For <strong>Arch Linux</strong>: use <span class="inline-code">yay -S visual-studio-code-bin</span>.</p></div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title"><span class="pill pill-lin">Linux</span> &nbsp;Launch VS Code</div>
+        <div class="step-desc">Type <span class="inline-code">code</span> in the terminal, or find it in your applications menu. The Welcome tab should open.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="verify-box">
+    <div class="verify-title">✓ Verify VS Code installed correctly</div>
+    <p style="font-size:14px;color:var(--green);">Open a terminal (or Command Prompt on Windows) and run:</p>
+    <div class="code-wrap" style="margin-top:8px;">
+      <div class="code-block"><pre>code --version</pre></div>
+    </div>
+    <p style="font-size:14px;color:var(--green);margin-top:8px;">You should see a version number like <span class="inline-code">1.90.0</span>. If you see "command not found," reopen your terminal and try again — the PATH update takes effect in new terminal sessions.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════ SECTION 2 — PYTHON ══════════════════════ -->
+<div class="section" id="s2">
+  <div class="section-label">Section 2</div>
+  <h2>Installing Python 3</h2>
+
+  <div class="lang-header lang-header-py">
+    <span class="lang-header-icon">🐍</span>
+    <div>
+      <div class="lang-header-name">Python 3</div>
+      <div class="lang-header-desc">Install the latest Python 3 release. Python 2 is end-of-life — always install Python 3.</div>
+    </div>
+  </div>
+
+  <!-- WINDOWS -->
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title"><span class="pill pill-win">Windows</span> &nbsp;Download Python</div>
+        <div class="step-desc">Go to <strong>python.org/downloads</strong>. The site detects Windows and shows the latest Python 3 release. Click the big yellow <strong>"Download Python 3.x.x"</strong> button.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title"><span class="pill pill-win">Windows</span> &nbsp;Run the installer — critical checkbox</div>
+        <div class="step-desc">Double-click the downloaded <span class="inline-code">.exe</span> file. <strong>Before clicking Install Now, check the box that says "Add Python to PATH"</strong> at the bottom of the first screen. This is the most common mistake — if you skip it, Python will not work in the terminal.</div>
+      </div>
+    </div>
+    <div class="step-content">
+      <div class="warn-box"><p><strong>⚠ Critical:</strong> The "Add Python to PATH" checkbox is unchecked by default. If you miss it, you will need to uninstall and reinstall Python, or manually add it to PATH. Always check this box.</p></div>
+      <p style="font-size:14px;">After checking the box, click <strong>"Install Now"</strong>. The installation takes about 1–2 minutes.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title"><span class="pill pill-win">Windows</span> &nbsp;Verify in Command Prompt</div>
+        <div class="step-desc">Open a <strong>new</strong> Command Prompt window (Start → type "cmd" → Enter). Run the verification command below.</div>
+      </div>
+    </div>
+    <div class="step-content">
+      <div class="code-wrap">
+        <div class="code-label"><span>Command Prompt</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-block"><pre>python --version</pre></div>
+      </div>
+      <div class="info-box"><p>If you see <span class="inline-code">Python 3.x.x</span> — you're done. If you see <span class="inline-code">Python 2.x</span> or "not recognised," try <span class="inline-code">python3 --version</span>. On some Windows machines, use <span class="inline-code">py --version</span>.</p></div>
+    </div>
+  </div>
+
+  <!-- MACOS -->
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title"><span class="pill pill-mac">macOS</span> &nbsp;Check if Python 3 is already installed</div>
+        <div class="step-desc">Open Terminal (Applications → Utilities → Terminal, or ⌘ Space → "terminal"). Run:</div>
+      </div>
+    </div>
+    <div class="step-content">
+      <div class="code-wrap">
+        <div class="code-label"><span>Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-block"><pre>python3 --version</pre></div>
+      </div>
+      <p style="font-size:14px;margin-top:8px;">If you see <span class="inline-code">Python 3.x.x</span>, Python is already installed — skip to Section 3. If you see an error or Python 2.x, continue to the next step.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title"><span class="pill pill-mac">macOS</span> &nbsp;Install via python.org (recommended)</div>
+        <div class="step-desc">Go to <strong>python.org/downloads</strong>, download the macOS <span class="inline-code">.pkg</span> installer, and run it. Click through the installer screens (defaults are fine). Python will install to <span class="inline-code">/usr/local/bin/python3</span>.</div>
+      </div>
+    </div>
+    <div class="step-content">
+      <div class="tip-box"><p><strong>Alternative — Homebrew:</strong> If you use Homebrew, run <span class="inline-code">brew install python3</span>. Either method works for this course.</p></div>
+    </div>
+  </div>
+
+  <!-- LINUX -->
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title"><span class="pill pill-lin">Linux</span> &nbsp;Install Python 3</div>
+        <div class="step-desc">Python 3 is usually pre-installed on Linux. Check first, then install if needed:</div>
+      </div>
+    </div>
+    <div class="step-content">
+      <div class="code-wrap">
+        <div class="code-label"><span>Terminal — Ubuntu / Debian</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-block"><pre>python3 --version               <span class="cc"># check if already installed</span>
+sudo apt update
+sudo apt install python3 python3-pip python3-venv</pre></div>
+      </div>
+      <div class="code-wrap">
+        <div class="code-label"><span>Terminal — Fedora</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-block"><pre>sudo dnf install python3 python3-pip</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="verify-box">
+    <div class="verify-title">✓ Verify Python installation</div>
+    <div class="code-wrap">
+      <div class="code-block"><pre>python3 --version        <span class="cc"># macOS / Linux</span>
+python --version         <span class="cc"># Windows (or py --version)</span></pre></div>
+    </div>
+    <p style="font-size:14px;color:var(--green);margin-top:8px;">Expected output: <span class="inline-code">Python 3.11.x</span> or higher. Also verify pip (Python's package manager):</p>
+    <div class="code-wrap" style="margin-top:6px;">
+      <div class="code-block"><pre>pip3 --version           <span class="cc"># macOS / Linux</span>
+pip --version            <span class="cc"># Windows</span></pre></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════ SECTION 3 — C / GCC ══════════════════════ -->
+<div class="section" id="s3">
+  <div class="section-label">Section 3</div>
+  <h2>Installing GCC — the C Compiler</h2>
+
+  <div class="lang-header lang-header-c">
+    <span class="lang-header-icon">⚙️</span>
+    <div>
+      <div class="lang-header-name">C / GCC</div>
+      <div class="lang-header-desc">GCC (GNU Compiler Collection) is the standard C compiler. Installation varies most across operating systems.</div>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <p><strong>What GCC does:</strong> GCC takes your <span class="inline-code">.c</span> source file and compiles it into an executable your computer can run directly. Unlike Python (interpreted) or C# (JIT compiled), C produces a standalone binary — no runtime needed to distribute it.</p>
+  </div>
+
+  <!-- WINDOWS — MinGW -->
+  <h3><span class="pill pill-win">Windows</span> &nbsp;Installing GCC via MSYS2</h3>
+  <p>Windows does not include a C compiler. We install one via <strong>MSYS2</strong> — a package manager that provides GCC and other Unix tools for Windows.</p>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Download and install MSYS2</div>
+        <div class="step-desc">Go to <strong>msys2.org</strong> and download the installer (<span class="inline-code">msys2-x86_64-YYYYMMDD.exe</span>). Run it. Install to the default location <span class="inline-code">C:\msys64</span>. Click through the installer — defaults are correct.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Open the MSYS2 terminal and update packages</div>
+        <div class="step-desc">After installation, the MSYS2 terminal opens automatically. Run the update command. When it finishes and asks you to close the window, do so — then reopen MSYS2 from the Start menu and run the update again.</div>
+      </div>
+    </div>
+    <div class="step-content">
+      <div class="code-wrap">
+        <div class="code-label"><span>MSYS2 terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-block"><pre>pacman -Syu</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Install GCC</div>
+        <div class="step-desc">In the MSYS2 terminal, install the GCC toolchain:</div>
+      </div>
+    </div>
+    <div class="step-content">
+      <div class="code-wrap">
+        <div class="code-label"><span>MSYS2 terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-block"><pre>pacman -S --needed base-devel mingw-w64-ucrt-x86_64-toolchain</pre></div>
+      </div>
+      <p style="font-size:14px;margin-top:8px;">When asked "Enter a selection," press <strong>Enter</strong> to install everything. This downloads and installs GCC, G++, GDB (debugger), and related tools.</p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">Add GCC to Windows PATH</div>
+        <div class="step-desc">GCC installs to <span class="inline-code">C:\msys64\ucrt64\bin</span>. You need to add this folder to your Windows PATH so that Command Prompt and VS Code can find it.</div>
+      </div>
+    </div>
+    <div class="step-content">
+      <ol style="font-size:14px;padding-left:18px;line-height:2.2;">
+        <li>Press <strong>Windows key</strong>, type <strong>"environment variables"</strong>, click <strong>"Edit the system environment variables"</strong></li>
+        <li>Click <strong>"Environment Variables…"</strong> button at the bottom</li>
+        <li>Under <strong>"System variables"</strong>, find <strong>Path</strong> and click <strong>Edit</strong></li>
+        <li>Click <strong>New</strong> and type: <span class="inline-code">C:\msys64\ucrt64\bin</span></li>
+        <li>Click <strong>OK</strong> on all three windows</li>
+        <li><strong>Open a new Command Prompt</strong> (existing ones won't see the change)</li>
+      </ol>
+      <div class="warn-box" style="margin-top:8px;"><p><strong>Important:</strong> Always open a <em>new</em> Command Prompt after changing PATH. Existing windows won't see the update.</p></div>
+    </div>
+  </div>
+
+  <!-- MACOS -->
+  <h3><span class="pill pill-mac">macOS</span> &nbsp;Installing GCC via Xcode Command Line Tools</h3>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Install Xcode Command Line Tools</div>
+        <div class="step-desc">Open Terminal and run the command below. A dialog box will appear — click <strong>Install</strong> (not "Get Xcode"). This installs Apple's version of GCC/Clang and other development tools (~700 MB). It may take 5–15 minutes.</div>
+      </div>
+    </div>
+    <div class="step-content">
+      <div class="code-wrap">
+        <div class="code-label"><span>Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-block"><pre>xcode-select --install</pre></div>
+      </div>
+      <div class="info-box"><p><strong>Note:</strong> macOS installs Clang (Apple's compiler) which is fully compatible with GCC for this course. When you run <span class="inline-code">gcc</span> on macOS, it actually runs Clang — this is fine. All C code in CSBS 315 compiles with either.</p></div>
+    </div>
+  </div>
+
+  <!-- LINUX -->
+  <h3><span class="pill pill-lin">Linux</span> &nbsp;Installing GCC</h3>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Install the build-essential package</div>
+        <div class="step-desc">This installs GCC, G++, make, and other essential build tools in one command:</div>
+      </div>
+    </div>
+    <div class="step-content">
+      <div class="code-wrap">
+        <div class="code-label"><span>Terminal — Ubuntu / Debian</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-block"><pre>sudo apt update
+sudo apt install build-essential gdb</pre></div>
+      </div>
+      <div class="code-wrap">
+        <div class="code-label"><span>Terminal — Fedora</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-block"><pre>sudo dnf groupinstall "Development Tools"
+sudo dnf install gdb</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="verify-box">
+    <div class="verify-title">✓ Verify GCC installation</div>
+    <div class="code-wrap">
+      <div class="code-block"><pre>gcc --version</pre></div>
+    </div>
+    <p style="font-size:14px;color:var(--green);margin-top:8px;">Expected output: something like <span class="inline-code">gcc (GCC) 13.x.x</span> or on macOS <span class="inline-code">Apple clang version 15.x.x</span>. Both are correct. If this command is not found, reopen your terminal and try again.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════ SECTION 4 — C# / .NET ══════════════════════ -->
+<div class="section" id="s4">
+  <div class="section-label">Section 4</div>
+  <h2>Installing the .NET SDK for C#</h2>
+
+  <div class="lang-header lang-header-cs">
+    <span class="lang-header-icon">◈</span>
+    <div>
+      <div class="lang-header-name">C# / .NET SDK</div>
+      <div class="lang-header-desc">The .NET SDK includes the C# compiler, the .NET runtime, and the <span class="inline-code">dotnet</span> command-line tool. Install the latest LTS (Long-Term Support) version.</div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Download the .NET SDK</div>
+        <div class="step-desc">Go to <strong>dotnet.microsoft.com/download</strong>. Download the <strong>.NET SDK</strong> (not the Runtime — the SDK includes everything). Choose the latest <strong>LTS version</strong> (look for the "Long Term Support" label). Select your operating system.</div>
+      </div>
+    </div>
+    <div class="step-content">
+      <div class="info-box"><p><strong>SDK vs Runtime:</strong> The SDK includes the compiler and tools needed to write and build programs. The Runtime only runs already-compiled programs. Always install the SDK for development.</p></div>
+    </div>
+  </div>
+
+  <!-- WINDOWS .NET -->
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title"><span class="pill pill-win">Windows</span> &nbsp;Run the .NET installer</div>
+        <div class="step-desc">Run the downloaded <span class="inline-code">.exe</span> file. Click through the installer — all defaults are correct. The installer automatically adds <span class="inline-code">dotnet</span> to your PATH. No extra steps needed.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MACOS .NET -->
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title"><span class="pill pill-mac">macOS</span> &nbsp;Run the .NET installer</div>
+        <div class="step-desc">Run the downloaded <span class="inline-code">.pkg</span> file. Click through the installer. Open a <strong>new</strong> Terminal window after installation completes.</div>
+      </div>
+    </div>
+    <div class="step-content">
+      <div class="tip-box"><p><strong>Apple Silicon (M1/M2/M3):</strong> Download the <strong>Arm64</strong> version of the .NET SDK, not x64. The download page should auto-detect this — look for "macOS Arm64" in the download options if it doesn't.</p></div>
+    </div>
+  </div>
+
+  <!-- LINUX .NET -->
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title"><span class="pill pill-lin">Linux</span> &nbsp;Install .NET via package manager</div>
+        <div class="step-desc">Microsoft provides packages for most Linux distributions. Run the commands below for Ubuntu/Debian:</div>
+      </div>
+    </div>
+    <div class="step-content">
+      <div class="code-wrap">
+        <div class="code-label"><span>Terminal — Ubuntu 22.04 / Debian 12</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-block"><pre>sudo apt update
+sudo apt install -y dotnet-sdk-8.0</pre></div>
+      </div>
+      <div class="code-wrap">
+        <div class="code-label"><span>Terminal — Fedora</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-block"><pre>sudo dnf install dotnet-sdk-8.0</pre></div>
+      </div>
+      <div class="info-box"><p>If the package is not found, visit <strong>learn.microsoft.com/dotnet/core/install/linux</strong> for your specific distribution's instructions.</p></div>
+    </div>
+  </div>
+
+  <div class="verify-box">
+    <div class="verify-title">✓ Verify .NET SDK installation</div>
+    <div class="code-wrap">
+      <div class="code-block"><pre>dotnet --version</pre></div>
+    </div>
+    <p style="font-size:14px;color:var(--green);margin-top:8px;">Expected output: <span class="inline-code">8.0.x</span> (or whichever LTS version you installed). Also run:</p>
+    <div class="code-wrap" style="margin-top:6px;">
+      <div class="code-block"><pre>dotnet --list-sdks</pre></div>
+    </div>
+    <p style="font-size:14px;color:var(--green);margin-top:6px;">This lists all installed .NET SDK versions. You should see at least one entry.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════ SECTION 5 — EXTENSIONS ══════════════════════ -->
+<div class="section" id="s5">
+  <div class="section-label">Section 5</div>
+  <h2>VS Code Extensions</h2>
+
+  <p>VS Code is a general-purpose editor. Language-specific features — syntax highlighting, IntelliSense, debugging, running code — come from extensions. Install these three now.</p>
+
+  <div class="info-box">
+    <p><strong>How to install an extension:</strong> In VS Code, click the Extensions icon in the left sidebar (it looks like four squares), or press <strong>Ctrl+Shift+X</strong> (Windows/Linux) or <strong>⌘Shift+X</strong> (macOS). Search for the extension name and click Install.</p>
+  </div>
+
+  <h3>Required Extensions</h3>
+
+  <div class="ext-card">
+    <span class="ext-icon">🐍</span>
+    <div style="flex:1;">
+      <div class="ext-name">Python</div>
+      <div class="ext-desc">Official Python extension from Microsoft. Adds IntelliSense, linting, debugging, Jupyter notebook support, and the ability to run Python files directly in VS Code.</div>
+      <div class="ext-tag">Publisher: Microsoft · Extension ID: ms-python.python</div>
+    </div>
+    <span class="pill pill-py">Required</span>
+  </div>
+
+  <div class="ext-card">
+    <span class="ext-icon">⚙️</span>
+    <div style="flex:1;">
+      <div class="ext-name">C/C++</div>
+      <div class="ext-desc">Official C and C++ extension from Microsoft. Adds IntelliSense, code navigation, debugging support via GDB, and syntax highlighting for <span class="inline-code">.c</span> and <span class="inline-code">.h</span> files.</div>
+      <div class="ext-tag">Publisher: Microsoft · Extension ID: ms-vscode.cpptools</div>
+    </div>
+    <span class="pill pill-c">Required</span>
+  </div>
+
+  <div class="ext-card">
+    <span class="ext-icon">◈</span>
+    <div style="flex:1;">
+      <div class="ext-name">C# Dev Kit</div>
+      <div class="ext-desc">Official C# extension from Microsoft. Adds IntelliSense, project management, debugging, and the ability to create and run .NET projects directly from VS Code.</div>
+      <div class="ext-tag">Publisher: Microsoft · Extension ID: ms-dotnettools.csdevkit</div>
+    </div>
+    <span class="pill pill-cs">Required</span>
+  </div>
+
+  <h3>Strongly Recommended Extensions</h3>
+
+  <div class="ext-card">
+    <span class="ext-icon">🎨</span>
+    <div style="flex:1;">
+      <div class="ext-name">Prettier — Code Formatter</div>
+      <div class="ext-desc">Automatically formats your code to be consistently indented and structured. Saves time and prevents formatting-related mistakes, especially in Python where indentation matters.</div>
+      <div class="ext-tag">Publisher: Prettier · Extension ID: esbenp.prettier-vscode</div>
+    </div>
+  </div>
+
+  <div class="ext-card">
+    <span class="ext-icon">🔍</span>
+    <div style="flex:1;">
+      <div class="ext-name">Error Lens</div>
+      <div class="ext-desc">Shows errors and warnings inline in the editor, right on the line where they occur — instead of only in the Problems panel at the bottom. Makes spotting mistakes much faster.</div>
+      <div class="ext-tag">Publisher: Alexander · Extension ID: usernamehw.errorlens</div>
+    </div>
+  </div>
+
+  <div class="ext-card">
+    <span class="ext-icon">🌈</span>
+    <div style="flex:1;">
+      <div class="ext-name">Bracket Pair Colorizer 2 / Rainbow Brackets</div>
+      <div class="ext-desc">Colours matching brackets, parentheses, and curly braces in the same colour. Makes it much easier to track nested blocks in C and C# code.</div>
+      <div class="ext-tag">Publisher: Various · Search "Rainbow Brackets" in Extensions</div>
+    </div>
+  </div>
+
+  <h3>Configuring the Python interpreter in VS Code</h3>
+  <p>After installing the Python extension, you need to tell VS Code which Python installation to use:</p>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Open the Command Palette</div>
+        <div class="step-desc">Press <strong>Ctrl+Shift+P</strong> (Windows/Linux) or <strong>⌘Shift+P</strong> (macOS). Type <strong>"Python: Select Interpreter"</strong> and press Enter.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Select your Python 3 installation</div>
+        <div class="step-desc">VS Code shows a list of Python installations it found. Select the one showing <strong>Python 3.x</strong> (not 2.x). On Windows it will show a path like <span class="inline-code">C:\Users\YourName\AppData\Local\Programs\Python\Python3x\python.exe</span>.</div>
+      </div>
+    </div>
+    <div class="step-content">
+      <div class="info-box"><p>The selected interpreter appears in the bottom status bar of VS Code. You can click it at any time to switch interpreters.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════ SECTION 6 — VERIFY EVERYTHING ══════════════════════ -->
+<div class="section" id="s6">
+  <div class="section-label">Section 6</div>
+  <h2>Verifying the Complete Installation</h2>
+
+  <p>Run all four verification commands in a single terminal session to confirm everything is installed and on the PATH.</p>
+
+  <div class="code-wrap">
+    <div class="code-label"><span>Terminal / Command Prompt — run all four</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+    <div class="code-block"><pre>code --version       <span class="cc"># VS Code</span>
+python3 --version    <span class="cc"># Python 3  (use "python" on Windows)</span>
+gcc --version        <span class="cc"># C compiler</span>
+dotnet --version     <span class="cc"># C# / .NET SDK</span></pre></div>
+  </div>
+
+  <div class="success-box">
+    <p><strong>All four should show version numbers.</strong> If any command says "not found" or "not recognised," jump to Section 8 — Troubleshooting for that specific tool.</p>
+  </div>
+
+  <h3>Expected output — what success looks like</h3>
+  <div class="g2">
+    <div>
+      <div class="code-label"><span>Windows — expected</span></div>
+      <div class="code-block"><pre>1.90.0              <span class="cc"># VS Code</span>
+Python 3.12.3       <span class="cc"># Python</span>
+gcc (GCC) 13.2.0    <span class="cc"># GCC</span>
+8.0.300             <span class="cc"># .NET SDK</span></pre></div>
+    </div>
+    <div>
+      <div class="code-label"><span>macOS / Linux — expected</span></div>
+      <div class="code-block"><pre>1.90.0              <span class="cc"># VS Code</span>
+Python 3.12.3       <span class="cc"># Python</span>
+Apple clang 15.0.0  <span class="cc"># GCC/Clang</span>
+8.0.300             <span class="cc"># .NET SDK</span></pre></div>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <p><strong>Version numbers do not need to match exactly.</strong> Any Python 3.x, GCC 11+, and .NET 6+ will work for this course. What matters is that the commands are found and respond with a version number.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════ SECTION 7 — FIRST PROGRAMS ══════════════════════ -->
+<div class="section" id="s7">
+  <div class="section-label">Section 7</div>
+  <h2>Your First Programs — Hello World in All Three Languages</h2>
+
+  <p>The best way to confirm everything works is to write, compile/interpret, and run a program in each language. Follow these steps for each one.</p>
+
+  <!-- PYTHON -->
+  <div class="lang-header lang-header-py">
+    <span class="lang-header-icon">🐍</span>
+    <div>
+      <div class="lang-header-name">Python — Hello World</div>
+      <div class="lang-header-desc">No compilation step needed — Python runs directly.</div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Create a new file in VS Code</div>
+        <div class="step-desc">Open VS Code. Click <strong>File → New File</strong>. Save it as <span class="inline-code">hello.py</span> (the <span class="inline-code">.py</span> extension tells VS Code this is Python).</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Write the program</div>
+      </div>
+    </div>
+    <div class="step-content">
+      <div class="code-wrap">
+        <div class="code-label"><span>hello.py</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-block"><pre>print(<span class="cs">"Hello, World!"</span>)
+print(<span class="cs">"Python is working correctly."</span>)</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Run the program</div>
+        <div class="step-desc"><strong>Method 1 (VS Code):</strong> Click the ▶ Run button in the top-right corner of the editor.<br><strong>Method 2 (terminal):</strong> Open the VS Code terminal (<strong>Ctrl+`</strong> or View → Terminal) and run:</div>
+      </div>
+    </div>
+    <div class="step-content">
+      <div class="code-wrap">
+        <div class="code-label"><span>Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-block"><pre>python3 hello.py     <span class="cc"># macOS / Linux</span>
+python hello.py      <span class="cc"># Windows</span></pre></div>
+      </div>
+      <div class="verify-box" style="margin-top:10px;">
+        <div class="verify-title">✓ Expected output</div>
+        <div class="code-block"><pre>Hello, World!
+Python is working correctly.</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- C -->
+  <div class="lang-header lang-header-c">
+    <span class="lang-header-icon">⚙️</span>
+    <div>
+      <div class="lang-header-name">C — Hello World</div>
+      <div class="lang-header-desc">C requires a compile step before running. Two commands: compile, then execute.</div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Create hello.c in VS Code</div>
+        <div class="step-desc">Create a new file, save it as <span class="inline-code">hello.c</span>. Write the program below exactly — every character matters in C.</div>
+      </div>
+    </div>
+    <div class="step-content">
+      <div class="code-wrap">
+        <div class="code-label"><span>hello.c</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-block"><pre>#include &lt;stdio.h&gt;
+
+int main() {
+    printf(<span class="cs">"Hello, World!\n"</span>);
+    printf(<span class="cs">"C is working correctly.\n"</span>);
+    return 0;
+}</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Compile and run from the terminal</div>
+        <div class="step-desc">Open the VS Code terminal (<strong>Ctrl+`</strong>). Navigate to the folder where you saved <span class="inline-code">hello.c</span>, then compile and run:</div>
+      </div>
+    </div>
+    <div class="step-content">
+      <div class="code-wrap">
+        <div class="code-label"><span>Terminal — compile then run</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-block"><pre>gcc hello.c -o hello    <span class="cc"># compile: creates an executable named "hello"</span>
+./hello                 <span class="cc"># run it (macOS / Linux)</span>
+hello.exe               <span class="cc"># run it (Windows)</span></pre></div>
+      </div>
+      <div class="info-box"><p><strong>What <span class="inline-code">-o hello</span> means:</strong> The <span class="inline-code">-o</span> flag tells GCC what to name the output file. Without it, GCC creates a file named <span class="inline-code">a.out</span> (or <span class="inline-code">a.exe</span> on Windows). Naming it something meaningful is good practice.</p></div>
+      <div class="verify-box" style="margin-top:10px;">
+        <div class="verify-title">✓ Expected output</div>
+        <div class="code-block"><pre>Hello, World!
+C is working correctly.</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- C# -->
+  <div class="lang-header lang-header-cs">
+    <span class="lang-header-icon">◈</span>
+    <div>
+      <div class="lang-header-name">C# — Hello World</div>
+      <div class="lang-header-desc">C# uses the dotnet CLI to create, build, and run projects. Always work inside a project folder.</div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Create a new C# console project</div>
+        <div class="step-desc">Open the VS Code terminal. Navigate to a folder where you want to store your C# code. Run the command below — it creates a new folder called <span class="inline-code">HelloCSharp</span> with a working C# console project inside.</div>
+      </div>
+    </div>
+    <div class="step-content">
+      <div class="code-wrap">
+        <div class="code-label"><span>Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-block"><pre>dotnet new console -n HelloCSharp
+cd HelloCSharp</pre></div>
+      </div>
+      <p style="font-size:14px;margin-top:8px;">This creates a folder with <span class="inline-code">Program.cs</span> (the C# source file), a <span class="inline-code">.csproj</span> project file, and an <span class="inline-code">obj/</span> folder. Open the folder in VS Code: <span class="inline-code">code .</span></p>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Edit Program.cs</div>
+        <div class="step-desc">Open <span class="inline-code">Program.cs</span> in VS Code. It may already contain a Hello World. Replace the contents with:</div>
+      </div>
+    </div>
+    <div class="step-content">
+      <div class="code-wrap">
+        <div class="code-label"><span>Program.cs</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-block"><pre>Console.WriteLine(<span class="cs">"Hello, World!"</span>);
+Console.WriteLine(<span class="cs">"C# is working correctly."</span>);</pre></div>
+      </div>
+      <div class="tip-box"><p><strong>Modern C# (top-level statements):</strong> Since .NET 6, you don't need a <span class="inline-code">class</span> or <span class="inline-code">Main</span> method for simple programs. The two lines above are a complete, valid C# program. We will cover what this means in Chapter 6.</p></div>
+    </div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Build and run</div>
+        <div class="step-desc">In the terminal (inside the HelloCSharp folder), run:</div>
+      </div>
+    </div>
+    <div class="step-content">
+      <div class="code-wrap">
+        <div class="code-label"><span>Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <div class="code-block"><pre>dotnet run</pre></div>
+      </div>
+      <p style="font-size:14px;margin-top:8px;"><span class="inline-code">dotnet run</span> compiles and runs the project in one step. You can also separate them: <span class="inline-code">dotnet build</span> then <span class="inline-code">dotnet run</span>.</p>
+      <div class="verify-box" style="margin-top:10px;">
+        <div class="verify-title">✓ Expected output</div>
+        <div class="code-block"><pre>Hello, World!
+C# is working correctly.</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="success-box" style="margin-top:8px;">
+    <p><strong>All three working?</strong> You are fully set up. Every program in this course can be written and run using exactly this workflow — create the file (or project for C#), write the code, compile if needed, and run.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════ SECTION 8 — TROUBLESHOOTING ══════════════════════ -->
+<div class="section" id="s8">
+  <div class="section-label">Section 8</div>
+  <h2>Troubleshooting Common Problems</h2>
+  <p>Click any problem below to expand the solution.</p>
+
+  <div class="trouble-item" onclick="toggleTrouble(this)">
+    <div class="trouble-q">"python is not recognised as an internal or external command" <span class="trouble-chevron">▼</span></div>
+    <div class="trouble-a">
+      <p><strong>Cause:</strong> Python was installed without checking "Add to PATH," or the terminal was opened before Python was installed.</p>
+      <p style="margin-top:8px;"><strong>Fix (Windows):</strong></p>
+      <ol style="padding-left:18px;margin-top:6px;line-height:2;">
+        <li>Try <span class="inline-code">py --version</span> instead — the Python Launcher may still work</li>
+        <li>If that fails, uninstall Python from Settings → Apps, then reinstall and <strong>check "Add to PATH"</strong></li>
+        <li>Always open a <em>new</em> terminal after installing</li>
+      </ol>
+      <p style="margin-top:8px;"><strong>Fix (macOS/Linux):</strong> Use <span class="inline-code">python3</span> instead of <span class="inline-code">python</span> — on Unix systems Python 3 is usually accessed as <span class="inline-code">python3</span>.</p>
+    </div>
+  </div>
+
+  <div class="trouble-item" onclick="toggleTrouble(this)">
+    <div class="trouble-q">"gcc is not recognised" or "gcc: command not found" <span class="trouble-chevron">▼</span></div>
+    <div class="trouble-a">
+      <p><strong>Windows:</strong> The MSYS2 bin folder was not added to PATH, or you need to open a new terminal. Check that <span class="inline-code">C:\msys64\ucrt64\bin</span> is in your System PATH (see Section 3, Step 4). Open a new Command Prompt and try again.</p>
+      <p style="margin-top:8px;"><strong>macOS:</strong> Run <span class="inline-code">xcode-select --install</span> again. If it says "already installed," try <span class="inline-code">clang --version</span> instead of <span class="inline-code">gcc --version</span> — on macOS, <span class="inline-code">gcc</span> is an alias for Clang and sometimes the alias isn't set up. Both work fine.</p>
+      <p style="margin-top:8px;"><strong>Linux:</strong> Run <span class="inline-code">sudo apt install build-essential</span> again and check for errors. Try <span class="inline-code">which gcc</span> to see if it's installed but not on PATH.</p>
+    </div>
+  </div>
+
+  <div class="trouble-item" onclick="toggleTrouble(this)">
+    <div class="trouble-q">"dotnet is not recognised" / dotnet command not found <span class="trouble-chevron">▼</span></div>
+    <div class="trouble-a">
+      <p>The .NET SDK installer should add <span class="inline-code">dotnet</span> to your PATH automatically. If it didn't:</p>
+      <p style="margin-top:8px;"><strong>Windows:</strong> Open a new Command Prompt (not the one you had open during installation). The PATH update only applies to new terminal sessions.</p>
+      <p style="margin-top:8px;"><strong>macOS/Linux:</strong> Run <span class="inline-code">echo $PATH</span> and check if <span class="inline-code">/usr/local/share/dotnet</span> or <span class="inline-code">~/.dotnet</span> appears. If not, add it manually to your shell profile (<span class="inline-code">~/.zshrc</span> on macOS, <span class="inline-code">~/.bashrc</span> on Linux):</p>
+      <div class="code-wrap" style="margin-top:8px;">
+        <div class="code-block"><pre>export PATH=$PATH:$HOME/.dotnet
+export PATH=$PATH:/usr/local/share/dotnet</pre></div>
+      </div>
+      <p>Then run <span class="inline-code">source ~/.zshrc</span> (or <span class="inline-code">source ~/.bashrc</span>) and try again.</p>
+    </div>
+  </div>
+
+  <div class="trouble-item" onclick="toggleTrouble(this)">
+    <div class="trouble-q">VS Code does not show Python as an available interpreter <span class="trouble-chevron">▼</span></div>
+    <div class="trouble-a">
+      <p>The Python extension may not have found your Python installation. Try these steps:</p>
+      <ol style="padding-left:18px;margin-top:8px;line-height:2.2;">
+        <li>Open the Command Palette (<strong>Ctrl+Shift+P</strong>) → type "Python: Select Interpreter"</li>
+        <li>Click <strong>"Enter interpreter path…"</strong> at the bottom of the list</li>
+        <li>Browse to your Python executable: <br>Windows: <span class="inline-code">C:\Users\YourName\AppData\Local\Programs\Python\Python3x\python.exe</span><br>macOS: <span class="inline-code">/usr/local/bin/python3</span><br>Linux: <span class="inline-code">/usr/bin/python3</span></li>
+        <li>Click <strong>Select Interpreter</strong></li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="trouble-item" onclick="toggleTrouble(this)">
+    <div class="trouble-q">C program compiles but the output window disappears immediately <span class="trouble-chevron">▼</span></div>
+    <div class="trouble-a">
+      <p>This happens when you run the compiled program by double-clicking the <span class="inline-code">.exe</span> file — the console window opens, shows output, and immediately closes.</p>
+      <p style="margin-top:8px;"><strong>Fix:</strong> Always run C programs from the terminal (VS Code terminal, Command Prompt, or Terminal), not by double-clicking. In the terminal the output stays visible after the program finishes.</p>
+      <div class="code-wrap" style="margin-top:8px;">
+        <div class="code-block"><pre>gcc hello.c -o hello
+./hello              <span class="cc"># macOS/Linux</span>
+.\hello.exe          <span class="cc"># Windows PowerShell</span>
+hello.exe            <span class="cc"># Windows Command Prompt</span></pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="trouble-item" onclick="toggleTrouble(this)">
+    <div class="trouble-q">Python IndentationError when running a file <span class="trouble-chevron">▼</span></div>
+    <div class="trouble-a">
+      <p><strong>Cause:</strong> Python uses indentation to define code structure. Mixing tabs and spaces causes an IndentationError, even if the code looks correct visually.</p>
+      <p style="margin-top:8px;"><strong>Fix:</strong> In VS Code, go to <strong>View → Command Palette</strong> → <strong>"Convert Indentation to Spaces"</strong>. Set your tab size to 4 (bottom-right corner of VS Code shows "Spaces: 4"). Never mix tabs and spaces in Python files.</p>
+      <p style="margin-top:8px;">To prevent this in future: in VS Code settings, search for "editor.insertSpaces" and set it to <span class="inline-code">true</span>, and "editor.tabSize" to <span class="inline-code">4</span>.</p>
+    </div>
+  </div>
+
+  <div class="trouble-item" onclick="toggleTrouble(this)">
+    <div class="trouble-q">C# error: "The project file is not in the current directory" <span class="trouble-chevron">▼</span></div>
+    <div class="trouble-a">
+      <p><span class="inline-code">dotnet run</span> must be run from inside the folder that contains the <span class="inline-code">.csproj</span> file — not from a parent folder, and not from the <span class="inline-code">obj</span> or <span class="inline-code">bin</span> subfolder.</p>
+      <div class="code-wrap" style="margin-top:8px;">
+        <div class="code-block"><pre>cd HelloCSharp        <span class="cc"># navigate INTO the project folder</span>
+ls                    <span class="cc"># you should see HelloCSharp.csproj and Program.cs</span>
+dotnet run            <span class="cc"># now run</span></pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="trouble-item" onclick="toggleTrouble(this)">
+    <div class="trouble-q">On macOS: "xcrun: error: invalid active developer path" when running gcc <span class="trouble-chevron">▼</span></div>
+    <div class="trouble-a">
+      <p>This means Xcode Command Line Tools need to be (re)installed, usually after a macOS update.</p>
+      <div class="code-wrap" style="margin-top:8px;">
+        <div class="code-block"><pre>xcode-select --install</pre></div>
+      </div>
+      <p style="margin-top:8px;">If that shows "already installed," reset the path first:</p>
+      <div class="code-wrap" style="margin-top:6px;">
+        <div class="code-block"><pre>sudo xcode-select --reset
+xcode-select --install</pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-box" style="margin-top:16px;">
+    <p><strong>Still stuck?</strong> Copy the exact error message from your terminal and search for it online. Stack Overflow, the official VS Code documentation at <strong>code.visualstudio.com/docs</strong>, and the .NET documentation at <strong>learn.microsoft.com</strong> cover almost every installation problem. Include your operating system and version in your search for best results.</p>
+  </div>
+</div>
+
+</div><!-- end .content -->
+
+<script>
+// NAV
+const SEC = ['s0','s1','s2','s3','s4','s5','s6','s7','s8'];
+function goTo(id, btn) {
+  document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'});
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+window.addEventListener('scroll', () => {
+  let cur = SEC[0];
+  SEC.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && window.scrollY >= el.offsetTop - 90) cur = id;
+  });
+  document.querySelectorAll('.nav-btn').forEach((b,i) => b.classList.toggle('active', SEC[i]===cur));
+  const pct = Math.min(100, Math.round((window.scrollY/(document.body.scrollHeight-window.innerHeight))*100));
+  document.getElementById('progFill').style.width = pct+'%';
+  document.getElementById('prog-pct').textContent = pct+'%';
+});
+
+// OS SWITCHER
+const OS_NOTES = {
+  win:'<strong>Windows selected.</strong> All steps below are for Windows 10 or Windows 11. If your computer runs a different OS, click the button above to switch.',
+  mac:'<strong>macOS selected.</strong> Steps work on macOS 12 Monterey or later. Apple Silicon (M1/M2/M3) and Intel Macs are both supported — any differences are noted.',
+  lin:'<strong>Linux selected.</strong> Primary instructions are for Ubuntu 22.04 / Debian. Alternatives for Fedora and Arch are noted where they differ.'
+};
+function switchOS(os) {
+  ['win','mac','lin'].forEach(o => {
+    document.getElementById('btn-'+o).className = 'os-tab' + (o===os ? ' active-'+o : '');
+  });
+  document.getElementById('os-note').innerHTML = OS_NOTES[os];
+}
+
+// CHECKLIST
+function toggleCheck(li) {
+  const box = li.querySelector('.check-box');
+  const txt = li.querySelector('.check-text');
+  box.classList.toggle('done');
+  txt.classList.toggle('done');
+}
+
+// TROUBLESHOOT
+function toggleTrouble(item) {
+  item.classList.toggle('open');
+}
+
+// COPY
+function copyCode(btn) {
+  const pre = btn.closest('.code-wrap').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = 'copied!';
+    setTimeout(()=>btn.textContent='copy', 1600);
+  });
+}
+</script>
+</body>
+</html>

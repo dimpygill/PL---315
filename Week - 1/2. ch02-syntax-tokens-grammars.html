@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 2 — Syntax, Tokens, and Grammars</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#F4F6FC;--surface:#FFFFFF;--border:#D0DAF0;--code-bg:#EEF1FA;
+  --navy:#1A2B5E;--blue:#2E5BFF;--accent:#4F8EF7;--text:#1E2A3A;--muted:#5A6A82;
+  --pill-c:#E8F0FE;--pill-c-text:#2E5BFF;
+  --pill-py:#FEF3E8;--pill-py-text:#C05E00;
+  --pill-cs:#F3E8FE;--pill-cs-text:#7B2FBE;
+  --green:#1A7A3C;--green-bg:#EAF7EE;
+  --red:#9B1C1C;--red-bg:#FEF2F2;
+  --yellow-bg:#FFFBEB;--yellow-border:#FCD34D;
+  --purple-bg:#F5F3FF;--purple-border:#C4B5FD;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.75;}
+a{color:var(--blue);}
+.hero-wrap{padding:44px 24px 0;max-width:900px;margin:0 auto;}
+.hero{background:linear-gradient(135deg,#1A2B5E 0%,#2E5BFF 100%);border-radius:18px;padding:44px 48px;color:#fff;position:relative;overflow:hidden;}
+.hero::after{content:'';position:absolute;bottom:-80px;right:-60px;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,0.05);}
+.hero-chip{display:inline-block;background:rgba(255,255,255,0.15);border-radius:20px;padding:3px 14px;font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,0.85);margin-bottom:14px;letter-spacing:.04em;}
+.hero h1{font-size:27px;font-weight:700;line-height:1.25;margin-bottom:10px;}
+.hero p{font-size:15px;color:rgba(255,255,255,0.75);max-width:520px;}
+.hero-langs{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap;}
+.lang-badge{padding:4px 14px;border-radius:20px;font-family:'DM Mono',monospace;font-size:12px;font-weight:500;}
+.badge-c{background:var(--pill-c);color:var(--pill-c-text);}
+.badge-cs{background:var(--pill-cs);color:var(--pill-cs-text);}
+.badge-py{background:var(--pill-py);color:var(--pill-py-text);}
+.hero-meta{display:flex;gap:28px;margin-top:22px;flex-wrap:wrap;}
+.hero-stat{display:flex;flex-direction:column;gap:2px;}
+.hero-stat-num{font-size:20px;font-weight:700;}
+.hero-stat-lbl{font-size:11px;color:rgba(255,255,255,0.5);font-family:'DM Mono',monospace;}
+.sticky-nav{position:sticky;top:0;z-index:100;background:rgba(244,246,252,0.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:0 24px;}
+.nav-inner{max-width:900px;margin:0 auto;display:flex;gap:4px;overflow-x:auto;padding:9px 0;scrollbar-width:none;}
+.nav-inner::-webkit-scrollbar{display:none;}
+.nav-btn{background:none;border:1px solid transparent;border-radius:6px;padding:4px 12px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .15s;}
+.nav-btn:hover{background:var(--code-bg);color:var(--blue);border-color:var(--border);}
+.nav-btn.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+.progress-wrap{max-width:900px;margin:22px auto 0;padding:0 24px;}
+.prog-top{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:5px;}
+.prog-bar{height:4px;background:var(--border);border-radius:4px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--navy),var(--blue));border-radius:4px;width:0;transition:width .5s ease;}
+.content{max-width:900px;margin:32px auto 80px;padding:0 24px;display:flex;flex-direction:column;gap:36px;}
+.section{scroll-margin-top:64px;}
+.section-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+.section h2{font-size:21px;font-weight:700;color:var(--navy);margin-bottom:14px;line-height:1.3;}
+.section h3{font-size:16px;font-weight:600;color:var(--text);margin:22px 0 10px;}
+.section p{margin-bottom:12px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:16px;}
+.code-wrap{margin:14px 0;}
+.code-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:4px;display:flex;align-items:center;justify-content:space-between;}
+.copy-btn{background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:2px 8px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);cursor:pointer;transition:all .15s;}
+.copy-btn:hover{background:var(--blue);color:#fff;border-color:var(--blue);}
+.code-block{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px 18px;overflow-x:auto;}
+.code-block pre{font-family:'DM Mono',monospace;font-size:13px;color:var(--navy);line-height:1.65;white-space:pre;}
+.cc{color:#7A90B8;}.ck{color:#5B3EA6;}.cs{color:#1A7A3C;}.cn{color:#B05800;}
+.inline-code{font-family:'DM Mono',monospace;background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:13px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:14px 0;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0;}
+.lang-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:14px 0;}
+.lc{border-radius:10px;padding:16px;font-size:14px;line-height:1.6;}
+.lc-c{background:var(--pill-c);border:1px solid #B8D0F8;}
+.lc-cs{background:var(--pill-cs);border:1px solid #D8B8F8;}
+.lc-py{background:var(--pill-py);border:1px solid #F8D8B8;}
+.lc-title{font-weight:700;font-size:13px;margin-bottom:6px;}
+.lc-c .lc-title{color:var(--pill-c-text);}
+.lc-cs .lc-title{color:var(--pill-cs-text);}
+.lc-py .lc-title{color:var(--pill-py-text);}
+.pill{display:inline-block;padding:2px 9px;border-radius:20px;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;}
+.pill-c{background:var(--pill-c);color:var(--pill-c-text);}
+.pill-cs{background:var(--pill-cs);color:var(--pill-cs-text);}
+.pill-py{background:var(--pill-py);color:var(--pill-py-text);}
+.analogy{background:var(--yellow-bg);border:1px solid var(--yellow-border);border-left:4px solid #F59E0B;border-radius:8px;padding:16px 18px;margin:16px 0;}
+.analogy-title{font-weight:700;font-size:13px;color:#92400E;margin-bottom:6px;}
+.analogy p{font-size:14px;color:#78350F;margin:0;}
+.info-box{background:#EFF6FF;border:1px solid #BFDBFE;border-left:4px solid var(--blue);border-radius:8px;padding:16px 18px;margin:16px 0;}
+.info-box p{font-size:14px;color:#1E3A8A;margin:0;}
+.warn-box{background:#FFF7ED;border:1px solid #FED7AA;border-left:4px solid #F97316;border-radius:8px;padding:16px 18px;margin:16px 0;}
+.warn-box p{font-size:14px;color:#9A3412;margin:0;}
+.misconception-box{background:var(--red-bg);border:1px solid #FCA5A5;border-left:4px solid #EF4444;border-radius:8px;padding:16px 18px;margin:12px 0;}
+.misconception-box .mc-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--red);margin-bottom:4px;font-weight:700;}
+.misconception-box p{font-size:14px;color:#7F1D1D;margin:0;}
+.correction-box{background:var(--green-bg);border:1px solid #6EE7B7;border-left:4px solid #10B981;border-radius:8px;padding:14px 18px;margin-top:8px;}
+.correction-box p{font-size:14px;color:var(--green);margin:0;}
+/* THINK ACTIVITY */
+.think{background:var(--purple-bg);border:1px solid var(--purple-border);border-left:4px solid #8B5CF6;border-radius:10px;padding:18px 20px;margin:18px 0;}
+.think-label{font-family:'DM Mono',monospace;font-size:11px;color:#6D28D9;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+.think p{font-size:14px;color:#4C1D95;margin:0 0 10px 0;}
+.think p:last-child{margin:0;}
+.reveal-btn{background:#8B5CF6;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s;}
+.reveal-btn:hover{background:#6D28D9;}
+.reveal-content{display:none;margin-top:12px;padding:12px 14px;background:#fff;border:1px solid var(--purple-border);border-radius:6px;font-size:14px;color:var(--text);line-height:1.6;}
+.reveal-content.show{display:block;}
+/* TOKEN CHIPS */
+.token-stream{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0;padding:16px;background:var(--code-bg);border:1px solid var(--border);border-radius:8px;}
+.tok{padding:3px 10px;border-radius:4px;font-family:'DM Mono',monospace;font-size:12px;font-weight:500;cursor:default;position:relative;}
+.tok:hover .tok-tip{display:block;}
+.tok-tip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;font-family:'DM Sans',monospace;font-size:11px;padding:3px 8px;border-radius:4px;white-space:nowrap;z-index:10;}
+.tok-kw{background:#E0D8FE;color:#4C1D95;}
+.tok-id{background:#DBEAFE;color:#1E40AF;}
+.tok-num{background:#DCFCE7;color:#166534;}
+.tok-op{background:#FEF9C3;color:#854D0E;}
+.tok-punc{background:#F1F5F9;color:#475569;}
+.tok-str{background:#FFE4E6;color:#9F1239;}
+.tok-type{background:#F3E8FF;color:#7C3AED;}
+.tok-legend{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;}
+/* BNF */
+.bnf-block{background:var(--code-bg);border:1px solid var(--border);border-left:4px solid var(--blue);border-radius:8px;padding:16px 18px;margin:14px 0;}
+.bnf-block pre{font-family:'DM Mono',monospace;font-size:13px;color:var(--navy);line-height:1.8;}
+.bnf-nt{color:#4C1D95;}.bnf-t{color:#166534;}.bnf-op{color:#B05800;}
+/* TABLE */
+.tbl-wrap{overflow-x:auto;margin:14px 0;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th{background:var(--navy);color:#fff;padding:10px 14px;text-align:left;font-weight:600;font-size:12px;}
+td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+tr:nth-child(even) td{background:var(--bg);}
+/* QUIZ */
+.quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px;}
+.quiz-header{background:var(--navy);color:#fff;padding:12px 20px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;}
+.quiz-num{font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,0.45);}
+.quiz-body{padding:20px;}
+.quiz-q{font-size:15px;font-weight:500;color:var(--text);margin-bottom:14px;line-height:1.55;}
+.quiz-options{display:flex;flex-direction:column;gap:8px;}
+.quiz-opt{display:flex;align-items:flex-start;gap:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;cursor:pointer;transition:all .15s;font-size:14px;text-align:left;width:100%;font-family:'DM Sans',sans-serif;}
+.quiz-opt:hover{border-color:var(--blue);background:#EEF4FF;}
+.quiz-opt.correct{background:var(--green-bg);border-color:#6EE7B7;color:var(--green);}
+.quiz-opt.wrong{background:var(--red-bg);border-color:#FCA5A5;color:var(--red);}
+.opt-letter{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);background:var(--border);border-radius:4px;padding:1px 6px;flex-shrink:0;margin-top:2px;}
+.quiz-feedback{margin-top:12px;padding:12px 14px;border-radius:8px;font-size:14px;display:none;line-height:1.55;}
+.quiz-feedback.show{display:block;}
+.quiz-feedback.ok{background:var(--green-bg);color:var(--green);border:1px solid #6EE7B7;}
+.quiz-feedback.bad{background:var(--red-bg);color:var(--red);border:1px solid #FCA5A5;}
+.score-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-top:8px;}
+.score-title{font-weight:700;font-size:15px;margin-bottom:16px;color:var(--navy);}
+.score-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.score-lbl{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);min-width:70px;}
+.score-track{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
+.score-fill{height:100%;background:linear-gradient(90deg,var(--navy),var(--blue));border-radius:4px;width:0;transition:width .5s;}
+.score-pct{font-family:'DM Mono',monospace;font-size:12px;color:var(--blue);min-width:36px;text-align:right;}
+/* COMPARISON ACTIVITY */
+.compare-wrap{background:var(--surface);border:2px solid var(--purple-border);border-radius:12px;padding:24px;margin:16px 0;}
+.compare-title{font-size:15px;font-weight:700;color:#4C1D95;margin-bottom:14px;}
+.compare-q{background:var(--purple-bg);border-radius:8px;padding:12px 14px;font-size:14px;color:#4C1D95;margin-bottom:8px;}
+.compare-q strong{display:block;margin-bottom:4px;}
+/* SYNTH */
+.synth-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0;}
+.synth-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;}
+.synth-icon{font-size:24px;margin-bottom:8px;}
+.synth-title{font-weight:700;font-size:13px;color:var(--navy);margin-bottom:4px;}
+.synth-desc{font-size:12px;color:var(--muted);line-height:1.5;}
+.synth-chapter{font-family:'DM Mono',monospace;font-size:10px;color:var(--blue);margin-top:6px;}
+/* INTERACTIVE TOKEN EXPLORER */
+.explorer-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin:16px 0;}
+.explorer-input{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-family:'DM Mono',monospace;font-size:14px;background:var(--bg);color:var(--text);margin-bottom:12px;}
+.explorer-input:focus{outline:none;border-color:var(--blue);}
+.explorer-btn{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:8px 18px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-right:8px;transition:background .15s;}
+.explorer-btn:hover{background:var(--navy);}
+.explorer-btn.secondary{background:var(--bg);color:var(--navy);border:1px solid var(--border);}
+.explorer-output{margin-top:14px;min-height:50px;}
+@media(max-width:680px){
+  .hero{padding:32px 24px;}.hero h1{font-size:21px;}
+  .g3,.g2,.lang-row,.synth-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero-wrap">
+  <div class="hero">
+    <div class="hero-chip">CSBS 315 · Chapter 2 of 12</div>
+    <h1>Syntax, Tokens, and Grammars</h1>
+    <p>C, Python, and C# can all perform the same tasks — so why do they look so different? This chapter unpacks the design choices behind how programming languages define what valid code looks like.</p>
+    <div class="hero-langs">
+      <span class="lang-badge badge-c">C</span>
+      <span class="lang-badge badge-cs">C#</span>
+      <span class="lang-badge badge-py">Python</span>
+    </div>
+    <div class="hero-meta">
+      <div class="hero-stat"><span class="hero-stat-num">7</span><span class="hero-stat-lbl">Sections</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">8</span><span class="hero-stat-lbl">Quiz Questions</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">6</span><span class="hero-stat-lbl">Think Activities</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">~45</span><span class="hero-stat-lbl">Min read</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="sticky-nav">
+  <div class="nav-inner">
+    <button class="nav-btn active" onclick="goTo('s0',this)">0 · The Opening Question</button>
+    <button class="nav-btn" onclick="goTo('s1',this)">1 · Tokens</button>
+    <button class="nav-btn" onclick="goTo('s2',this)">2 · Syntax</button>
+    <button class="nav-btn" onclick="goTo('s3',this)">3 · Grammar</button>
+    <button class="nav-btn" onclick="goTo('s4',this)">4 · Syntax vs Meaning</button>
+    <button class="nav-btn" onclick="goTo('s5',this)">5 · The Why</button>
+    <button class="nav-btn" onclick="goTo('s6',this)">6 · Language Analysis</button>
+    <button class="nav-btn" onclick="goTo('s7',this)">7 · Practice</button>
+  </div>
+</nav>
+
+<!-- PROGRESS -->
+<div class="progress-wrap">
+  <div class="prog-top"><span>Reading progress</span><span id="prog-pct">0%</span></div>
+  <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- SECTION 0 — THE OPENING QUESTION -->
+<!-- ══════════════════════════════════════════════════ -->
+<div class="section" id="s0">
+  <div class="section-label">Section 0 — The Motivating Question</div>
+  <h2>Why don't all programming languages look the same?</h2>
+
+  <p>You already know that C, Python, and C# can all be used to write software. They can all store data, make decisions, and repeat operations. In that sense, they are capable of exactly the same things.</p>
+
+  <p>So here is a question worth sitting with for a moment:</p>
+
+  <div class="card" style="background:var(--navy);border-color:var(--navy);">
+    <p style="font-size:18px;font-weight:700;color:#fff;text-align:center;line-height:1.5;">If C, Python, and C# can all perform the same tasks —<br>why don't they use exactly the same syntax?</p>
+  </div>
+
+  <p>Look at this. Three languages. One task: check if a score is above 50, and print a message if it is.</p>
+
+  <div class="g3">
+    <div>
+      <div class="code-label"><span><span class="pill pill-c">C</span></span></div>
+      <div class="code-block"><pre><span class="ck">if</span> (score > 50) {
+    printf(<span class="cs">"Pass\n"</span>);
+}</pre></div>
+    </div>
+    <div>
+      <div class="code-label"><span><span class="pill pill-cs">C#</span></span></div>
+      <div class="code-block"><pre><span class="ck">if</span> (score > 50) {
+    Console.WriteLine(<span class="cs">"Pass"</span>);
+}</pre></div>
+    </div>
+    <div>
+      <div class="code-label"><span><span class="pill pill-py">Python</span></span></div>
+      <div class="code-block"><pre><span class="ck">if</span> score > 50:
+    print(<span class="cs">"Pass"</span>)</pre></div>
+    </div>
+  </div>
+
+  <p>The task is identical. The result is identical. But look at what is different — parentheses, braces, colons, indentation. These are not random. Every one of those differences is a deliberate design decision made by the people who designed each language.</p>
+
+  <div class="think">
+    <div class="think-label">🤔 Think about it first</div>
+    <p>Before reading on: look at the three examples above. Pick one difference between Python and C. Why do you think a language designer might have made that choice?</p>
+    <button class="reveal-btn" onclick="reveal(this)">See discussion</button>
+    <div class="reveal-content">
+      <p>Python drops the parentheses around the condition and replaces curly braces with indentation. The designer, Guido van Rossum, wanted code to look as much like plain English as possible — clean, minimal, readable. C's designer, Dennis Ritchie, came from a world of systems programming where explicitness and machine-level control mattered most. Parentheses and braces made the structure unambiguous for both human readers and the compiler.</p>
+      <p style="margin-top:8px;">Neither choice is objectively better. They reflect different priorities — and that tension between readability, explicitness, and control is what this chapter is about.</p>
+    </div>
+  </div>
+
+  <p>This chapter gives you the vocabulary and concepts to talk precisely about these differences — and more importantly, to explain <em>why</em> they exist.</p>
+
+  <p>We will build from the familiar to the abstract:</p>
+
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:0;flex-wrap:wrap;">
+      <div style="text-align:center;padding:10px 16px;background:var(--pill-c);border-radius:8px;min-width:100px;">
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);">Step 1</div>
+        <div style="font-weight:700;color:var(--navy);font-size:14px;margin-top:4px;">Code</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">What you write</div>
+      </div>
+      <div style="font-size:20px;color:var(--muted);padding:0 8px;">→</div>
+      <div style="text-align:center;padding:10px 16px;background:var(--pill-cs);border-radius:8px;min-width:100px;">
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);">Step 2</div>
+        <div style="font-weight:700;color:var(--navy);font-size:14px;margin-top:4px;">Tokens</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Building blocks</div>
+      </div>
+      <div style="font-size:20px;color:var(--muted);padding:0 8px;">→</div>
+      <div style="text-align:center;padding:10px 16px;background:var(--pill-py);border-radius:8px;min-width:100px;">
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);">Step 3</div>
+        <div style="font-weight:700;color:var(--navy);font-size:14px;margin-top:4px;">Syntax</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">Rules for arrangement</div>
+      </div>
+      <div style="font-size:20px;color:var(--muted);padding:0 8px;">→</div>
+      <div style="text-align:center;padding:10px 16px;background:var(--green-bg);border-radius:8px;min-width:100px;">
+        <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);">Step 4</div>
+        <div style="font-weight:700;color:var(--navy);font-size:14px;margin-top:4px;">Grammar</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">How rules are described</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- SECTION 1 — TOKENS -->
+<!-- ══════════════════════════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="section-label">Section 1</div>
+  <h2>Tokens: The Building Blocks of Code</h2>
+
+  <p>Start with something small and familiar. Here is one line of C:</p>
+
+  <div class="code-block"><pre><span class="ck">int</span> age = 25;</pre></div>
+
+  <p>Read it naturally and you see one statement. But a programming language doesn't read it the way you do. Before it can do anything with that line, it has to break it into individual pieces — the smallest units that the language recognises as meaningful.</p>
+
+  <p>Those pieces are called <strong>tokens</strong>.</p>
+
+  <div class="think">
+    <div class="think-label">🤔 What are the pieces?</div>
+    <p>Before you read on — how many distinct pieces can you identify in <span class="inline-code">int age = 25;</span>? Write them out.</p>
+    <button class="reveal-btn" onclick="reveal(this)">See the tokens</button>
+    <div class="reveal-content">
+      <p>There are five: <span class="inline-code">int</span> · <span class="inline-code">age</span> · <span class="inline-code">=</span> · <span class="inline-code">25</span> · <span class="inline-code">;</span></p>
+      <p style="margin-top:8px;">Each one is a distinct kind of thing — a type name, a variable name, an operator, a number, and a punctuation mark. Giving these categories precise names is what this section does.</p>
+    </div>
+  </div>
+
+  <h3>The five token categories</h3>
+
+  <p>Every token in every language falls into one of these categories:</p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Token type</th><th>What it is</th><th>Examples from our three languages</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="tok tok-type" style="font-size:12px;">keyword</span></td>
+          <td>A reserved word with a fixed meaning — the language owns it, you cannot use it as a variable name</td>
+          <td><span class="inline-code">if</span>, <span class="inline-code">while</span>, <span class="inline-code">return</span>, <span class="inline-code">def</span>, <span class="inline-code">class</span></td>
+        </tr>
+        <tr>
+          <td><span class="tok tok-id" style="font-size:12px;">identifier</span></td>
+          <td>A name that the programmer creates — for a variable, function, or class</td>
+          <td><span class="inline-code">age</span>, <span class="inline-code">score</span>, <span class="inline-code">calculate_total</span>, <span class="inline-code">Student</span></td>
+        </tr>
+        <tr>
+          <td><span class="tok tok-num" style="font-size:12px;">literal</span></td>
+          <td>A fixed value written directly in the code</td>
+          <td><span class="inline-code">25</span>, <span class="inline-code">3.14</span>, <span class="inline-code">"Hello"</span>, <span class="inline-code">true</span></td>
+        </tr>
+        <tr>
+          <td><span class="tok tok-op" style="font-size:12px;">operator</span></td>
+          <td>A symbol that performs an operation on values</td>
+          <td><span class="inline-code">=</span>, <span class="inline-code">+</span>, <span class="inline-code">==</span>, <span class="inline-code">></span>, <span class="inline-code">&&</span></td>
+        </tr>
+        <tr>
+          <td><span class="tok tok-punc" style="font-size:12px;">punctuation</span></td>
+          <td>A structural character that organises the code — not an operator</td>
+          <td><span class="inline-code">;</span>, <span class="inline-code">{</span>, <span class="inline-code">}</span>, <span class="inline-code">(</span>, <span class="inline-code">)</span>, <span class="inline-code">:</span>, <span class="inline-code">,</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Seeing it in real code</h3>
+
+  <p>Here is that same statement with each token colour-coded. Hover over any token to see its type.</p>
+
+  <div class="tok-legend">
+    <span class="tok tok-type">type/keyword</span>
+    <span class="tok tok-id">identifier</span>
+    <span class="tok tok-num">literal</span>
+    <span class="tok tok-op">operator</span>
+    <span class="tok tok-punc">punctuation</span>
+  </div>
+
+  <div class="code-label"><span><span class="pill pill-c">C</span> — <code style="font-family:'DM Mono',monospace;font-size:12px;">int age = 25;</code></span></div>
+  <div class="token-stream">
+    <span class="tok tok-type">int<div class="tok-tip">type keyword</div></span>
+    <span class="tok tok-id">age<div class="tok-tip">identifier</div></span>
+    <span class="tok tok-op">=<div class="tok-tip">operator</div></span>
+    <span class="tok tok-num">25<div class="tok-tip">literal</div></span>
+    <span class="tok tok-punc">;<div class="tok-tip">punctuation</div></span>
+  </div>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Five tokens. <span class="inline-code">int</span> tells the compiler this variable holds an integer. <span class="inline-code">age</span> is the name the programmer chose. The semicolon signals the end of the statement.</p>
+
+  <div class="code-label"><span><span class="pill pill-cs">C#</span> — <code style="font-family:'DM Mono',monospace;font-size:12px;">int age = 25;</code></span></div>
+  <div class="token-stream">
+    <span class="tok tok-type">int<div class="tok-tip">type keyword</div></span>
+    <span class="tok tok-id">age<div class="tok-tip">identifier</div></span>
+    <span class="tok tok-op">=<div class="tok-tip">operator</div></span>
+    <span class="tok tok-num">25<div class="tok-tip">literal</div></span>
+    <span class="tok tok-punc">;<div class="tok-tip">punctuation</div></span>
+  </div>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Identical to C for this statement. C# deliberately mirrors C's token structure for basic declarations — lowering the barrier for programmers who already know C.</p>
+
+  <div class="code-label"><span><span class="pill pill-py">Python</span> — <code style="font-family:'DM Mono',monospace;font-size:12px;">age = 25</code></span></div>
+  <div class="token-stream">
+    <span class="tok tok-id">age<div class="tok-tip">identifier</div></span>
+    <span class="tok tok-op">=<div class="tok-tip">operator</div></span>
+    <span class="tok tok-num">25<div class="tok-tip">literal</div></span>
+  </div>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:8px;">Three tokens — two fewer than C. No type keyword (<span class="inline-code">int</span>) because Python determines the type automatically at runtime. No semicolon because Python uses the newline itself to mark the end of a statement.</p>
+
+  <div class="info-box">
+    <p><strong>Two tokens removed = two design decisions made.</strong> Python's missing type keyword reflects a choice about when types are checked — at runtime, not at write-time. Python's missing semicolon reflects a choice about how statements are separated — by line breaks, not explicit punctuation. Both removals make code shorter and cleaner. Both also have consequences that we'll explore.</p>
+  </div>
+
+  <div class="think">
+    <div class="think-label">🤔 Which part is a token?</div>
+    <p>In this Python line — <span class="inline-code">result = score + 10</span> — how many tokens are there? List them and give each a type from the table above.</p>
+    <button class="reveal-btn" onclick="reveal(this)">See the answer</button>
+    <div class="reveal-content">
+      <p>Five tokens: <span class="tok tok-id" style="font-size:12px;">result</span> (identifier) · <span class="tok tok-op" style="font-size:12px;">=</span> (operator) · <span class="tok tok-id" style="font-size:12px;">score</span> (identifier) · <span class="tok tok-op" style="font-size:12px;">+</span> (operator) · <span class="tok tok-num" style="font-size:12px;">10</span> (literal). No punctuation token — in Python, the newline at the end of the line plays the role the semicolon plays in C.</p>
+    </div>
+  </div>
+
+  <h3>Try it: Token Explorer</h3>
+  <p>Type any line of code below and see it break into tokens. Try examples from all three languages.</p>
+  <div class="explorer-wrap">
+    <input class="explorer-input" type="text" id="tok-input" placeholder='Try: int age = 25;' value='int age = 25;'>
+    <button class="explorer-btn" onclick="tokenise()">Tokenise</button>
+    <button class="explorer-btn secondary" onclick="loadExample(this)">Load next example</button>
+    <div class="explorer-output" id="tok-output"></div>
+    <div id="tok-count" style="margin-top:8px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- SECTION 2 — SYNTAX -->
+<!-- ══════════════════════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="section-label">Section 2</div>
+  <h2>Syntax: Rules for Arranging Tokens</h2>
+
+  <p>Now that we can identify tokens, here is the next question: not every combination of tokens is a valid program. How does the language decide which arrangements are allowed?</p>
+
+  <p>The answer is <strong>syntax</strong> — the set of rules that defines which token arrangements are legal in a language.</p>
+
+  <div class="analogy">
+    <div class="analogy-title">💡 English grammar as an analogy</div>
+    <p>"The dog chased the cat" — grammatically correct English.<br>"Dog the chased cat the" — all the same words, but the arrangement breaks the rules.<br><br>Programming languages work the same way. The tokens exist. Syntax determines which orderings of those tokens form valid statements.</p>
+  </div>
+
+  <h3>What changed between these two versions?</h3>
+
+  <div class="think">
+    <div class="think-label">🤔 Spot the difference</div>
+    <p>Both of these look similar. One is valid C. One is a syntax error. What changed — and why does it matter?</p>
+    <div class="g2" style="margin:10px 0;">
+      <div>
+        <div class="code-label"><span>Version A</span></div>
+        <div class="code-block"><pre><span class="ck">if</span> (score > 50) {
+    printf(<span class="cs">"Pass\n"</span>);
+}</pre></div>
+      </div>
+      <div>
+        <div class="code-label"><span>Version B</span></div>
+        <div class="code-block"><pre><span class="ck">if</span> score > 50 {
+    printf(<span class="cs">"Pass\n"</span>);
+}</pre></div>
+      </div>
+    </div>
+    <button class="reveal-btn" onclick="reveal(this)">See the explanation</button>
+    <div class="reveal-content">
+      <p><strong>Version B is a syntax error in C.</strong> The parentheses around the condition are not optional — they are part of the grammar rule for an if-statement in C. Removing them produces a token arrangement that C's rules do not permit.</p>
+      <p style="margin-top:8px;">Interestingly, Version B <em>would</em> be valid in Python (with a colon instead of braces). This is exactly the point: different languages define different rules for the same tokens.</p>
+    </div>
+  </div>
+
+  <h3>Syntax is about structure, not meaning</h3>
+
+  <p>Syntax only asks one question: <em>Is this token arrangement a form the language accepts?</em> It says nothing about whether the code will do something useful or sensible. That is a separate question — one we address in Section 4.</p>
+
+  <p>Three important syntax elements that differ across our languages:</p>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Block delimiters — how does the language mark a group of statements?</h3>
+    <div class="g2">
+      <div>
+        <div class="code-label"><span><span class="pill pill-c">C</span> and <span class="pill pill-cs">C#</span> — curly braces <span class="inline-code">{}</span></span></div>
+        <div class="code-block"><pre><span class="ck">if</span> (x > 0) {
+    doA();
+    doB();
+}
+doC(); <span class="cc">// always runs</span></pre></div>
+        <p style="font-size:13px;color:var(--muted);margin-top:6px;">The opening <span class="inline-code">{</span> and closing <span class="inline-code">}</span> are punctuation tokens that mark exactly where the block begins and ends — regardless of how the code is indented.</p>
+      </div>
+      <div>
+        <div class="code-label"><span><span class="pill pill-py">Python</span> — indentation</span></div>
+        <div class="code-block"><pre><span class="ck">if</span> x > 0:
+    do_a()
+    do_b()
+do_c()  <span class="cc"># always runs</span></pre></div>
+        <p style="font-size:13px;color:var(--muted);margin-top:6px;">There are no brace tokens. Instead, Python's rules use the amount of indentation to define which statements belong to the block. A dedent signals the block has ended.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Statement terminators — how does the language know a statement is complete?</h3>
+    <div class="g2">
+      <div>
+        <div class="code-label"><span><span class="pill pill-c">C</span> and <span class="pill pill-cs">C#</span> — semicolons</span></div>
+        <div class="code-block"><pre>x = 5;
+y = x + 10;  <span class="cc">// ; ends each statement</span>
+<span class="cc">// can span multiple lines:</span>
+z = x
+  + y;       <span class="cc">// still one statement</span></pre></div>
+      </div>
+      <div>
+        <div class="code-label"><span><span class="pill pill-py">Python</span> — newlines</span></div>
+        <div class="code-block"><pre>x = 5
+y = x + 10   <span class="cc"># newline ends statement</span>
+<span class="cc"># to span lines, use \:</span>
+z = x \
+  + y        <span class="cc"># continues to next line</span></pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Type declarations — must the programmer state the type of each variable?</h3>
+    <div class="g3">
+      <div>
+        <div class="code-label"><span><span class="pill pill-c">C</span> — always required</span></div>
+        <div class="code-block"><pre><span class="ck">int</span> score = 95;
+<span class="ck">float</span> gpa = 3.8;
+<span class="cc">// type token is part of
+// the grammar rule</span></pre></div>
+      </div>
+      <div>
+        <div class="code-label"><span><span class="pill pill-cs">C#</span> — required or inferred</span></div>
+        <div class="code-block"><pre><span class="ck">int</span> score = 95;   <span class="cc">// explicit</span>
+<span class="ck">var</span> gpa = 3.8;    <span class="cc">// inferred</span>
+<span class="cc">// var: compiler figures
+// out the type</span></pre></div>
+      </div>
+      <div>
+        <div class="code-label"><span><span class="pill pill-py">Python</span> — never declared</span></div>
+        <div class="code-block"><pre>score = 95
+gpa = 3.8
+<span class="cc"># no type token —
+# determined at runtime</span></pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="think">
+    <div class="think-label">🤔 What design choice?</div>
+    <p>Python removed the type keyword from variable declarations. What are the consequences of that choice — what does the programmer gain, and what do they give up?</p>
+    <button class="reveal-btn" onclick="reveal(this)">See discussion</button>
+    <div class="reveal-content">
+      <p><strong>Gain:</strong> Code is shorter and faster to write. You focus on what the variable holds, not what kind of thing it is. Great for rapid prototyping and scripts.</p>
+      <p style="margin-top:8px;"><strong>Give up:</strong> The language can no longer check at write-time whether you are using the variable correctly. A mistake like adding a number to a string goes undetected until that line actually runs — possibly much later, possibly in a live system. C and C# would catch that error immediately during compilation.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- SECTION 3 — GRAMMAR -->
+<!-- ══════════════════════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="section-label">Section 3</div>
+  <h2>Grammar: Describing the Rules Precisely</h2>
+
+  <p>Syntax rules exist. But how does a language make those rules precise enough that a compiler can enforce them automatically, without any ambiguity?</p>
+
+  <p>The answer is a <strong>grammar</strong> — a formal, written description of every valid structure a language allows. A grammar takes syntax from something informal ("you need braces after an if") to something precise enough to build a compiler from.</p>
+
+  <div class="analogy">
+    <div class="analogy-title">💡 A grammar in plain English first</div>
+    <p>Consider this rule: "An assignment statement consists of a name, then an equals sign, then a value."<br><br>In plain English you just understood that rule. A grammar is a way of writing such rules precisely, so that a compiler can use them to verify whether any token sequence is valid — without relying on human judgment.</p>
+  </div>
+
+  <h3>A grammar rule in simple notation</h3>
+
+  <p>Here is the plain-English rule from above written as a grammar rule:</p>
+
+  <div class="bnf-block">
+    <pre><span class="bnf-nt">&lt;assignment&gt;</span>  <span class="bnf-op">::=</span>  <span class="bnf-nt">&lt;identifier&gt;</span>  <span class="bnf-t">"="</span>  <span class="bnf-nt">&lt;value&gt;</span></pre>
+  </div>
+
+  <p>Reading this: an assignment is made of three things — an identifier (a name the programmer chose), the literal <span class="inline-code">=</span> symbol, and a value. Three pieces of notation:</p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Notation</th><th>Meaning</th><th>In the rule above</th></tr></thead>
+      <tbody>
+        <tr><td><span class="inline-code">&lt;name&gt;</span></td><td>A rule name — something the grammar itself defines elsewhere</td><td><span class="inline-code">&lt;identifier&gt;</span>, <span class="inline-code">&lt;value&gt;</span></td></tr>
+        <tr><td><span class="inline-code">"text"</span></td><td>An exact token that must appear in the code literally</td><td><span class="inline-code">"="</span></td></tr>
+        <tr><td><span class="inline-code">::=</span></td><td>"is defined as" — the left side expands to the right side</td><td>The rule itself</td></tr>
+        <tr><td><span class="inline-code">|</span></td><td>"or" — choose one of the alternatives</td><td>(used in examples below)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Growing the grammar — from digits to numbers</h3>
+
+  <p>Grammar rules build on each other. Here is how a grammar might define what a valid number looks like, starting from just single digits:</p>
+
+  <div class="bnf-block">
+    <pre><span class="bnf-nt">&lt;digit&gt;</span>   <span class="bnf-op">::=</span>  <span class="bnf-t">"0"</span> <span class="bnf-op">|</span> <span class="bnf-t">"1"</span> <span class="bnf-op">|</span> <span class="bnf-t">"2"</span> <span class="bnf-op">|</span> <span class="bnf-t">"3"</span> <span class="bnf-op">|</span> <span class="bnf-t">"4"</span> <span class="bnf-op">|</span> <span class="bnf-t">"5"</span> <span class="bnf-op">|</span> <span class="bnf-t">"6"</span> <span class="bnf-op">|</span> <span class="bnf-t">"7"</span> <span class="bnf-op">|</span> <span class="bnf-t">"8"</span> <span class="bnf-op">|</span> <span class="bnf-t">"9"</span>
+<span class="bnf-nt">&lt;integer&gt;</span> <span class="bnf-op">::=</span>  <span class="bnf-nt">&lt;digit&gt;</span>  <span class="bnf-op">|</span>  <span class="bnf-nt">&lt;integer&gt;</span> <span class="bnf-nt">&lt;digit&gt;</span></pre>
+  </div>
+
+  <p>The second rule reads: an integer is either a single digit, or an existing integer followed by a digit. This allows <span class="inline-code">5</span>, <span class="inline-code">42</span>, <span class="inline-code">100</span>, and so on — any whole number of any length, built from the same two simple rules.</p>
+
+  <h3>What the grammar rule for an if-statement looks like</h3>
+
+  <p>Now look at how a grammar captures the syntax differences between C and Python for something you already know:</p>
+
+  <div class="g2">
+    <div>
+      <div class="code-label"><span><span class="pill pill-c">C</span> — if-statement grammar</span></div>
+      <div class="bnf-block">
+        <pre><span class="bnf-nt">&lt;if-stmt&gt;</span> <span class="bnf-op">::=</span>
+  <span class="bnf-t">"if"</span> <span class="bnf-t">"("</span> <span class="bnf-nt">&lt;condition&gt;</span> <span class="bnf-t">")"</span>
+  <span class="bnf-t">"{"</span> <span class="bnf-nt">&lt;statements&gt;</span> <span class="bnf-t">"}"</span></pre>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin-top:6px;">The grammar requires the parentheses and the braces as literal tokens. There is no option — the rule demands them.</p>
+    </div>
+    <div>
+      <div class="code-label"><span><span class="pill pill-py">Python</span> — if-statement grammar</span></div>
+      <div class="bnf-block">
+        <pre><span class="bnf-nt">&lt;if-stmt&gt;</span> <span class="bnf-op">::=</span>
+  <span class="bnf-t">"if"</span> <span class="bnf-nt">&lt;condition&gt;</span> <span class="bnf-t">":"</span>
+  <span class="bnf-t">INDENT</span> <span class="bnf-nt">&lt;statements&gt;</span> <span class="bnf-t">DEDENT</span></pre>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin-top:6px;">No parentheses. No braces. Instead, a colon token, and special INDENT/DEDENT markers that the language generates from the physical indentation in your file.</p>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <p><strong>The grammar is where design choices become binding.</strong> When a language designer writes a grammar rule that requires parentheses, every valid program in that language must have parentheses there — forever. That is why grammar design is so consequential: the decisions made in the grammar become the rules every programmer has to follow.</p>
+  </div>
+
+  <div class="think">
+    <div class="think-label">🤔 Is this valid?</div>
+    <p>Given the C grammar rule above, which of these is a valid C if-statement?<br>
+    A: <span class="inline-code">if (x > 0) { doA(); }</span><br>
+    B: <span class="inline-code">if x > 0 { doA(); }</span><br>
+    C: <span class="inline-code">if (x > 0) doA();</span></p>
+    <button class="reveal-btn" onclick="reveal(this)">See the answer</button>
+    <div class="reveal-content">
+      <p><strong>A is valid.</strong> It follows the grammar exactly: <span class="inline-code">if</span> <span class="inline-code">(</span> condition <span class="inline-code">)</span> <span class="inline-code">{</span> statements <span class="inline-code">}</span>.</p>
+      <p style="margin-top:6px;"><strong>B is invalid.</strong> The grammar requires parentheses around the condition. Removing them violates the rule.</p>
+      <p style="margin-top:6px;"><strong>C is a tricky case.</strong> In C, omitting braces when there is only one statement is actually legal — the grammar has an alternative form for that. But it is a well-known source of bugs: if you later add a second statement thinking it is still inside the if, it will not be.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- SECTION 4 — SYNTAX VS MEANING -->
+<!-- ══════════════════════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="section-label">Section 4</div>
+  <h2>Syntax vs Meaning — Two Separate Questions</h2>
+
+  <p>There is one important distinction to understand before going further. A language checking your code asks two completely separate questions:</p>
+
+  <div class="g2">
+    <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:18px;">
+      <div style="font-weight:700;font-size:14px;color:#1E40AF;margin-bottom:8px;">Syntax — Is it written correctly?</div>
+      <p style="font-size:14px;color:#1E3A8A;line-height:1.6;">Does this token arrangement follow the grammar rules? Can the language even parse this text into a valid structure? This is checked before anything runs.</p>
+    </div>
+    <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:18px;">
+      <div style="font-weight:700;font-size:14px;color:var(--green);margin-bottom:8px;">Semantics — Does it mean something sensible?</div>
+      <p style="font-size:14px;color:var(--green);line-height:1.6;">Even if the structure is valid, does the code make logical sense? Are the types compatible? Does the variable exist? This is a separate check, happening later.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Four examples that show the difference</h3>
+    <div class="tbl-wrap" style="margin:0;">
+      <table>
+        <thead><tr><th>Code</th><th>Syntactically valid?</th><th>Semantically valid?</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="inline-code">int x = 5 + 3;</span></td>
+            <td style="color:var(--green);">✓ Yes</td>
+            <td style="color:var(--green);">✓ Yes</td>
+            <td>Correct structure, compatible types, all good</td>
+          </tr>
+          <tr>
+            <td><span class="inline-code">int x = 5 + ;</span></td>
+            <td style="color:var(--red);">✗ No</td>
+            <td style="color:var(--muted);">— Not checked</td>
+            <td>Grammar requires a value after <span class="inline-code">+</span>. Syntax fails first.</td>
+          </tr>
+          <tr>
+            <td><span class="inline-code">int x = "hello" + 3;</span></td>
+            <td style="color:var(--green);">✓ Yes</td>
+            <td style="color:var(--red);">✗ No</td>
+            <td>Valid structure — but you can't add a string to an integer. Semantic error.</td>
+          </tr>
+          <tr>
+            <td><span class="inline-code">int x = y + 3;</span> (y never declared)</td>
+            <td style="color:var(--green);">✓ Yes</td>
+            <td style="color:var(--red);">✗ No</td>
+            <td>Valid structure — but <span class="inline-code">y</span> doesn't exist. Semantic error.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <p>Our three languages differ not in <em>whether</em> they catch semantic errors but in <em>when</em>:</p>
+
+  <div class="lang-row">
+    <div class="lc lc-c">
+      <div class="lc-title">C — at compile time</div>
+      <p>C's type system catches most type errors before the program runs. You will see a compiler warning or error, not a crash later.</p>
+    </div>
+    <div class="lc lc-cs">
+      <div class="lc-title">C# — at compile time (stricter)</div>
+      <p>C# catches more classes of errors than C does. Modern C# even warns about potential null references — things C would let through silently.</p>
+    </div>
+    <div class="lc lc-py">
+      <div class="lc-title">Python — at runtime only</div>
+      <p>Python checks types only when a line actually executes. A type error in code you rarely run might go undetected for a long time.</p>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <p><strong>This chapter focuses on syntax.</strong> Semantics — types, scope, binding — is covered in detail in Chapters 3, 4, and 5. For now, remember: a program that is syntactically correct is not necessarily correct in any other way.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- SECTION 5 — THE WHY -->
+<!-- ══════════════════════════════════════════════════ -->
+<div class="section" id="s5">
+  <div class="section-label">Section 5 — The Most Important Part</div>
+  <h2>Why Did Each Language Make These Choices?</h2>
+
+  <p>This is the question that matters most in a course on language design. Listing the differences between C, Python, and C# is straightforward. Understanding why those differences exist — and what each choice costs — is the skill this course is building.</p>
+
+  <p>Every syntax decision involves trade-offs. A choice that helps one thing usually makes another harder. Here are the main ones at work in our three languages.</p>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Trade-off 1 — Braces vs Indentation</h3>
+    <p><strong>The choice:</strong> How does the language mark which statements belong inside a block?</p>
+    <div class="g2" style="margin-top:12px;">
+      <div>
+        <p style="font-size:13px;font-weight:700;color:var(--navy);">Braces <span class="pill pill-c">C</span> <span class="pill pill-cs">C#</span></p>
+        <p style="font-size:14px;"><strong>Readability:</strong> Structure is always explicit — the braces tell you exactly where the block starts and ends, no matter how the code is visually formatted.<br><br><strong>Writability:</strong> You have to type the braces. Forgetting a closing brace is a common error. Omitting braces when you only have one statement is legal but a known source of bugs.<br><br><strong>Explicitness:</strong> High — nothing is inferred from layout.</p>
+      </div>
+      <div>
+        <p style="font-size:13px;font-weight:700;color:var(--navy);">Indentation <span class="pill pill-py">Python</span></p>
+        <p style="font-size:14px;"><strong>Readability:</strong> Code always looks exactly like its structure — the visual layout and the logical structure are guaranteed to match, because the language enforces it.<br><br><strong>Writability:</strong> Less to type. No braces to forget. But mixing tabs and spaces silently breaks programs — the error is invisible to the eye.<br><br><strong>Consistency:</strong> All Python code in the world is indented consistently — the syntax enforces it.</p>
+      </div>
+    </div>
+    <div class="info-box" style="margin-top:12px;">
+      <p><strong>The design lesson:</strong> Braces give the compiler authority over structure — the programmer can format code however they like. Indentation gives the programmer's visual layout authority. Neither is universally better. Each is a deliberate trade between explicitness and readability.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Trade-off 2 — Semicolons vs Newlines</h3>
+    <p><strong>The choice:</strong> How does the language know where one statement ends?</p>
+    <div class="g2" style="margin-top:12px;">
+      <div>
+        <p style="font-size:13px;font-weight:700;color:var(--navy);">Semicolons <span class="pill pill-c">C</span> <span class="pill pill-cs">C#</span></p>
+        <p style="font-size:14px;">Clear, unambiguous statement boundaries. Statements can span multiple lines freely. But forgotten semicolons are an extremely common beginner error, producing confusing error messages.</p>
+      </div>
+      <div>
+        <p style="font-size:13px;font-weight:700;color:var(--navy);">Newlines <span class="pill pill-py">Python</span></p>
+        <p style="font-size:14px;">Less punctuation to write and remember. Cleaner visual appearance. But multi-line statements require explicit continuation markers — which is less intuitive for beginners.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Trade-off 3 — Required type declarations</h3>
+    <p><strong>The choice:</strong> Must the programmer state the type of each variable?</p>
+    <div class="tbl-wrap" style="margin-top:12px;">
+      <table>
+        <thead><tr><th>Language</th><th>What it requires</th><th>What you gain</th><th>What you give up</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="pill pill-c">C</span></td>
+            <td>Always declare the type</td>
+            <td>Early error detection, self-documenting code, fast compilation</td>
+            <td>More typing, less flexibility</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-cs">C#</span></td>
+            <td>Declare or use <span class="inline-code">var</span> (inferred)</td>
+            <td>Flexibility without losing type safety — the compiler still checks</td>
+            <td>Slightly more complex language rules</td>
+          </tr>
+          <tr>
+            <td><span class="pill pill-py">Python</span></td>
+            <td>Never declare — just assign</td>
+            <td>Maximum conciseness, fast to write, flexible</td>
+            <td>Type errors only appear at runtime, not at write-time</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Trade-off 4 — Parentheses in if-conditions</h3>
+    <p><strong>The choice:</strong> Must the condition of an if-statement be wrapped in parentheses?</p>
+    <div class="g2" style="margin-top:12px;">
+      <div>
+        <div class="code-block"><pre><span class="cc">// C / C# — required</span>
+<span class="ck">if</span> (score > 50) { ... }</pre></div>
+        <p style="font-size:14px;margin-top:8px;">Parentheses unambiguously separate the condition from the surrounding code. Historically, this made parsing simpler. C# kept the requirement for familiarity — programmers coming from C or Java already expect it.</p>
+      </div>
+      <div>
+        <div class="code-block"><pre><span class="cc"># Python — not used</span>
+<span class="ck">if</span> score > 50: ...</pre></div>
+        <p style="font-size:14px;margin-top:8px;">The colon serves as the boundary. Removing the parentheses reduces visual noise. Guido van Rossum judged them unnecessary clutter when a colon already marks the end of the condition clearly.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <p><strong>There is no universally best syntax.</strong> Every one of these trade-offs has valid arguments on both sides. C's designers were optimising for control and explicitness. Python's designer was optimising for readability and conciseness. C#'s designers were optimising for familiarity and safety. Those goals are different — and different goals lead to different grammars.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- SECTION 6 — LANGUAGE ANALYSIS -->
+<!-- ══════════════════════════════════════════════════ -->
+<div class="section" id="s6">
+  <div class="section-label">Section 6 — Putting It Together</div>
+  <h2>Analysing the Same Code in Three Languages</h2>
+
+  <p>Here is the same small program — ask the user for a score, check if it passes, print a message — written in all three languages. This time, don't just look at what is different. Think about the design choices behind each difference.</p>
+
+  <div class="g3">
+    <div>
+      <div class="code-label"><span><span class="pill pill-c">C</span></span></div>
+      <div class="code-block"><pre>#include &lt;stdio.h&gt;
+
+<span class="ck">int</span> main() {
+    <span class="ck">int</span> score;
+    scanf(<span class="cs">"%d"</span>, &score);
+    <span class="ck">if</span> (score > 50) {
+        printf(<span class="cs">"Pass\n"</span>);
+    } <span class="ck">else</span> {
+        printf(<span class="cs">"Fail\n"</span>);
+    }
+    <span class="ck">return</span> 0;
+}</pre></div>
+    </div>
+    <div>
+      <div class="code-label"><span><span class="pill pill-cs">C#</span></span></div>
+      <div class="code-block"><pre><span class="ck">int</span> score =
+  <span class="ck">int</span>.Parse(
+    Console.ReadLine()
+  );
+<span class="ck">if</span> (score > 50) {
+    Console.WriteLine(
+      <span class="cs">"Pass"</span>);
+} <span class="ck">else</span> {
+    Console.WriteLine(
+      <span class="cs">"Fail"</span>);
+}</pre></div>
+    </div>
+    <div>
+      <div class="code-label"><span><span class="pill pill-py">Python</span></span></div>
+      <div class="code-block"><pre>score = int(input())
+
+<span class="ck">if</span> score > 50:
+    print(<span class="cs">"Pass"</span>)
+<span class="ck">else</span>:
+    print(<span class="cs">"Fail"</span>)</pre></div>
+    </div>
+  </div>
+
+  <div class="compare-wrap">
+    <div class="compare-title">🔎 Language Design Analysis</div>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:14px;">Work through these questions. Expand each one to check your thinking.</p>
+
+    <div class="compare-q">
+      <strong>Question 1 — What does each language require that others leave implicit?</strong>
+      <button class="reveal-btn" style="margin-top:8px;" onclick="reveal(this)">See answer</button>
+      <div class="reveal-content">
+        <p><strong>C requires:</strong> an explicit type for <span class="inline-code">score</span> (<span class="inline-code">int</span>), parentheses around the if-condition, curly braces for the blocks, a <span class="inline-code">return</span> statement, and a <span class="inline-code">main()</span> function entry point.</p>
+        <p style="margin-top:6px;"><strong>C# requires:</strong> the type declaration (or <span class="inline-code">var</span>), explicit type conversion from string to int, parentheses and braces. It handles the entry point for you in modern versions.</p>
+        <p style="margin-top:6px;"><strong>Python leaves implicit:</strong> the type of <span class="inline-code">score</span>, the block boundaries (using indentation instead), the entry point. You still write explicit type conversion (<span class="inline-code">int()</span>) but everything else is minimal.</p>
+      </div>
+    </div>
+
+    <div class="compare-q">
+      <strong>Question 2 — What syntax choices look intentional, and what goal do they serve?</strong>
+      <button class="reveal-btn" style="margin-top:8px;" onclick="reveal(this)">See answer</button>
+      <div class="reveal-content">
+        <p><strong>C's explicitness</strong> — every type, every brace, every return — is intentional. C was designed for systems programming where you need to know exactly what is happening. Implicit behaviour is a source of bugs when you are writing device drivers or operating systems.</p>
+        <p style="margin-top:6px;"><strong>Python's minimalism</strong> — no braces, no type keywords, no semicolons — is intentional. Guido van Rossum wanted code to read like pseudocode. The fewer tokens between the programmer and the idea, the better.</p>
+        <p style="margin-top:6px;"><strong>C#'s middle position</strong> — keeping braces and types but adding inference and a richer library — is intentional. Microsoft wanted a language that was safe and productive for large teams, with a gentle transition path from C and Java.</p>
+      </div>
+    </div>
+
+    <div class="compare-q">
+      <strong>Question 3 — Which version do you find easier to read, and why might someone disagree?</strong>
+      <button class="reveal-btn" style="margin-top:8px;" onclick="reveal(this)">See answer</button>
+      <div class="reveal-content">
+        <p>Most beginners find Python easiest to read — it's closest to English and has the fewest tokens. But experienced C programmers often find the explicit structure of C easier to read for complex programs, because nothing is hidden and nothing is inferred.</p>
+        <p style="margin-top:6px;">This is an important insight: <em>readability is not objective</em>. It depends on what the reader already knows. A language that looks cluttered to a Python programmer looks clear and safe to a C programmer. Language designers cannot optimise for all readers simultaneously — so they make a choice about which reader to prioritise.</p>
+      </div>
+    </div>
+
+    <div class="compare-q">
+      <strong>Question 4 — What trade-off does each language's approach create?</strong>
+      <button class="reveal-btn" style="margin-top:8px;" onclick="reveal(this)">See answer</button>
+      <div class="reveal-content">
+        <p><strong>C's trade-off:</strong> Maximum control and transparency in exchange for verbosity and more responsibility on the programmer. The compiler will warn about many errors — but not all. Memory and type bugs are your problem.</p>
+        <p style="margin-top:6px;"><strong>C#'s trade-off:</strong> Safety and productivity in exchange for a more complex language. You get a powerful type system and rich library, but there is more to learn before you can use the language fully.</p>
+        <p style="margin-top:6px;"><strong>Python's trade-off:</strong> Speed of writing and simplicity in exchange for catching errors later. You can prototype in minutes — but a bug in an untested code path might only appear months after you wrote it.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>Common misconceptions</h3>
+
+  <div class="misconception-box">
+    <div class="mc-label">❌ Misconception</div>
+    <p>"Python's indentation is just a style preference — you could use anything."</p>
+  </div>
+  <div class="correction-box">
+    <p><strong>✓ Correction:</strong> Indentation in Python is a syntax requirement, not a style choice. The grammar produces special INDENT and DEDENT tokens from indentation changes, and the parser uses those tokens to define block boundaries. Wrong indentation is a syntax error — not a formatting complaint.</p>
+  </div>
+
+  <div class="misconception-box" style="margin-top:14px;">
+    <div class="mc-label">❌ Misconception</div>
+    <p>"A program that compiles without errors is correct."</p>
+  </div>
+  <div class="correction-box">
+    <p><strong>✓ Correction:</strong> Compiling successfully means the syntax is valid and (in statically typed languages) the types check out. It says nothing about whether the program produces the right answer, handles all inputs correctly, or is free of logic errors. Compilation is necessary but far from sufficient for correctness.</p>
+  </div>
+
+  <div class="misconception-box" style="margin-top:14px;">
+    <div class="mc-label">❌ Misconception</div>
+    <p>"There is a best syntax — one of these languages gets it right and the others are wrong."</p>
+  </div>
+  <div class="correction-box">
+    <p><strong>✓ Correction:</strong> Every syntax choice in every language reflects a prioritisation among competing goals. C prioritises control. Python prioritises readability. C# prioritises safety with familiarity. All of these are legitimate goals. The "best" syntax depends entirely on what you are trying to build and for whom — which is exactly why multiple languages exist.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- SECTION 7 — PRACTICE -->
+<!-- ══════════════════════════════════════════════════ -->
+
+  <!-- Q1 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q1 of 8 — Tokens</span> Identifying token types</div>
+    <div class="quiz-body">
+      <div class="quiz-q">In <span class="inline-code">int age = 25;</span>, what type of token is <span class="inline-code">age</span>?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q1')"><span class="opt-letter">A</span>A keyword — it has a fixed meaning reserved by the language</button>
+        <button class="quiz-opt" onclick="ans(this,'correct','Q1')"><span class="opt-letter">B</span>An identifier — it is a name the programmer created</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q1')"><span class="opt-letter">C</span>A literal — it is a fixed value written in the code</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q1')"><span class="opt-letter">D</span>A type keyword — it declares what kind of value the variable holds</button>
+      </div>
+      <div class="quiz-feedback" id="Q1"></div>
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q2 of 8 — Token counting</span> Comparing token streams</div>
+    <div class="quiz-body">
+      <div class="quiz-q">Python's <span class="inline-code">age = 25</span> has fewer tokens than C's <span class="inline-code">int age = 25;</span>. Which two tokens are absent in Python — and why?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q2')"><span class="opt-letter">A</span>The operator and the literal — Python handles assignments differently</button>
+        <button class="quiz-opt" onclick="ans(this,'correct','Q2')"><span class="opt-letter">B</span>The type keyword (<span class="inline-code">int</span>) and the semicolon (<span class="inline-code">;</span>) — reflecting dynamic typing and newline-as-terminator</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q2')"><span class="opt-letter">C</span>The identifier and the literal — Python uses positional assignment</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q2')"><span class="opt-letter">D</span>The operator and the semicolon — Python uses different symbols for both</button>
+      </div>
+      <div class="quiz-feedback" id="Q2"></div>
+    </div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q3 of 8 — Syntax</span> What syntax defines</div>
+    <div class="quiz-body">
+      <div class="quiz-q">Which of the following best describes what <strong>syntax</strong> does in a programming language?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q3')"><span class="opt-letter">A</span>It defines what a program does when it runs</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q3')"><span class="opt-letter">B</span>It controls how fast the program executes</button>
+        <button class="quiz-opt" onclick="ans(this,'correct','Q3')"><span class="opt-letter">C</span>It defines which arrangements of tokens form valid code in the language</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q3')"><span class="opt-letter">D</span>It specifies what types of values each variable can hold</button>
+      </div>
+      <div class="quiz-feedback" id="Q3"></div>
+    </div>
+  </div>
+
+  <!-- Q4 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q4 of 8 — Grammar</span> Reading a grammar rule</div>
+    <div class="quiz-body">
+      <div class="quiz-q">A grammar rule states: <span class="inline-code">&lt;assignment&gt; ::= &lt;identifier&gt; "=" &lt;value&gt;</span>. Which of the following is a valid assignment according to this rule?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q4')"><span class="opt-letter">A</span><span class="inline-code">= score 50</span></button>
+        <button class="quiz-opt" onclick="ans(this,'correct','Q4')"><span class="opt-letter">B</span><span class="inline-code">score = 50</span></button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q4')"><span class="opt-letter">C</span><span class="inline-code">score 50</span></button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q4')"><span class="opt-letter">D</span><span class="inline-code">50 = score</span></button>
+      </div>
+      <div class="quiz-feedback" id="Q4"></div>
+    </div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q5 of 8 — Syntax vs Meaning</span> Classifying an error</div>
+    <div class="quiz-body">
+      <div class="quiz-q">In Python, <span class="inline-code">result = "hello" + 5</span> is syntactically valid but produces a TypeError when run. This error is best described as:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q5')"><span class="opt-letter">A</span>A syntax error — the grammar does not allow + between these values</button>
+        <button class="quiz-opt" onclick="ans(this,'correct','Q5')"><span class="opt-letter">B</span>A semantic error — the syntax is valid but the meaning is incompatible at runtime</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q5')"><span class="opt-letter">C</span>A lexical error — the lexer cannot tokenise this expression</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q5')"><span class="opt-letter">D</span>A grammar error — the rule for + forbids string operands</button>
+      </div>
+      <div class="quiz-feedback" id="Q5"></div>
+    </div>
+  </div>
+
+  <!-- Q6 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q6 of 8 — Design trade-offs</span> Indentation vs braces</div>
+    <div class="quiz-body">
+      <div class="quiz-q">What is the primary language-design benefit Python gains by using indentation instead of curly braces to define code blocks?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q6')"><span class="opt-letter">A</span>It makes Python programs run faster</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q6')"><span class="opt-letter">B</span>It allows Python to run on more types of hardware</button>
+        <button class="quiz-opt" onclick="ans(this,'correct','Q6')"><span class="opt-letter">C</span>It guarantees that visual structure always matches logical structure — readability is enforced by the syntax itself</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q6')"><span class="opt-letter">D</span>It eliminates the need for a grammar entirely</button>
+      </div>
+      <div class="quiz-feedback" id="Q6"></div>
+    </div>
+  </div>
+
+  <!-- Q7 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q7 of 8 — The why</span> Design goals behind syntax</div>
+    <div class="quiz-body">
+      <div class="quiz-q">C and C# require parentheses around if-statement conditions (<span class="inline-code">if (x > 0)</span>) while Python does not (<span class="inline-code">if x > 0:</span>). Which trade-off most directly explains this difference?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q7')"><span class="opt-letter">A</span>Performance vs safety — parentheses allow the compiler to optimise the condition</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q7')"><span class="opt-letter">B</span>Portability vs control — parentheses enable cross-platform compilation</button>
+        <button class="quiz-opt" onclick="ans(this,'correct','Q7')"><span class="opt-letter">C</span>Explicitness and familiarity (C/C#) vs readability and minimal noise (Python) — different priorities for what good syntax looks like</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q7')"><span class="opt-letter">D</span>Static vs dynamic typing — parentheses signal compile-time type checking</button>
+      </div>
+      <div class="quiz-feedback" id="Q7"></div>
+    </div>
+  </div>
+
+  <!-- Q8 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q8 of 8 — Big picture</span> The chapter's core idea</div>
+    <div class="quiz-body">
+      <div class="quiz-q">Which statement best captures why C, Python, and C# have different syntax rather than all using the same rules?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q8')"><span class="opt-letter">A</span>The languages were designed by people in different countries who did not coordinate</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q8')"><span class="opt-letter">B</span>Older languages like C had not yet discovered what good syntax looks like</button>
+        <button class="quiz-opt" onclick="ans(this,'correct','Q8')"><span class="opt-letter">C</span>Each language was optimising for different goals — control, readability, safety — and different goals lead to different design choices</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q8')"><span class="opt-letter">D</span>Programming language design is not yet standardised, so every designer invents their own conventions randomly</button>
+      </div>
+      <div class="quiz-feedback" id="Q8"></div>
+    </div>
+  </div>
+
+  <div class="score-wrap">
+    <div class="score-title">Quiz Score</div>
+    <div class="score-bar-row">
+      <span class="score-lbl">Correct</span>
+      <div class="score-track"><div class="score-fill" id="scoreFill"></div></div>
+      <span class="score-pct" id="scorePct">0 / 8</span>
+    </div>
+    <p id="scoreMsg" style="font-size:13px;color:var(--muted);margin-top:10px;"></p>
+  </div>
+
+  <h3 style="margin-top:24px;">What this chapter connects to</h3>
+  <div class="synth-grid">
+    <div class="synth-card">
+      <div class="synth-icon">🔗</div>
+      <div class="synth-title">Variable Binding</div>
+      <div class="synth-desc">The syntax of declarations (int x vs var x vs just x) reflects when binding happens — and which language makes that decision.</div>
+      <div class="synth-chapter">→ Chapter 3</div>
+    </div>
+    <div class="synth-card">
+      <div class="synth-icon">🔭</div>
+      <div class="synth-title">Scope Rules</div>
+      <div class="synth-desc">Block delimiters — braces or indentation — define the boundaries of scope. Syntax and scope are directly connected.</div>
+      <div class="synth-chapter">→ Chapter 4</div>
+    </div>
+    <div class="synth-card">
+      <div class="synth-icon">🏷️</div>
+      <div class="synth-title">Type Systems</div>
+      <div class="synth-desc">Whether a type keyword appears in a declaration is the syntactic face of the static vs dynamic typing decision.</div>
+      <div class="synth-chapter">→ Chapter 5</div>
+    </div>
+  </div>
+
+  <div class="info-box" style="margin-top:8px;">
+    <p><strong>The chapter in one sentence:</strong> Tokens are the building blocks of code, syntax is the set of rules for arranging them, a grammar describes those rules precisely, and every language's rules are different because language design is a series of deliberate trade-offs between competing goals.</p>
+  </div>
+</div>
+
+</div><!-- end .content -->
+
+<script>
+const SEC=['s0','s1','s2','s3','s4','s5','s6','s7'];
+function goTo(id,btn){
+  document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'});
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+window.addEventListener('scroll',()=>{
+  let cur=SEC[0];
+  SEC.forEach(id=>{const el=document.getElementById(id);if(el&&window.scrollY>=el.offsetTop-90)cur=id;});
+  document.querySelectorAll('.nav-btn').forEach((b,i)=>b.classList.toggle('active',SEC[i]===cur));
+  const pct=Math.min(100,Math.round((window.scrollY/(document.body.scrollHeight-window.innerHeight))*100));
+  document.getElementById('progFill').style.width=pct+'%';
+  document.getElementById('prog-pct').textContent=pct+'%';
+});
+function reveal(btn){
+  const c=btn.nextElementSibling;
+  c.classList.toggle('show');
+  btn.textContent=c.classList.contains('show')?'Hide explanation':'See explanation';
+}
+const EXP={
+  Q1:{ok:'Correct. An identifier is any name the programmer creates — for a variable, function, or class. Keywords like int are reserved by the language. Literals like 25 are fixed values.',bad:'Not quite. age is an identifier — a name the programmer chose. int is the type keyword (reserved by C). 25 is the literal. The semicolon is punctuation.'},
+  Q2:{ok:'Correct. Python removes the type keyword because it uses dynamic typing — types are inferred at runtime. Python removes the semicolon because it uses newlines as statement terminators instead of explicit punctuation.',bad:'Not quite. Compare int age = 25; (5 tokens) with age = 25 (3 tokens). The two missing tokens are int (no type declaration — dynamic typing) and ; (no semicolon — Python uses newlines as terminators).'},
+  Q3:{ok:'Correct. Syntax defines the rules for which token arrangements form valid code — it is the formal grammar of the language. It does not define what the code does (that is semantics) or how fast it runs.',bad:'Not quite. Syntax is specifically about structure — which sequences of tokens are legal. What a program does is semantics. How fast it runs is a runtime concern.'},
+  Q4:{ok:'Correct. The rule requires: an identifier, then "=", then a value. Only score = 50 matches — identifier (score), then =, then a value (50).',bad:'Not quite. The rule says the order must be: identifier, then =, then value. Only score = 50 follows that order. All other options have the wrong arrangement.'},
+  Q5:{ok:'Correct. The expression "hello" + 5 is syntactically valid — Python\'s grammar allows + between any two expressions. But at runtime, Python discovers the types are incompatible. That is a semantic error, not a syntax error.',bad:'Not quite. The syntax of "hello" + 5 is fine — it follows Python\'s grammar. The problem is semantic: incompatible types discovered at runtime. Python checks types dynamically, not at parse time.'},
+  Q6:{ok:'Correct. Python\'s indentation requirement guarantees that visual layout always matches logical structure. In C, you can format code deceptively while braces define a completely different structure. Python makes that impossible.',bad:'Not quite. Indentation does not affect execution speed or hardware compatibility. The benefit is that visual structure and logical structure are always identical — enforced by the syntax rules.'},
+  Q7:{ok:'Correct. C added parentheses for unambiguous parsing in the 1970s. C# kept them for familiarity with C and Java. Python\'s designer chose the colon as a cleaner boundary and dropped the parentheses as visual noise. Different readability priorities, different choices.',bad:'Not quite. Parentheses around conditions have no effect on performance, portability, or typing. They are a syntax decision about clarity and familiarity. Python\'s designer judged the colon sufficient and parentheses redundant.'},
+  Q8:{ok:'Correct. Every language reflects the goals of its designers. C prioritised hardware control and speed. Python prioritised readability and productivity. C# prioritised safety and familiarity for large teams. Different goals produce different syntax.',bad:'Not quite. The differences are deliberate — each language optimised for genuinely different goals. C was optimising for control, Python for readability, C# for safety and productivity. That is why they look different.'},
+};
+let scores={};
+function ans(btn,result,qid){
+  if(scores[qid]!==undefined)return;
+  btn.closest('.quiz-options').querySelectorAll('.quiz-opt').forEach(o=>{o.onclick=null;o.disabled=true;});
+  btn.classList.add(result);
+  const fb=document.getElementById(qid);
+  fb.classList.add('show',result==='correct'?'ok':'bad');
+  fb.textContent=result==='correct'?EXP[qid].ok:EXP[qid].bad;
+  scores[qid]=result==='correct'?1:0;
+  updateScore();
+}
+function updateScore(){
+  const total=8,correct=Object.values(scores).reduce((a,b)=>a+b,0);
+  const pct=Math.round((correct/total)*100);
+  document.getElementById('scoreFill').style.width=pct+'%';
+  document.getElementById('scorePct').textContent=correct+' / '+total;
+  const msgs=['Keep going!','Starting out.','Making progress.','Halfway there.','Good understanding.','Strong work.','Excellent!','Perfect score! Design thinking unlocked!'];
+  document.getElementById('scoreMsg').textContent=msgs[correct]||'';
+}
+const KEYWORDS=new Set(['if','else','while','for','foreach','do','return','int','float','char','double','void','class','new','null','true','false','var','string','bool','long','short','break','continue','switch','case','default','const','static','public','private','using','def','import','from','as','and','or','not','in','is','True','False','None','pass','try','except','finally','raise','with','elif','print','input','range','len']);
+const TYPES=new Set(['int','float','char','double','void','string','bool','long','short','var']);
+function tokenise(){
+  const src=document.getElementById('tok-input').value;
+  const out=document.getElementById('tok-output');
+  const countEl=document.getElementById('tok-count');
+  if(!src.trim()){out.innerHTML='<span style="color:var(--muted);font-size:13px;">Enter some code above.</span>';return;}
+  const tokens=[];let i=0;
+  while(i<src.length){
+    if(/\s/.test(src[i])){i++;continue;}
+    if(src[i]==='"'||src[i]==="'"){const q=src[i];let j=i+1;while(j<src.length&&src[j]!==q)j++;tokens.push({type:'str',value:src.slice(i,j+1)});i=j+1;continue;}
+    if(src[i]==='/'&&src[i+1]==='/'){let j=i;while(j<src.length&&src[j]!=='\n')j++;i=j;continue;}
+    if(src[i]==='#'){let j=i;while(j<src.length&&src[j]!=='\n')j++;i=j;continue;}
+    if(/[0-9]/.test(src[i])){let j=i;while(j<src.length&&/[0-9.]/.test(src[j]))j++;tokens.push({type:'num',value:src.slice(i,j)});i=j;continue;}
+    if(/[a-zA-Z_]/.test(src[i])){let j=i;while(j<src.length&&/[a-zA-Z0-9_]/.test(src[j]))j++;const w=src.slice(i,j);tokens.push({type:TYPES.has(w)?'type':KEYWORDS.has(w)?'kw':'id',value:w});i=j;continue;}
+    const two=src.slice(i,i+2);
+    if(['==','!=','<=','>=','&&','||','++','--','+=','-='].includes(two)){tokens.push({type:'op',value:two});i+=2;continue;}
+    if('+-*/%=<>!&|^~'.includes(src[i])){tokens.push({type:'op',value:src[i]});i++;continue;}
+    if(';{}()[],:.\\'.includes(src[i])){tokens.push({type:'punc',value:src[i]});i++;continue;}
+    i++;
+  }
+  const tc={kw:'tok-kw',id:'tok-id',num:'tok-num',op:'tok-op',punc:'tok-punc',str:'tok-str',type:'tok-type'};
+  const tl={kw:'keyword',id:'identifier',num:'literal',op:'operator',punc:'punctuation',str:'string literal',type:'type keyword'};
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  out.innerHTML='<div class="token-stream">'+tokens.map(t=>`<span class="tok ${tc[t.type]}">${esc(t.value)}<div class="tok-tip">${tl[t.type]}</div></span>`).join('')+'</div>';
+  countEl.textContent=tokens.length+' token'+(tokens.length===1?'':'s')+' — hover any token to see its type';
+}
+const EXAMPLES=['int age = 25;','age = 25','if (score > 50) { printf("Pass"); }','if score > 50:\n    print("Pass")','for (int i = 0; i < 5; i++) { }','for i in range(5):\n    print(i)','Console.WriteLine("Hello");'];
+let exIdx=0;
+function loadExample(btn){exIdx=(exIdx+1)%EXAMPLES.length;document.getElementById('tok-input').value=EXAMPLES[exIdx];tokenise();}
+window.addEventListener('load',tokenise);
+</script>
+</body>
+</html>

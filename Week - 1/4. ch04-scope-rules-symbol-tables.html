@@ -1,0 +1,1908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 4 — Scope Rules & Symbol Tables · CSBS 315</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#F4F6FC;--surface:#FFFFFF;--border:#D0DAF0;--code-bg:#EEF1FA;
+  --navy:#1A2B5E;--blue:#2E5BFF;--accent:#4F8EF7;--text:#1E2A3A;--muted:#5A6A82;
+  --pill-c:#E8F0FE;--pill-c-text:#2E5BFF;
+  --pill-py:#FEF3E8;--pill-py-text:#C05E00;
+  --pill-cs:#F3E8FE;--pill-cs-text:#7B2FBE;
+  --green:#1A7A3C;--green-bg:#EAF7EE;
+  --red:#9B1C1C;--red-bg:#FEF2F2;
+  --yellow-bg:#FFFBEB;--yellow-border:#FCD34D;
+  --purple-bg:#F5F3FF;--purple-border:#C4B5FD;
+  --teal-bg:#F0FDFA;--teal-border:#5EEAD4;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.75;}
+a{color:var(--blue);}
+/* ── HERO ── */
+.hero-wrap{padding:44px 24px 0;max-width:900px;margin:0 auto;}
+.hero{background:linear-gradient(135deg,#1A2B5E 0%,#2E5BFF 100%);border-radius:18px;padding:44px 48px;color:#fff;position:relative;overflow:hidden;}
+.hero::after{content:'';position:absolute;bottom:-80px;right:-60px;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,0.05);}
+.hero-chip{display:inline-block;background:rgba(255,255,255,0.15);border-radius:20px;padding:3px 14px;font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,0.85);margin-bottom:14px;letter-spacing:.04em;}
+.hero h1{font-size:27px;font-weight:700;line-height:1.25;margin-bottom:10px;}
+.hero p{font-size:15px;color:rgba(255,255,255,0.75);max-width:540px;}
+.hero-langs{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap;}
+.lang-badge{padding:4px 14px;border-radius:20px;font-family:'DM Mono',monospace;font-size:12px;font-weight:500;}
+.badge-c{background:var(--pill-c);color:var(--pill-c-text);}
+.badge-cs{background:var(--pill-cs);color:var(--pill-cs-text);}
+.badge-py{background:var(--pill-py);color:var(--pill-py-text);}
+.hero-meta{display:flex;gap:28px;margin-top:22px;flex-wrap:wrap;}
+.hero-stat{display:flex;flex-direction:column;gap:2px;}
+.hero-stat-num{font-size:20px;font-weight:700;}
+.hero-stat-lbl{font-size:11px;color:rgba(255,255,255,0.5);font-family:'DM Mono',monospace;}
+/* ── NAV ── */
+.sticky-nav{position:sticky;top:0;z-index:100;background:rgba(244,246,252,0.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:0 24px;}
+.nav-inner{max-width:900px;margin:0 auto;display:flex;gap:4px;overflow-x:auto;padding:9px 0;scrollbar-width:none;}
+.nav-inner::-webkit-scrollbar{display:none;}
+.nav-btn{background:none;border:1px solid transparent;border-radius:6px;padding:4px 12px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .15s;}
+.nav-btn:hover{background:var(--code-bg);color:var(--blue);border-color:var(--border);}
+.nav-btn.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+/* ── PROGRESS ── */
+.progress-wrap{max-width:900px;margin:22px auto 0;padding:0 24px;}
+.prog-top{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:5px;}
+.prog-bar{height:4px;background:var(--border);border-radius:4px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--navy),var(--blue));border-radius:4px;width:0;transition:width .5s ease;}
+/* ── CONTENT ── */
+.content{max-width:900px;margin:32px auto 80px;padding:0 24px;display:flex;flex-direction:column;gap:36px;}
+.section{scroll-margin-top:64px;}
+.section-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+.section h2{font-size:21px;font-weight:700;color:var(--navy);margin-bottom:14px;line-height:1.3;}
+.section h3{font-size:16px;font-weight:600;color:var(--text);margin:22px 0 10px;}
+.section p{margin-bottom:12px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:16px;}
+/* ── CODE ── */
+.code-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+.code-block{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px 18px;overflow-x:auto;margin:8px 0 14px;}
+.code-block pre{font-family:'DM Mono',monospace;font-size:13px;color:var(--navy);line-height:1.65;white-space:pre;}
+.cc{color:#7A90B8;}.ck{color:#5B3EA6;}.cs{color:#1A7A3C;}.cn{color:#B05800;}
+/* scope highlighting colors */
+.sh-g{background:#DCFCE7;border-radius:3px;padding:0 2px;}   /* global */
+.sh-e{background:#FEF9C3;border-radius:3px;padding:0 2px;}   /* enclosing */
+.sh-l{background:#EDE9FE;border-radius:3px;padding:0 2px;}   /* local */
+.sh-b{background:#FEE2E2;border-radius:3px;padding:0 2px;}   /* built-in */
+.inline-code{font-family:'DM Mono',monospace;background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:13px;}
+/* ── GRIDS ── */
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:14px 0;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0;}
+/* ── LANG CARDS ── */
+.lc{border-radius:10px;padding:16px;font-size:14px;line-height:1.6;}
+.lc-c{background:var(--pill-c);border:1px solid #B8D0F8;}
+.lc-cs{background:var(--pill-cs);border:1px solid #D8B8F8;}
+.lc-py{background:var(--pill-py);border:1px solid #F8D8B8;}
+.lc-title{font-weight:700;font-size:13px;margin-bottom:6px;}
+.lc-c .lc-title{color:var(--pill-c-text);}
+.lc-cs .lc-title{color:var(--pill-cs-text);}
+.lc-py .lc-title{color:var(--pill-py-text);}
+.pill{display:inline-block;padding:2px 9px;border-radius:20px;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;}
+.pill-c{background:var(--pill-c);color:var(--pill-c-text);}
+.pill-cs{background:var(--pill-cs);color:var(--pill-cs-text);}
+.pill-py{background:var(--pill-py);color:var(--pill-py-text);}
+/* ── CALLOUT BOXES ── */
+.info-box{background:#EFF6FF;border:1px solid #BFDBFE;border-left:4px solid var(--blue);border-radius:8px;padding:16px 18px;margin:16px 0;}
+.info-box p{font-size:14px;color:#1E3A8A;margin:0;}
+.warn-box{background:var(--yellow-bg);border:1px solid var(--yellow-border);border-left:4px solid #F59E0B;border-radius:8px;padding:16px 18px;margin:16px 0;}
+.warn-box p{font-size:14px;color:#92400E;margin:0;}
+.think{background:var(--purple-bg);border:1px solid var(--purple-border);border-left:4px solid #8B5CF6;border-radius:10px;padding:18px 20px;margin:18px 0;}
+.think-label{font-family:'DM Mono',monospace;font-size:11px;color:#6D28D9;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+.think p{font-size:14px;color:#4C1D95;margin:0 0 10px 0;}
+.think p:last-child{margin:0;}
+.reveal-btn{background:#8B5CF6;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s;margin-top:6px;}
+.reveal-btn:hover{background:#6D28D9;}
+.reveal-content{display:none;margin-top:12px;padding:12px 14px;background:#fff;border:1px solid var(--purple-border);border-radius:6px;font-size:14px;color:var(--text);line-height:1.65;}
+.reveal-content.show{display:block;}
+.mc-box{background:var(--red-bg);border:1px solid #FCA5A5;border-left:4px solid #EF4444;border-radius:8px;padding:14px 18px;margin:12px 0;}
+.mc-box .mc-lbl{font-family:'DM Mono',monospace;font-size:11px;color:var(--red);font-weight:700;margin-bottom:4px;}
+.mc-box p{font-size:14px;color:#7F1D1D;margin:0;}
+.fix-box{background:var(--green-bg);border:1px solid #6EE7B7;border-left:4px solid #10B981;border-radius:8px;padding:14px 18px;margin:4px 0 12px;}
+.fix-box p{font-size:14px;color:var(--green);margin:0;}
+/* ── TABLES ── */
+.tbl-wrap{overflow-x:auto;margin:14px 0;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th{background:var(--navy);color:#fff;padding:10px 14px;text-align:left;font-weight:600;font-size:12px;}
+td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.55;}
+tr:last-child td{border-bottom:none;}
+tr:nth-child(even) td{background:var(--bg);}
+/* ── QUIZ ── */
+.quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px;}
+.quiz-header{background:var(--navy);color:#fff;padding:12px 20px;font-size:13px;font-weight:600;}
+.quiz-num{font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,0.45);}
+.quiz-body{padding:20px;}
+.quiz-q{font-size:15px;font-weight:500;color:var(--text);margin-bottom:14px;line-height:1.55;}
+.quiz-opts{display:flex;flex-direction:column;gap:8px;}
+.qopt{display:flex;align-items:flex-start;gap:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;cursor:pointer;transition:all .15s;font-size:14px;text-align:left;width:100%;font-family:'DM Sans',sans-serif;line-height:1.5;}
+.qopt:hover{border-color:var(--blue);background:#EEF4FF;}
+.qopt.correct{background:var(--green-bg);border-color:#6EE7B7;color:var(--green);}
+.qopt.wrong{background:var(--red-bg);border-color:#FCA5A5;color:var(--red);}
+.qopt.disabled{cursor:default;}
+.opt-ltr{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);background:var(--border);border-radius:4px;padding:1px 6px;flex-shrink:0;margin-top:2px;}
+.quiz-fb{margin-top:12px;padding:12px 14px;border-radius:8px;font-size:14px;display:none;line-height:1.55;}
+.quiz-fb.show{display:block;}
+.quiz-fb.ok{background:var(--green-bg);color:var(--green);border:1px solid #6EE7B7;}
+.quiz-fb.bad{background:var(--red-bg);color:var(--red);border:1px solid #FCA5A5;}
+/* ── SCOPE VISUALISER ── */
+.scope-viz{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:18px 0;}
+.scope-viz-header{background:var(--navy);color:#fff;padding:10px 16px;font-size:13px;font-weight:600;font-family:'DM Mono',monospace;}
+.scope-viz-body{padding:18px;}
+.scope-layer{border-radius:8px;padding:14px 16px;margin-bottom:10px;position:relative;}
+.scope-layer:last-child{margin-bottom:0;}
+.scope-layer-label{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
+.scope-vars{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+.scope-var{font-family:'DM Mono',monospace;font-size:12px;padding:3px 9px;border-radius:4px;font-weight:500;}
+/* LEGB colours */
+.layer-b{background:#FEE2E2;border:1px solid #FCA5A5;}
+.layer-b .scope-layer-label{color:#991B1B;}
+.layer-b .scope-var{background:#FCA5A5;color:#7F1D1D;}
+.layer-g{background:#DCFCE7;border:1px solid #6EE7B7;}
+.layer-g .scope-layer-label{color:#166534;}
+.layer-g .scope-var{background:#6EE7B7;color:#14532D;}
+.layer-e{background:#FEF9C3;border:1px solid #FCD34D;}
+.layer-e .scope-layer-label{color:#92400E;}
+.layer-e .scope-var{background:#FCD34D;color:#78350F;}
+.layer-l{background:#EDE9FE;border:1px solid #C4B5FD;}
+.layer-l .scope-layer-label{color:#4C1D95;}
+.layer-l .scope-var{background:#C4B5FD;color:#4C1D95;}
+/* ── SYMBOL TABLE ── */
+.symtbl{border-collapse:collapse;width:100%;font-size:13px;font-family:'DM Mono',monospace;margin:12px 0;}
+.symtbl th{background:#1A2B5E;color:#fff;padding:8px 12px;font-size:11px;}
+.symtbl td{padding:7px 12px;border-bottom:1px solid var(--border);}
+.symtbl tr:hover td{background:var(--code-bg);}
+.sym-name{color:var(--navy);font-weight:700;}
+.sym-type{color:#5B3EA6;}
+.sym-scope{color:#166534;}
+.sym-addr{color:#92400E;}
+/* ── SCOPE FLOW DIAGRAM ── */
+.scope-flow{display:flex;flex-direction:column;gap:0;margin:14px 0;}
+.sf-level{display:flex;align-items:stretch;gap:0;}
+.sf-indent{width:32px;flex-shrink:0;}
+.sf-block{flex:1;border-radius:8px;padding:12px 14px;margin:4px 0;font-size:13px;line-height:1.5;}
+.sf-arrow{display:flex;align-items:center;padding:0 8px;color:var(--muted);font-size:11px;}
+/* ── ACTIVITY ── */
+.activity{background:var(--surface);border:2px solid var(--purple-border);border-radius:12px;padding:22px;margin:16px 0;}
+.activity-label{font-family:'DM Mono',monospace;font-size:11px;color:#6D28D9;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
+.designer-opts{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0;}
+.designer-opt{padding:8px 18px;border:2px solid var(--border);border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;transition:all .15s;background:var(--bg);}
+.designer-opt:hover{border-color:var(--blue);background:#EEF4FF;color:var(--blue);}
+.designer-opt.selected{border-color:#8B5CF6;background:var(--purple-bg);color:#4C1D95;}
+.df-reveal{margin-top:12px;font-size:14px;color:var(--text);line-height:1.6;display:none;padding:12px 14px;background:#fff;border:1px solid var(--purple-border);border-radius:6px;}
+.df-reveal.show{display:block;}
+/* ── SCORE ── */
+.score-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-top:8px;}
+.score-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.score-lbl{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);min-width:70px;}
+.score-track{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
+.score-fill{height:100%;background:linear-gradient(90deg,var(--navy),var(--blue));border-radius:4px;width:0;transition:width .5s;}
+.score-pct{font-family:'DM Mono',monospace;font-size:12px;color:var(--blue);min-width:40px;text-align:right;}
+/* ── CHAPTER LINKS ── */
+.ch-link{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-top:8px;display:flex;align-items:center;gap:14px;}
+.ch-link-icon{font-size:22px;}
+.ch-link-title{font-weight:700;font-size:14px;color:var(--navy);}
+.ch-link-desc{font-size:13px;color:var(--muted);margin-top:2px;}
+.synth-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0;}
+.synth-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;}
+.synth-title{font-weight:700;font-size:13px;color:var(--navy);margin-bottom:6px;}
+.synth-desc{font-size:12px;color:var(--muted);line-height:1.6;}
+/* ── TRACE ANIMATION ── */
+.trace-container{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:0;overflow:hidden;margin:18px 0;}
+.trace-header{background:var(--navy);color:#fff;padding:12px 18px;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:space-between;}
+.trace-controls{display:flex;gap:8px;}
+.trace-btn{background:rgba(255,255,255,0.15);border:none;color:#fff;padding:4px 10px;border-radius:5px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.trace-btn:hover{background:rgba(255,255,255,0.25);}
+.trace-body{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+.trace-code{padding:18px;border-right:1px solid var(--border);font-family:'DM Mono',monospace;font-size:12px;line-height:2;}
+.trace-state{padding:18px;}
+.trace-line{border-radius:4px;padding:0 4px;transition:background .2s;}
+.trace-line.active{background:#FEF9C3;}
+.trace-step-info{font-size:13px;color:var(--text);margin-bottom:10px;}
+.trace-lookup{display:flex;flex-direction:column;gap:6px;}
+.trace-scope-row{display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:12px;}
+.trace-scope-name{min-width:80px;color:var(--muted);}
+.trace-scope-found{background:var(--green-bg);color:var(--green);padding:2px 8px;border-radius:4px;font-size:11px;}
+.trace-scope-miss{background:var(--red-bg);color:var(--red);padding:2px 8px;border-radius:4px;font-size:11px;}
+.trace-scope-val{background:var(--code-bg);color:var(--navy);padding:2px 8px;border-radius:4px;font-size:12px;}
+/* ── FLOW DIAGRAM ── */
+.flow-diagram{background:var(--code-bg);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin:14px 0;font-family:'DM Mono',monospace;font-size:13px;color:var(--navy);line-height:2.2;}
+.flow-step{display:flex;align-items:center;gap:10px;margin:2px 0;}
+.flow-step-box{background:#fff;border:1px solid var(--border);border-radius:6px;padding:3px 14px;font-size:12px;color:var(--navy);font-weight:500;}
+.flow-arrow{color:var(--blue);font-size:14px;margin:0 2px;}
+/* ── DESIGN CONNECTION ── */
+.design-box{background:linear-gradient(135deg,#EFF6FF,#F5F3FF);border:1px solid var(--purple-border);border-left:4px solid var(--blue);border-radius:10px;padding:18px 20px;margin:18px 0;}
+.design-box-label{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+.design-box p{font-size:14px;color:#1E3A8A;margin:0 0 8px;}
+.design-box p:last-child{margin:0;}
+/* ── NAME RESOLUTION TRACE ── */
+.nr-trace{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin:10px 0;font-family:'DM Mono',monospace;font-size:12px;color:var(--navy);line-height:1.9;}
+.nr-found{color:var(--green);font-weight:700;}
+.nr-miss{color:var(--red);}
+.nr-label{color:var(--muted);font-size:11px;}
+@media(max-width:680px){
+  .hero{padding:32px 24px;}.hero h1{font-size:21px;}
+  .g3,.g2,.synth-grid{grid-template-columns:1fr;}
+  .trace-body{grid-template-columns:1fr;}.trace-code{border-right:none;border-bottom:1px solid var(--border);}
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero-wrap">
+  <div class="hero">
+    <div class="hero-chip">CSBS 315 · Chapter 4 of 12 · Unit 2</div>
+    <h1>Scope Rules &amp; Symbol Tables</h1>
+    <p>When a name appears in code, how does the language decide which variable it refers to? This chapter answers that question — and shows why C, C#, and Python give different answers.</p>
+    <div class="hero-langs">
+      <span class="lang-badge badge-c">C</span>
+      <span class="lang-badge badge-cs">C#</span>
+      <span class="lang-badge badge-py">Python</span>
+    </div>
+    <div class="hero-meta">
+      <div class="hero-stat"><span class="hero-stat-num">13</span><span class="hero-stat-lbl">Sections</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">12</span><span class="hero-stat-lbl">Practice Qs</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">7</span><span class="hero-stat-lbl">Activities</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">~55</span><span class="hero-stat-lbl">Min read</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="sticky-nav">
+  <div class="nav-inner">
+    <button class="nav-btn active" onclick="goTo('s0',this)">0 · Opening</button>
+    <button class="nav-btn" onclick="goTo('s1',this)">1 · What Is Scope?</button>
+    <button class="nav-btn" onclick="goTo('s2',this)">2 · Static vs Dynamic</button>
+    <button class="nav-btn" onclick="goTo('s3',this)">3 · C Scope</button>
+    <button class="nav-btn" onclick="goTo('s4',this)">4 · Python LEGB</button>
+    <button class="nav-btn" onclick="goTo('s5',this)">5 · C# Levels</button>
+    <button class="nav-btn" onclick="goTo('s6',this)">6 · Shadowing</button>
+    <button class="nav-btn" onclick="goTo('s6b',this)">6b · Name Resolution</button>
+    <button class="nav-btn" onclick="goTo('s7',this)">7 · Symbol Tables</button>
+    <button class="nav-btn" onclick="goTo('s8',this)">8 · Tracing</button>
+    <button class="nav-btn" onclick="goTo('s9',this)">9 · Misconceptions</button>
+    <button class="nav-btn" onclick="goTo('s10',this)">10 · Practice</button>
+    <button class="nav-btn" onclick="goTo('s10b',this)">11 · Design Tradeoffs</button>
+  </div>
+</nav>
+
+<div class="progress-wrap">
+  <div class="prog-top"><span>Reading progress</span><span id="prog-pct">0%</span></div>
+  <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
+</div>
+
+<div class="content">
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 0 — OPENING QUESTION -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section" id="s0">
+  <div class="section-label">From Chapter 3 → Chapter 4</div>
+  <h2>Which <span class="inline-code">x</span> Does the Language Mean?</h2>
+
+  <div class="info-box">
+    <p><strong>Where we left off:</strong> Chapter 3 asked <em>what is a variable and how long does it exist?</em> — binding, lifetime, name vs object. Now we ask the follow-up question: <strong>when a name appears in code, which variable does the language decide it refers to?</strong> That is scope.</p>
+  </div>
+
+  <p>Consider this Python program:</p>
+
+  <div class="code-block"><pre>x = 100          <span class="cc"># (A) — defined at the top level</span>
+
+<span class="ck">def</span> outer():
+    x = 50       <span class="cc"># (B) — defined inside outer()</span>
+
+    <span class="ck">def</span> inner():
+        x = 10   <span class="cc"># (C) — defined inside inner()</span>
+        print(x) <span class="cc"># Which x does this print?</span>
+
+    inner()
+
+outer()</pre></div>
+
+  <div class="think">
+    <div class="think-label">🤔 Think First</div>
+    <p>Three variables all named <span class="inline-code">x</span> exist at the same time. When <span class="inline-code">print(x)</span> runs inside <span class="inline-code">inner()</span>, which one does Python use — (A), (B), or (C)? Write your prediction and your reasoning before reading on.</p>
+    <button class="reveal-btn" onclick="reveal(this)">See the answer</button>
+    <div class="reveal-content">
+      <p><strong>Answer: (C) — the value is 10.</strong></p>
+      <p style="margin-top:8px;">Python looks up <code>x</code> starting in the <em>innermost</em> scope first. The name <code>x</code> exists locally in <code>inner()</code>, so that is what <code>print(x)</code> finds. Python never needs to look further.</p>
+      <p style="margin-top:8px;">But now change the question: what if we remove line (C) — the <code>x = 10</code> inside <code>inner()</code>? Then Python would look in <code>outer()</code> next and find <code>x = 50</code>. Remove that too, and it finds <code>x = 100</code> at the top level. This search order is the LEGB rule — and it is one of the most important things to understand about Python.</p>
+      <p style="margin-top:8px;"><strong>The deeper question:</strong> Why does Python use this particular search order? And why do C and C# structure scope differently? Those are the language design questions this chapter answers.</p>
+    </div>
+  </div>
+
+  <p>This chapter is about how languages resolve names. The problem sounds simple, but the design decisions behind it have real consequences for readability, correctness, and how easy it is to reason about code.</p>
+
+  <h3>The conceptual flow of this chapter</h3>
+  <p>Every time your code uses a name, the language must go through a chain of decisions. This chapter follows that chain:</p>
+
+  <div class="flow-diagram">
+    <div class="flow-step"><span class="flow-step-box">Programmer writes a declaration</span></div>
+    <div style="margin-left:20px;color:var(--blue);font-size:13px;">↓</div>
+    <div class="flow-step"><span class="flow-step-box">Language defines scope rules — where that name is visible</span></div>
+    <div style="margin-left:20px;color:var(--blue);font-size:13px;">↓</div>
+    <div class="flow-step"><span class="flow-step-box">A name is referenced somewhere in the code</span></div>
+    <div style="margin-left:20px;color:var(--blue);font-size:13px;">↓</div>
+    <div class="flow-step"><span class="flow-step-box">Name resolution determines which declaration it refers to</span></div>
+    <div style="margin-left:20px;color:var(--blue);font-size:13px;">↓</div>
+    <div class="flow-step"><span class="flow-step-box">Symbol table stores information about names to support this</span></div>
+    <div style="margin-left:20px;color:var(--blue);font-size:13px;">↓</div>
+    <div class="flow-step"><span class="flow-step-box">Compiler/interpreter uses that information to check and run the program</span></div>
+  </div>
+
+  <div class="design-box">
+    <div class="design-box-label">🔧 Language Design Connection</div>
+    <p>The interesting question is not just <em>how</em> languages implement this — it is <em>what design choices they made</em>. Should names in inner scopes be allowed to shadow outer ones? Should nested functions see their enclosing function's variables? How much should the language protect programmers from accidental name conflicts?</p>
+    <p>C, C#, and Python each give different answers. By the end of this chapter you will be able to explain those differences and the tradeoffs behind them.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 1 — WHAT IS SCOPE? -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="section-label">Section 1</div>
+  <h2>What Is Scope?</h2>
+
+  <p>In Chapter 3 we defined scope briefly and told you to keep it separate from lifetime. Now we go deeper.</p>
+
+  <div class="card" style="background:var(--navy);border-color:var(--navy);">
+    <p style="font-size:16px;font-weight:700;color:#fff;line-height:1.5;text-align:center;">Scope is the region of source code in which a name is visible and can be used.</p>
+  </div>
+
+  <p>Scope answers the question: <em>where in the program can you write a name and have the language understand what you mean?</em></p>
+
+  <h3>Scope is a textual property — not a runtime property</h3>
+  <p>This is the most important thing to understand about scope upfront. Scope is determined by the <em>structure of the source code</em> — you can figure it out by reading the program, without running it. This is why it is often called <strong>lexical scope</strong> or <strong>static scope</strong> (we will return to this distinction in Section 2).</p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Concept</th><th>Main question</th><th>Determined by</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Scope</strong></td>
+          <td>Where can I use this name?</td>
+          <td>Source code structure — readable without running the program</td>
+          <td>"<span class="inline-code">score</span> is visible only inside <span class="inline-code">greet()</span>"</td>
+        </tr>
+        <tr>
+          <td><strong>Lifetime</strong></td>
+          <td>How long does the object/value exist?</td>
+          <td>Runtime — depends on when functions are called and return</td>
+          <td>"<span class="inline-code">score</span> is created when <span class="inline-code">greet()</span> is called and destroyed when it returns"</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="info-box">
+    <p><strong>Scope and lifetime are related but not the same thing.</strong> A classic example in C: a local variable declared with <span class="inline-code">static</span> has <em>function scope</em> (only visible inside the function) but <em>program-long lifetime</em> (persists across calls). The name goes out of scope when the function returns, but the object lives on.</p>
+  </div>
+
+  <h3>The name resolution problem</h3>
+  <p>Every time a program refers to a name, the language must <strong>resolve</strong> it — find which variable (or function, or type) that name refers to. Scope rules are the rules the language uses to do that resolution.</p>
+
+  <div class="g3">
+    <div class="lc lc-c">
+      <div class="lc-title">C — block scope</div>
+      <p>Names are visible from their declaration to the end of the enclosing block <span class="inline-code">{ }</span>. No notion of class or module scope.</p>
+    </div>
+    <div class="lc lc-cs">
+      <div class="lc-title">C# — four levels</div>
+      <p>Block → method → class → namespace. Each layer contains the next. A name can be visible at multiple levels simultaneously.</p>
+    </div>
+    <div class="lc lc-py">
+      <div class="lc-title">Python — LEGB</div>
+      <p>Local → Enclosing → Global → Built-in. Python searches outward through these four layers whenever it resolves a name.</p>
+    </div>
+  </div>
+
+  <div class="design-box">
+    <div class="design-box-label">🔧 Language Design Connection</div>
+    <p><strong>What should happen when two scopes contain the same name?</strong> A language designer must answer this — and the answer determines how name resolution works, whether shadowing is allowed, and how deeply a function can "see" into its surrounding environment.</p>
+    <p>C, C#, and Python each draw different boundaries. Those differences are not accidents — they reflect deliberate choices about simplicity, safety, expressiveness, and implementation complexity. Sections 3–5 examine each language's choice in detail.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 2 — STATIC VS DYNAMIC SCOPING -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="section-label">Section 2</div>
+  <h2>Static Scoping vs Dynamic Scoping</h2>
+
+  <p>Before examining the specific rules of C, C#, and Python, there is a fundamental language-design choice that underlies all of them: <em>when</em> are scope rules applied?</p>
+
+  <div class="g2">
+    <div class="card" style="margin:0;border-left:4px solid var(--blue);">
+      <h3 style="margin-top:0;color:var(--pill-c-text);">Static (Lexical) Scoping</h3>
+      <p style="font-size:14px;line-height:1.65;margin-bottom:8px;">The scope of a name is determined by its position in the <em>source code</em> — by the text of the program, as written. You can determine which variable a name refers to by reading the code, without running it.</p>
+      <p style="font-size:13px;color:var(--muted);margin:0;"><strong>Used by:</strong> C, C#, Python, Java, JavaScript, most modern languages.</p>
+    </div>
+    <div class="card" style="margin:0;border-left:4px solid #F59E0B;">
+      <h3 style="margin-top:0;color:#92400E;">Dynamic Scoping</h3>
+      <p style="font-size:14px;line-height:1.65;margin-bottom:8px;">The scope of a name is determined by the <em>runtime call stack</em> — which function called which. A name resolves to the most recently assigned value in the chain of callers, not in the textual structure of the code.</p>
+      <p style="font-size:13px;color:var(--muted);margin:0;"><strong>Used by:</strong> Early Lisp, Emacs Lisp, some shell scripting. Rare in modern languages.</p>
+    </div>
+  </div>
+
+  <h3>Why the difference matters — a concrete example</h3>
+
+  <div class="code-block"><pre><span class="cc">-- Hypothetical: what DYNAMIC scoping would mean --</span>
+x = <span class="cn">1</span>
+
+<span class="ck">def</span> print_x():
+    print(x)      <span class="cc"># which x does this see?</span>
+
+<span class="ck">def</span> caller_a():
+    x = <span class="cn">99</span>
+    print_x()     <span class="cc"># dynamic: would see x=99 from caller_a's stack</span>
+
+<span class="ck">def</span> caller_b():
+    x = <span class="cn">42</span>
+    print_x()     <span class="cc"># dynamic: would see x=42 from caller_b's stack</span></pre></div>
+
+  <div class="g2">
+    <div>
+      <div class="code-label"><span>Under <strong>static scoping</strong> (how Python actually works)</span></div>
+      <div class="code-block"><pre>print_x()  <span class="cc"># always prints 1</span>
+caller_a() <span class="cc"># always prints 1</span>
+caller_b() <span class="cc"># always prints 1</span>
+<span class="cc"># x in print_x() is resolved
+# by WHERE it is written —
+# at the module level where x=1</span></pre></div>
+    </div>
+    <div>
+      <div class="code-label"><span>Under <strong>dynamic scoping</strong> (hypothetical)</span></div>
+      <div class="code-block"><pre>print_x()  <span class="cc"># prints 1 (no caller's x)</span>
+caller_a() <span class="cc"># prints 99 (caller_a's x)</span>
+caller_b() <span class="cc"># prints 42 (caller_b's x)</span>
+<span class="cc"># x in print_x() is resolved
+# by WHO called it at runtime —
+# unpredictable from reading code</span></pre></div>
+    </div>
+  </div>
+
+  <div class="warn-box">
+    <p><strong>Why most modern languages chose static scoping:</strong> With dynamic scoping, the meaning of a name depends on who called the function — you cannot understand the code by reading it alone. A function's behaviour can vary based on the call chain, making programs hard to reason about and hard for compilers to check at compile time.</p>
+    <p style="margin-top:8px;"><strong>Note on symbol tables:</strong> Symbol tables are useful for both static and dynamic scoping. Under static scoping, a compiler can build most of the symbol table from the source text alone. Under dynamic scoping, the language runtime still needs to track names and their values — but the lookup follows the call stack rather than the source structure. Static scoping makes compile-time analysis and error detection significantly easier.</p>
+  </div>
+
+  <div class="think">
+    <div class="think-label">🤔 Design Question</div>
+    <p>Can you think of a situation where dynamic scoping might actually be useful? What kind of program might benefit from a name resolving differently depending on who called the function?</p>
+    <button class="reveal-btn" onclick="reveal(this)">See discussion</button>
+    <div class="reveal-content">
+      <p>Dynamic scoping has been used in configuration and environment systems — where you want a function to use the "current context's" settings without passing them explicitly. For example, a logging function that should use whatever log level is active in the current execution context.</p>
+      <p style="margin-top:8px;">But this same flexibility makes code hard to debug and maintain. Most modern language designers concluded that the predictability of static scoping outweighs the convenience of dynamic scoping. Python, C, and C# all use static (lexical) scoping.</p>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <p><strong>All three of our languages — C, C#, and Python — use static (lexical) scoping.</strong> Their scope rules differ in the <em>structure</em> they define (blocks, functions, classes, namespaces, the LEGB rule), but all three resolve names based on the textual structure of the source code, not on the runtime call stack.</p>
+  </div>
+  <div class="design-box">
+    <div class="design-box-label">🔧 Language Design Connection</div>
+    <p>Choosing static scoping was a design decision with consequences: it makes programs more predictable and enables compilers to check names and types before the program runs. It also meant language designers had to specify exactly which textual structures create new scopes — blocks, functions, classes, modules — and in what order those scopes are searched. The next three sections show how C, Python, and C# each answered those questions.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 3 — C SCOPE RULES -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="section-label">Section 3</div>
+  <h2>C: Block Scope, File Scope, and Three Keywords</h2>
+
+  <p>C has a relatively simple scope model — three levels, determined entirely by where a declaration appears in the source code. This simplicity is itself a design choice: C's designers prioritised directness and programmer control over the kind of multi-level scoping that object-oriented languages later introduced.</p>
+
+  <h3>The three levels of scope in C</h3>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Scope level</th><th>Where the name is declared</th><th>Visibility</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Block scope</strong></td>
+          <td>Inside a pair of <span class="inline-code">{ }</span></td>
+          <td>From declaration to the closing <span class="inline-code">}</span></td>
+          <td>Local variables in a function, variables in an <span class="inline-code">if</span> block</td>
+        </tr>
+        <tr>
+          <td><strong>Function scope</strong></td>
+          <td>Labels only (for <span class="inline-code">goto</span>)</td>
+          <td>Entire function body</td>
+          <td><span class="inline-code">start:</span> in a <span class="inline-code">goto start;</span> statement</td>
+        </tr>
+        <tr>
+          <td><strong>File scope</strong></td>
+          <td>Outside any function</td>
+          <td>From declaration to end of file</td>
+          <td>Global variables, functions defined at the top level</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Block scope — the common case</h3>
+  <div class="code-block"><pre>#include &lt;stdio.h&gt;
+
+<span class="ck">int</span> globalScore = 0;    <span class="cc">// file scope — visible everywhere in this file</span>
+
+<span class="ck">void</span> process(<span class="ck">int</span> n) {   <span class="cc">// n has block scope: the function body</span>
+    <span class="ck">int</span> result = n * 2;  <span class="cc">// block scope: visible from here to the }</span>
+
+    <span class="ck">if</span> (result > 10) {
+        <span class="ck">int</span> bonus = 5;   <span class="cc">// block scope: visible only inside this if-block</span>
+        result += bonus;
+    }
+
+    <span class="cc">// bonus is NOT visible here — its block has ended</span>
+    printf(<span class="cs">"%d\n"</span>, result);
+}</pre></div>
+
+  <h3>The <span class="inline-code">static</span> keyword — extending or restricting scope</h3>
+  <p>C's <span class="inline-code">static</span> keyword does two different things depending on where it is used — a notorious source of confusion for new C programmers:</p>
+
+  <div class="g2">
+    <div>
+      <div class="code-label"><span>static on a local variable — extended lifetime, same scope</span></div>
+      <div class="code-block"><pre><span class="ck">void</span> counter() {
+    <span class="ck">static int</span> count = 0;
+    count++;
+    printf(<span class="cs">"%d\n"</span>, count);
+}
+<span class="cc">// count is still only visible inside counter()
+// but persists across calls: 1, 2, 3, 4 ...</span></pre></div>
+    </div>
+    <div>
+      <div class="code-label"><span>static on a file-scope variable — restricted to this file</span></div>
+      <div class="code-block"><pre><span class="cc">// file: helper.c</span>
+<span class="ck">static int</span> internalCount = 0;
+<span class="cc">// internalCount is NOT visible to other .c files
+// even though it's at file scope
+// This is C's version of "private"</span></pre></div>
+    </div>
+  </div>
+
+  <div class="warn-box">
+    <p><strong>Same keyword, two meanings:</strong> <span class="inline-code">static</span> on a local variable means "preserve this variable's value across function calls" (affects lifetime, not scope). <span class="inline-code">static</span> on a file-scope variable or function means "don't make this visible to other files" (restricts scope). This overloading of one keyword is widely considered a C design flaw — C++ and other languages provide separate mechanisms for each.</p>
+  </div>
+
+  <h3>The <span class="inline-code">extern</span> keyword — reaching across files</h3>
+  <div class="g2">
+    <div>
+      <div class="code-label"><span>main.c</span></div>
+      <div class="code-block"><pre><span class="ck">extern int</span> sharedCount;
+<span class="cc">// "sharedCount is defined somewhere else"
+// This declaration lets this file use it</span>
+
+<span class="ck">int</span> main() {
+    sharedCount++;
+    <span class="ck">return</span> 0;
+}</pre></div>
+    </div>
+    <div>
+      <div class="code-label"><span>counter.c</span></div>
+      <div class="code-block"><pre><span class="ck">int</span> sharedCount = 0;
+<span class="cc">// The actual definition lives here.
+// Any other file that uses "extern"
+// can access this variable.</span></pre></div>
+    </div>
+  </div>
+
+  <p>C has no notion of class scope or namespace scope — these were additions made by C++ and later languages. In C, multi-file organisation relies entirely on <span class="inline-code">static</span> (to hide) and <span class="inline-code">extern</span> (to share), which are powerful but require careful discipline.</p>
+
+  <h3>Name resolution in action — C's rule</h3>
+  <p>When the compiler encounters a name in C, it searches outward through nested scopes until it finds a matching declaration. The first match wins. Consider this example, which demonstrates shadowing across three levels:</p>
+  <div class="code-block"><pre><span class="ck">int</span> x = 10;       <span class="cc">// file scope</span>
+
+<span class="ck">int</span> main() {
+    <span class="ck">int</span> x = 20;   <span class="cc">// shadows the file-scope x</span>
+
+    {
+        <span class="ck">int</span> x = 30; <span class="cc">// shadows main()'s x</span>
+        printf(<span class="cs">"%d"</span>, x); <span class="cc">// (1) → 30: innermost x wins</span>
+    }
+
+    printf(<span class="cs">"%d"</span>, x); <span class="cc">// (2) → 20: inner block ended, main()'s x is visible</span>
+}</pre></div>
+  <div class="nr-trace">
+    <span class="nr-label">Resolving x at (1):</span><br>
+    Look in innermost block → <span class="nr-found">found: x = 30</span> ✓ stop here<br>
+    <br>
+    <span class="nr-label">Resolving x at (2):</span><br>
+    Inner block ended — its x is gone<br>
+    Look in main() scope → <span class="nr-found">found: x = 20</span> ✓ stop here<br>
+    <br>
+    <span class="nr-label">File-scope x = 10 is never reached in either case — it is shadowed.</span>
+  </div>
+  <div class="design-box">
+    <div class="design-box-label">🔧 Language Design Connection</div>
+    <p><strong>C's design choice:</strong> Any block <span class="inline-code">{ }</span> can introduce a new scope. The inner declaration does not replace the outer one — both exist simultaneously, but the inner one takes precedence within its block. This gives programmers flexibility but requires careful reading: a name can silently refer to a different variable than it appears to.</p>
+  </div>
+
+  <div class="think">
+    <div class="think-label">🔬 Trace the scope</div>
+    <p>In the code below, mark each use of <span class="inline-code">x</span> with which declaration it refers to:</p>
+    <div class="code-block"><pre><span class="ck">int</span> x = 1;            <span class="cc">// Declaration A</span>
+<span class="ck">void</span> foo() {
+    <span class="ck">int</span> x = 2;        <span class="cc">// Declaration B</span>
+    {
+        <span class="ck">int</span> x = 3;    <span class="cc">// Declaration C</span>
+        printf(<span class="cs">"%d"</span>, x); <span class="cc">// Use 1 — which declaration?</span>
+    }
+    printf(<span class="cs">"%d"</span>, x);   <span class="cc">// Use 2 — which declaration?</span>
+}
+printf(<span class="cs">"%d"</span>, x);       <span class="cc">// Use 3 — which declaration?</span></pre></div>
+    <button class="reveal-btn" onclick="reveal(this)">See answer</button>
+    <div class="reveal-content">
+      <p><strong>Use 1 → Declaration C (x = 3):</strong> Inside the innermost block, x refers to the nearest enclosing declaration — C.</p>
+      <p style="margin-top:6px;"><strong>Use 2 → Declaration B (x = 2):</strong> The inner block has closed, so Declaration C no longer exists. The nearest declaration is B.</p>
+      <p style="margin-top:6px;"><strong>Use 3 → Declaration A (x = 1):</strong> Outside foo(), B and C no longer exist. Only the file-scope A is visible.</p>
+      <p style="margin-top:8px;">This "nearest enclosing declaration" rule is the core of C's lexical scope. When multiple declarations share a name, the innermost one wins — the outer ones are <em>shadowed</em> (Section 6).</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 4 — PYTHON LEGB -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="section-label">Section 4</div>
+  <h2>Python: The LEGB Rule</h2>
+
+  <p>Python has a formal, named scope rule: <strong>LEGB</strong>. When Python looks up a name, it searches through four layers in this order — stopping at the first match.</p>
+
+  <div class="scope-viz">
+    <div class="scope-viz-header">Python LEGB scope — search order (innermost → outermost)</div>
+    <div class="scope-viz-body">
+      <div class="scope-layer layer-l">
+        <div class="scope-layer-label">L — Local</div>
+        <p style="font-size:13px;color:#4C1D95;margin-bottom:8px;">Names defined inside the <em>current function</em>. Python searches here first.</p>
+        <div class="scope-vars">
+          <span class="scope-var">function parameters</span>
+          <span class="scope-var">variables assigned in this function</span>
+        </div>
+      </div>
+      <div class="scope-layer layer-e">
+        <div class="scope-layer-label">E — Enclosing</div>
+        <p style="font-size:13px;color:#78350F;margin-bottom:8px;">Names in the local scope of any <em>enclosing function</em> (for nested functions). Python searches from the immediately enclosing function outward.</p>
+        <div class="scope-vars">
+          <span class="scope-var">variables in outer()</span>
+          <span class="scope-var">variables in outer-outer()</span>
+        </div>
+      </div>
+      <div class="scope-layer layer-g">
+        <div class="scope-layer-label">G — Global</div>
+        <p style="font-size:13px;color:#14532D;margin-bottom:8px;">Names defined at the <em>module level</em> — the top of the current .py file. Also where <span class="inline-code">import</span>ed names land.</p>
+        <div class="scope-vars">
+          <span class="scope-var">module-level variables</span>
+          <span class="scope-var">functions defined at module level</span>
+          <span class="scope-var">imported names</span>
+        </div>
+      </div>
+      <div class="scope-layer layer-b">
+        <div class="scope-layer-label">B — Built-in</div>
+        <p style="font-size:13px;color:#7F1D1D;margin-bottom:8px;">Names Python always provides — built-in functions and constants. Python searches here last.</p>
+        <div class="scope-vars">
+          <span class="scope-var">print</span>
+          <span class="scope-var">len</span>
+          <span class="scope-var">range</span>
+          <span class="scope-var">type</span>
+          <span class="scope-var">True / False / None</span>
+          <span class="scope-var">int, str, list …</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>LEGB in action — a complete example</h3>
+
+  <div class="code-block"><pre>x = <span class="cs">"global"</span>         <span class="cc"># G — global scope</span>
+
+<span class="ck">def</span> outer():
+    x = <span class="cs">"enclosing"</span>  <span class="cc"># E — enclosing scope (for inner)</span>
+
+    <span class="ck">def</span> inner():
+        x = <span class="cs">"local"</span>  <span class="cc"># L — local scope</span>
+        print(x)      <span class="cc"># finds "local" immediately → prints "local"</span>
+
+    inner()
+    print(x)          <span class="cc"># outer's local x → prints "enclosing"</span>
+
+outer()
+print(x)              <span class="cc"># global x → prints "global"</span>
+print(len)            <span class="cc"># B — found in built-ins → the built-in function len</span></pre></div>
+
+  <h3>The <span class="inline-code">global</span> and <span class="inline-code">nonlocal</span> keywords</h3>
+  <p>By default, assignment inside a function creates a <em>new local variable</em> — it does not modify the enclosing or global variable of the same name. To modify a variable in an outer scope, you must explicitly declare your intent:</p>
+
+  <div class="g2">
+    <div>
+      <div class="code-label"><span><span class="pill pill-py">Python</span> — global keyword</span></div>
+      <div class="code-block"><pre>count = 0
+
+<span class="ck">def</span> increment():
+    <span class="ck">global</span> count    <span class="cc"># "I mean the module-level count"</span>
+    count += 1      <span class="cc"># modifies the global</span>
+
+increment()
+print(count)  <span class="cc"># 1</span></pre></div>
+    </div>
+    <div>
+      <div class="code-label"><span><span class="pill pill-py">Python</span> — nonlocal keyword</span></div>
+      <div class="code-block"><pre><span class="ck">def</span> outer():
+    count = 0
+
+    <span class="ck">def</span> inner():
+        <span class="ck">nonlocal</span> count  <span class="cc"># "I mean outer's count"</span>
+        count += 1
+
+    inner()
+    print(count)  <span class="cc"># 1</span>
+
+outer()</pre></div>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <p><strong>Why require <span class="inline-code">global</span> and <span class="inline-code">nonlocal</span>?</strong> Python's design decision: assignment inside a function always creates a local binding by default. This prevents accidental modification of outer variables — a common source of bugs. The explicit <span class="inline-code">global</span> or <span class="inline-code">nonlocal</span> declaration makes the programmer state their intent clearly. C does not have this protection — assignment in a function always modifies whatever variable the name resolves to.</p>
+  </div>
+  <div class="design-box">
+    <div class="design-box-label">🔧 Language Design Connection</div>
+    <p><strong>Python's designers chose the LEGB rule to support closures cleanly.</strong> Because the E (Enclosing) layer exists, an inner function can read variables from an outer function without any special syntax — the LEGB search finds them automatically. But to <em>write</em> to an outer variable, the programmer must be explicit (<span class="inline-code">nonlocal</span>). This design makes closures powerful while reducing accidental side effects. C made the opposite choice: no enclosing-function scope at all, keeping the model simpler but less expressive.</p>
+  </div>
+
+  <h3>The UnboundLocalError trap</h3>
+  <p>Python's "assignment creates a local" rule causes a surprising error that many Python programmers encounter:</p>
+
+  <div class="code-block"><pre>x = 10
+
+<span class="ck">def</span> broken():
+    print(x)     <span class="cc"># UnboundLocalError! Python sees x = x + 1 below</span>
+    x = x + 1   <span class="cc"># this assignment makes x "local" for the whole function</span>
+                 <span class="cc"># so reading x before the assignment fails</span>
+
+broken()</pre></div>
+
+  <div class="warn-box">
+    <p><strong>The trap:</strong> When Python processes a function, it scans the whole body for assignments. If it finds <span class="inline-code">x = ...</span> anywhere in the function, it treats <span class="inline-code">x</span> as local throughout the entire function — including lines before the assignment. Reading a local variable before it is assigned produces an <span class="inline-code">UnboundLocalError</span>. The fix is to add <span class="inline-code">global x</span> at the top of the function.</p>
+  </div>
+
+  <div class="think">
+    <div class="think-label">🤔 LEGB Trace</div>
+    <p>For each print statement, which LEGB layer does Python find the name in?</p>
+    <div class="code-block"><pre>result = <span class="cn">100</span>
+
+<span class="ck">def</span> compute():
+    multiplier = <span class="cn">3</span>
+
+    <span class="ck">def</span> apply(n):
+        total = n * multiplier
+        print(total)     <span class="cc"># (1) total comes from which layer?</span>
+        print(multiplier) <span class="cc"># (2) multiplier comes from which layer?</span>
+        print(result)    <span class="cc"># (3) result comes from which layer?</span>
+        print(len)       <span class="cc"># (4) len comes from which layer?</span>
+
+    apply(<span class="cn">5</span>)
+
+compute()</pre></div>
+    <button class="reveal-btn" onclick="reveal(this)">See answer</button>
+    <div class="reveal-content">
+      <p><strong>(1) total → L (Local):</strong> <code>total</code> is assigned inside <code>apply()</code>, so it is local to <code>apply()</code>. Found immediately.</p>
+      <p style="margin-top:6px;"><strong>(2) multiplier → E (Enclosing):</strong> Not in <code>apply()</code>'s local scope. Python looks outward to <code>compute()</code>, which is the enclosing function — finds <code>multiplier = 3</code> there.</p>
+      <p style="margin-top:6px;"><strong>(3) result → G (Global):</strong> Not local, not in any enclosing function. Found at module level where <code>result = 100</code>.</p>
+      <p style="margin-top:6px;"><strong>(4) len → B (Built-in):</strong> Not defined anywhere in the program — Python searches all the way to the built-in scope and finds the built-in function <code>len</code>.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 5 — C# FOUR LEVELS -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section" id="s5">
+  <div class="section-label">Section 5</div>
+  <h2>C#: Four Levels of Scope</h2>
+
+  <p>C# has a richer scope hierarchy than C, reflecting its object-oriented design. For this course we use four useful levels to reason about C# names: block, method, class, and namespace. This is a teaching model — actual C# scope rules are more detailed, but these four levels cover the cases you will encounter most often.</p>
+
+  <div class="scope-viz">
+    <div class="scope-viz-header">C# scope hierarchy — outermost → innermost</div>
+    <div class="scope-viz-body">
+      <div class="scope-layer" style="background:#EFF6FF;border:1px solid #BFDBFE;">
+        <div class="scope-layer-label" style="color:#1E40AF;">Namespace scope</div>
+        <p style="font-size:13px;color:#1E3A8A;margin-bottom:8px;">The broadest level. Classes, interfaces, enums declared inside a <span class="inline-code">namespace</span> block are visible throughout that namespace (and to other code that imports it). Equivalent to C's multi-file visibility.</p>
+        <div class="scope-vars" style="gap:6px;">
+          <span class="scope-var" style="background:#BFDBFE;color:#1E40AF;">namespace MyApp { ... }</span>
+        </div>
+      </div>
+      <div class="scope-layer" style="background:#F5F3FF;border:1px solid #C4B5FD;margin-top:8px;">
+        <div class="scope-layer-label" style="color:#4C1D95;">Class / type scope</div>
+        <p style="font-size:13px;color:#4C1D95;margin-bottom:8px;">Fields and methods declared in a class are visible to all methods in that class (subject to access modifiers like <span class="inline-code">private</span>, <span class="inline-code">public</span>). C has no equivalent — it must simulate this with structs and conventions.</p>
+        <div class="scope-vars" style="gap:6px;">
+          <span class="scope-var" style="background:#C4B5FD;color:#4C1D95;">class fields</span>
+          <span class="scope-var" style="background:#C4B5FD;color:#4C1D95;">class methods</span>
+          <span class="scope-var" style="background:#C4B5FD;color:#4C1D95;">properties</span>
+        </div>
+      </div>
+      <div class="scope-layer" style="background:var(--green-bg);border:1px solid #6EE7B7;margin-top:8px;">
+        <div class="scope-layer-label" style="color:#166534;">Method scope</div>
+        <p style="font-size:13px;color:#14532D;margin-bottom:8px;">Parameters and local variables declared inside a method are visible from declaration to the end of the method. Equivalent to C's block scope at the function level.</p>
+        <div class="scope-vars" style="gap:6px;">
+          <span class="scope-var" style="background:#6EE7B7;color:#14532D;">method parameters</span>
+          <span class="scope-var" style="background:#6EE7B7;color:#14532D;">local variables</span>
+        </div>
+      </div>
+      <div class="scope-layer" style="background:#DCFCE7;border:1px solid #6EE7B7;margin-top:8px;">
+        <div class="scope-layer-label" style="color:#166534;">Block scope</div>
+        <p style="font-size:13px;color:#14532D;margin-bottom:8px;">Variables declared inside a block (<span class="inline-code">if</span>, <span class="inline-code">for</span>, <span class="inline-code">while</span>, etc.) are visible only within that block. Same as C's innermost rule.</p>
+        <div class="scope-vars" style="gap:6px;">
+          <span class="scope-var" style="background:#6EE7B7;color:#14532D;">loop variables</span>
+          <span class="scope-var" style="background:#6EE7B7;color:#14532D;">if-block variables</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>A complete C# scope example</h3>
+  <div class="code-block"><pre><span class="ck">namespace</span> SchoolApp {           <span class="cc">// namespace scope</span>
+
+    <span class="ck">class</span> Student {               <span class="cc">// class scope</span>
+        <span class="ck">private string</span> name;    <span class="cc">// visible to all methods in Student</span>
+        <span class="ck">private int</span> grade;
+
+        <span class="ck">public</span> Student(<span class="ck">string</span> n, <span class="ck">int</span> g) {
+            name = n;             <span class="cc">// 'name' is the class field</span>
+            grade = g;
+        }
+
+        <span class="ck">public void</span> Report() {   <span class="cc">// method scope</span>
+            <span class="ck">string</span> prefix = <span class="cs">"Student:"</span>; <span class="cc">// method-local</span>
+
+            <span class="ck">if</span> (grade >= 90) {
+                <span class="ck">string</span> msg = <span class="cs">"Excellent"</span>; <span class="cc">// block scope — only here</span>
+                Console.WriteLine(<span class="cs">$"{prefix} {name} — {msg}"</span>);
+            }
+            <span class="cc">// msg is NOT accessible here — block has ended</span>
+        }
+    }
+}</pre></div>
+
+  <h3>C# scope vs C scope vs Python scope</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Scope level</th><th>C</th><th>C#</th><th>Python</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Innermost block</strong></td><td>Block <span class="inline-code">{ }</span></td><td>Block <span class="inline-code">{ }</span></td><td>Not applicable — no <span class="inline-code">{ }</span></td></tr>
+        <tr><td><strong>Function / method</strong></td><td>Function block</td><td>Method scope</td><td>Local scope (L in LEGB)</td></tr>
+        <tr><td><strong>Enclosing function</strong></td><td>Not supported</td><td>Not supported</td><td>Enclosing scope (E in LEGB)</td></tr>
+        <tr><td><strong>Type / class</strong></td><td>None (no classes)</td><td>Class scope</td><td>Class body (limited)</td></tr>
+        <tr><td><strong>File / module</strong></td><td>File scope</td><td>Namespace scope</td><td>Global / module scope (G)</td></tr>
+        <tr><td><strong>Language built-ins</strong></td><td>None (use <span class="inline-code">#include</span>)</td><td>System namespace</td><td>Built-in scope (B in LEGB)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="info-box">
+    <p><strong>The design rationale behind C#'s extra levels:</strong> C# was designed for object-oriented software where code is organised into classes and namespaces. A field should be visible to all methods in its class; a class should be visible to all code in its namespace. C doesn't need these levels because it has no classes. Python has classes but handles their scope differently — a method doesn't automatically see the class's attributes without <span class="inline-code">self</span>.</p>
+  </div>
+  <div class="design-box">
+    <div class="design-box-label">🔧 Language Design Connection</div>
+    <p><strong>Each additional scope level in C# reflects a structural unit in the language's design.</strong> Adding a class meant adding class scope. Adding namespaces meant adding namespace scope. The scope hierarchy is not arbitrary — it follows the language's organisational model. This illustrates a general principle: the scope rules of a language tend to mirror the abstraction mechanisms the language provides.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 6 — SHADOWING -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section" id="s6">
+  <div class="section-label">Section 6</div>
+  <h2>Shadowing: When Inner Scope Hides Outer Scope</h2>
+
+  <p><strong>Shadowing</strong> occurs when a declaration in an inner scope uses the same name as a declaration in an outer scope. The inner declaration takes precedence within that scope — the outer one is invisible there, though it continues to exist.</p>
+
+  <p>Shadowing is a design decision, not just a technical mechanism. A language designer must decide: should inner scopes be allowed to reuse names from outer scopes, and if so, what are the rules?</p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Language</th><th>Is shadowing allowed?</th><th>Design choice</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="pill pill-c">C</span></td>
+          <td>Yes — any inner block variable can hide an outer variable</td>
+          <td>Simplicity: no special rules, inner scope always wins</td>
+        </tr>
+        <tr>
+          <td><span class="pill pill-py">Python</span></td>
+          <td>Yes — local/enclosing/global names can share a spelling</td>
+          <td>Flexibility: LEGB search; <span class="inline-code">global</span>/<span class="inline-code">nonlocal</span> to override default</td>
+        </tr>
+        <tr>
+          <td><span class="pill pill-cs">C#</span></td>
+          <td>Partially — class fields can be shadowed; local-shadowing-local in the same method is restricted</td>
+          <td>Safety: prevents a specific common mistake while preserving flexibility elsewhere</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="g3">
+    <div class="lc lc-c">
+      <div class="lc-title">C — shadowing allowed, no warning</div>
+      <div class="code-block" style="margin:8px 0;font-size:12px;"><pre><span class="ck">int</span> x = 1;
+<span class="ck">void</span> f() {
+    <span class="ck">int</span> x = 2; <span class="cc">// shadows global x</span>
+    printf(<span class="cs">"%d"</span>, x); <span class="cc">// 2</span>
+}</pre></div>
+      <p style="font-size:13px;margin:0;">No warning. The compiler silently uses the nearest x. Can cause subtle bugs if the shadowing is unintentional.</p>
+    </div>
+    <div class="lc lc-cs">
+      <div class="lc-title">C# — some shadowing restricted</div>
+      <div class="code-block" style="margin:8px 0;font-size:12px;"><pre><span class="ck">int</span> x = 1;
+<span class="ck">if</span> (<span class="ck">true</span>) {
+    <span class="cc">// int x = 2; — ERROR in C#</span>
+    <span class="cc">// Cannot shadow a local variable
+    // from the same method scope</span>
+}</pre></div>
+      <p style="font-size:13px;margin:0;">C# disallows shadowing a local variable from the same method scope — a deliberate safety decision. Class fields CAN be shadowed by locals.</p>
+    </div>
+    <div class="lc lc-py">
+      <div class="lc-title">Python — shadowing allowed</div>
+      <div class="code-block" style="margin:8px 0;font-size:12px;"><pre>x = <span class="cs">"global"</span>
+<span class="ck">def</span> f():
+    x = <span class="cs">"local"</span> <span class="cc"># shadows global x</span>
+    print(x)   <span class="cc"># "local"</span>
+print(x)       <span class="cc"># "global"</span></pre></div>
+      <p style="font-size:13px;margin:0;">Python allows shadowing. A local x does not modify the global x. The global remains intact after the function returns.</p>
+    </div>
+  </div>
+
+  <h3>Shadowing a class field with a local variable (C#)</h3>
+  <div class="code-block"><pre><span class="ck">class</span> Counter {
+    <span class="ck">private int</span> count = 0;  <span class="cc">// class field</span>
+
+    <span class="ck">public void</span> Broken(<span class="ck">int</span> count) {  <span class="cc">// parameter shadows class field!</span>
+        count++;                      <span class="cc">// increments the PARAMETER, not the field</span>
+        Console.WriteLine(count);     <span class="cc">// prints parameter value</span>
+        Console.WriteLine(<span class="ck">this</span>.count); <span class="cc">// use 'this' to reach the field</span>
+    }
+}</pre></div>
+
+  <div class="warn-box">
+    <p><strong>The shadowing bug pattern:</strong> One of the most common bugs in C# (and Java) is accidentally naming a local variable or parameter the same as a class field. The local silently shadows the field. Using <span class="inline-code">this.fieldName</span> explicitly avoids this — but requires discipline. C# only blocks the narrower case of shadowing a local with another local in the same method.</p>
+  </div>
+
+  <h3>When is shadowing intentional?</h3>
+  <div class="code-block"><pre><span class="cc"># Python — deliberate shadowing in comprehensions</span>
+items = [1, 2, 3, 4, 5]
+result = [x * 2 <span class="ck">for</span> x <span class="ck">in</span> items]  <span class="cc"># x is local to the comprehension</span>
+<span class="cc"># In Python 3, x does NOT "leak" out of the comprehension</span>
+<span class="cc"># This was a Python 2 bug — Python 3 fixed it by making comprehension</span>
+<span class="cc"># variables have their own scope</span></pre></div>
+
+  <div class="think">
+    <div class="think-label">🤔 Design Question</div>
+    <p>C# prevents shadowing a local variable with another local in the same method — but C and Python both allow it freely. Is shadowing a useful feature, a source of confusion, or both? What is C# trying to prevent, and what is it trading away?</p>
+    <button class="reveal-btn" onclick="reveal(this)">See discussion</button>
+    <div class="reveal-content">
+      <p><strong>What C# prevents:</strong> A programmer writes <code>int x = 5;</code> in a method, then later (in a nested block) writes <code>int x = 10;</code> — perhaps forgetting the first declaration. In C, the second x silently shadows the first, which can produce confusing bugs. C# makes this a compile error, forcing the programmer to use a different name.</p>
+      <p style="margin-top:8px;"><strong>What C# trades away:</strong> Sometimes using the same name in a nested block is intentional — loop counters, temporary variables. Restricting this requires programmers to invent new names.</p>
+      <p style="margin-top:8px;"><strong>The design lesson:</strong> There is no universally correct answer. C prioritises simplicity and flexibility. C# prioritises catching a specific class of bugs. Python prioritises making closures and nested functions natural. Each is a defensible choice, and each reflects the language's broader design philosophy.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 6b — NAME RESOLUTION -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section" id="s6b">
+  <div class="section-label">Section 6b</div>
+  <h2>Name Resolution: Connecting a Reference to Its Declaration</h2>
+
+  <p>We have discussed scope rules for C, Python, and C#. Now let's make explicit the process those rules support.</p>
+
+  <div class="card" style="background:var(--navy);border-color:var(--navy);">
+    <p style="font-size:15px;font-weight:700;color:#fff;line-height:1.5;text-align:center;">Name resolution is the process of determining which declaration a particular use of a name refers to.</p>
+  </div>
+
+  <p>Every time code refers to a name, the language must resolve it. Scope rules define the algorithm. Symbol tables (Section 7) are the data structure that supports the algorithm.</p>
+
+  <h3>The resolution algorithm — a procedure you can follow</h3>
+  <div class="card">
+    <ol style="font-size:14px;line-height:2;padding-left:20px;color:var(--text);">
+      <li><strong>Find the use</strong> — identify the name being referenced.</li>
+      <li><strong>Identify the current scope</strong> — which function, block, or module is the reference in?</li>
+      <li><strong>Search the current scope</strong> — is there a declaration for that name here?</li>
+      <li><strong>If found</strong> — use that declaration. Stop.</li>
+      <li><strong>If not found</strong> — move outward to the enclosing scope, according to the language's rules.</li>
+      <li><strong>Continue outward</strong> — repeat until the name is found or there are no more enclosing scopes.</li>
+      <li><strong>If never found</strong> — the language determines what happens: usually an error (<span class="inline-code">NameError</span> in Python, "undeclared identifier" in C).</li>
+    </ol>
+  </div>
+
+  <h3>Tracing name resolution through nested Python scopes</h3>
+  <div class="g2">
+    <div>
+      <div class="code-label"><span>Program with three levels of x</span></div>
+      <div class="code-block"><pre>x = <span class="cn">100</span>          <span class="cc"># G — global</span>
+
+<span class="ck">def</span> outer():
+    x = <span class="cn">50</span>       <span class="cc"># E — enclosing</span>
+
+    <span class="ck">def</span> inner():
+        x = <span class="cn">10</span>   <span class="cc"># L — local</span>
+        print(x)  <span class="cc"># ← resolve this</span>
+
+    inner()
+
+outer()</pre></div>
+    </div>
+    <div>
+      <div class="code-label"><span>Resolution trace for print(x)</span></div>
+      <div class="nr-trace">
+        <span class="nr-label">Step 1 — Search Local (inner):</span><br>
+        x = 10 declared here → <span class="nr-found">Found!</span><br>
+        Stop. Use x = 10.<br>
+        <br>
+        <span style="color:var(--muted);font-size:12px;">Output: 10</span>
+      </div>
+      <div class="code-label" style="margin-top:14px;"><span>If inner's x = 10 is removed:</span></div>
+      <div class="nr-trace">
+        <span class="nr-label">Step 1 — Search Local (inner):</span><br>
+        <span class="nr-miss">No x here.</span><br>
+        <span class="nr-label">Step 2 — Search Enclosing (outer):</span><br>
+        x = 50 declared here → <span class="nr-found">Found!</span><br>
+        Stop. Use x = 50.<br>
+        <br>
+        <span style="color:var(--muted);font-size:12px;">Output: 50</span>
+      </div>
+    </div>
+  </div>
+
+  <h3>The procedure across all three languages</h3>
+  <p>The same algorithm applies in all three languages — what differs is which scopes exist and in what order they are searched:</p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Step</th><th><span class="pill pill-c">C</span></th><th><span class="pill pill-cs">C#</span></th><th><span class="pill pill-py">Python</span></th></tr></thead>
+      <tbody>
+        <tr><td>1st search</td><td>Current block</td><td>Current block</td><td>Local scope (L)</td></tr>
+        <tr><td>2nd search</td><td>Enclosing block(s)</td><td>Enclosing blocks / method</td><td>Enclosing function(s) (E)</td></tr>
+        <tr><td>3rd search</td><td>File scope</td><td>Class / type scope</td><td>Global / module scope (G)</td></tr>
+        <tr><td>4th search</td><td>—</td><td>Namespace scope</td><td>Built-in scope (B)</td></tr>
+        <tr><td>If not found</td><td>Compile error</td><td>Compile error</td><td>NameError at runtime</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="design-box">
+    <div class="design-box-label">🔧 Language Design Connection</div>
+    <p><strong>Notice the last row:</strong> C and C# report undeclared names at compile time — they refuse to run until all names are resolved. Python discovers undeclared names at runtime, when the relevant line executes. This is a direct consequence of static typing (C/C#) vs dynamic binding (Python) — a theme running through Chapters 3, 4, and 5.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 7 — SYMBOL TABLES -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section" id="s7">
+  <div class="section-label">Section 7</div>
+  <h2>Symbol Tables: How Compilers Track Names</h2>
+
+  <p>Section 6b described name resolution as an algorithm. Symbol tables are the data structure that makes that algorithm efficient. Every compiler or interpreter needs some mechanism to remember what names have been declared, where, and what their types and kinds are.</p>
+
+  <div class="card" style="background:var(--navy);border-color:var(--navy);">
+    <p style="font-size:15px;font-weight:700;color:#fff;line-height:1.5;text-align:center;">A symbol table is a data structure used by a compiler or interpreter to keep track of names — mapping each identifier to its kind, type, scope, and associated information.</p>
+  </div>
+
+  <p>A simple conceptual symbol table might look like this:</p>
+
+  <div class="tbl-wrap">
+    <table class="symtbl">
+      <thead><tr><th>Name</th><th>Kind</th><th>Type</th><th>Scope</th></tr></thead>
+      <tbody>
+        <tr><td class="sym-name">x</td><td>variable</td><td class="sym-type">int</td><td class="sym-scope">local (main)</td></tr>
+        <tr><td class="sym-name">name</td><td>variable</td><td class="sym-type">string</td><td class="sym-scope">class (Student)</td></tr>
+        <tr><td class="sym-name">calculate</td><td>function</td><td class="sym-type">—</td><td class="sym-scope">module</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Real compilers store considerably more — storage location, whether a variable is initialised, parameter counts for functions, access modifiers, and more. The table above is a teaching model, not a complete picture.</p>
+
+  <h3>What a symbol table records</h3>
+
+  <div class="code-block"><pre><span class="cc">// C program the compiler is analysing:</span>
+<span class="ck">int</span> globalCount = 0;
+
+<span class="ck">float</span> average(<span class="ck">int</span> a, <span class="ck">int</span> b) {
+    <span class="ck">int</span> sum = a + b;
+    <span class="ck">float</span> result = (<span class="ck">float</span>) sum / 2;
+    <span class="ck">return</span> result;
+}</pre></div>
+
+  <div class="tbl-wrap">
+    <table class="symtbl">
+      <thead><tr><th>Name</th><th>Kind</th><th>Type</th><th>Scope</th><th>Attributes</th></tr></thead>
+      <tbody>
+        <tr><td class="sym-name">globalCount</td><td>variable</td><td class="sym-type">int</td><td class="sym-scope">file (global)</td><td>initialised to 0</td></tr>
+        <tr><td class="sym-name">average</td><td>function</td><td class="sym-type">float</td><td class="sym-scope">file</td><td>params: (int, int)</td></tr>
+        <tr><td class="sym-name">a</td><td>parameter</td><td class="sym-type">int</td><td class="sym-scope">average()</td><td>param index 0</td></tr>
+        <tr><td class="sym-name">b</td><td>parameter</td><td class="sym-type">int</td><td class="sym-scope">average()</td><td>param index 1</td></tr>
+        <tr><td class="sym-name">sum</td><td>variable</td><td class="sym-type">int</td><td class="sym-scope">average() block</td><td>local</td></tr>
+        <tr><td class="sym-name">result</td><td>variable</td><td class="sym-type">float</td><td class="sym-scope">average() block</td><td>local</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Scoped symbol tables — how nested scopes work</h3>
+  <p>In practice, compilers maintain a <em>stack of symbol tables</em> — one per scope. When a new scope opens (a function is entered, a block starts), a new table is pushed onto the stack. When the scope closes, that table is popped.</p>
+
+  <h3>Nested scopes → nested symbol tables</h3>
+  <p>Because scope is hierarchical, a single flat table is not enough. Compilers maintain a <strong>stack of symbol tables</strong> — one per active scope. The structure reflects the source code nesting directly:</p>
+
+  <div class="g2">
+    <div>
+      <div class="code-label"><span>Source code nesting</span></div>
+      <div class="code-block"><pre>Global Scope
+  └── Function Scope
+        └── Block Scope</pre></div>
+      <div class="code-block" style="margin-top:8px;"><pre><span class="cc">// Compiler symbol table stack</span>
+<span class="cc">// while processing inner block:</span>
+┌─────────────────────┐
+│ Current Block       │ ← searched first
+├─────────────────────┤
+│ Function Scope      │
+├─────────────────────┤
+│ Global Scope        │ ← searched last
+└─────────────────────┘</pre></div>
+    </div>
+    <div>
+      <div class="code-label"><span>What happens at each lifecycle event</span></div>
+      <div class="code-block"><pre><span class="cc">// Enter scope:
+//   create and push a new table</span>
+
+<span class="cc">// Declare a name:
+//   record it in the top table</span>
+
+<span class="cc">// Reference a name:
+//   search top → ... → bottom
+//   stop at first match</span>
+
+<span class="cc">// Exit scope:
+//   pop the top table
+//   (names in it are gone)</span></pre></div>
+    </div>
+  </div>
+
+  <div class="design-box">
+    <div class="design-box-label">🔧 Language Design Connection</div>
+    <p>The symbol table stack directly mirrors the scope hierarchy the language designer chose. A language with four scope levels (like C#) needs a four-layer stack. Python's LEGB rule maps directly: Built-in (always at the bottom), then Global, then Enclosing function tables, then Local at the top. The <em>design decision</em> about scope rules determines what the implementation must support.</p>
+  </div>
+
+  <h3>Why symbol tables matter for programming language design</h3>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>What symbol tables enable</th><th>What this means for the language</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Name resolution</strong></td>
+          <td>Determining which declaration a use of a name refers to — the core of scope rules</td>
+        </tr>
+        <tr>
+          <td><strong>Type checking</strong></td>
+          <td>Once the compiler knows <em>which</em> variable is referenced, it can check whether operations on it are type-correct</td>
+        </tr>
+        <tr>
+          <td><strong>Duplicate detection</strong></td>
+          <td>Reporting an error if the same name is declared twice in the same scope</td>
+        </tr>
+        <tr>
+          <td><strong>Unused variable warnings</strong></td>
+          <td>Noticing that a name was added to the symbol table but never looked up</td>
+        </tr>
+        <tr>
+          <td><strong>Optimisation</strong></td>
+          <td>Knowing the scope of a variable allows the compiler to allocate storage efficiently</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="info-box">
+    <p><strong>Statically vs dynamically scoped languages:</strong> In a statically scoped language (C, C#, Python), the symbol table structure can be built at compile time — the compiler processes the source text and builds scope tables by reading the code. In a dynamically scoped language, name resolution depends on the runtime call stack — the compiler cannot build a definitive symbol table ahead of time. This is one reason static scoping enables better compile-time error detection.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 8 — SCOPE TRACING INTERACTIVE -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section" id="s8">
+  <div class="section-label">Section 8 · Interactive</div>
+  <h2>Scope Tracing: Walk Through a Program</h2>
+  <p>One of the best ways to master scope rules is to trace through a program manually — asking at every name reference: which scope does this come from? This section gives you structured practice.</p>
+
+  <h3>Trace Exercise 1 — Python LEGB</h3>
+
+  <div class="trace-container">
+    <div class="trace-header">
+      <span>LEGB Name Resolution Trace — step through each name lookup</span>
+      <div class="trace-controls">
+        <button class="trace-btn" onclick="traceStep(-1)">← Prev</button>
+        <button class="trace-btn" onclick="traceStep(1)">Next →</button>
+        <button class="trace-btn" onclick="traceReset()">Reset</button>
+      </div>
+    </div>
+    <div class="trace-body">
+      <div class="trace-code" id="trace-code">
+        <div class="trace-line" id="tl0">multiplier = 3        <span class="cc"># G</span></div>
+        <div class="trace-line" id="tl1"> </div>
+        <div class="trace-line" id="tl2">def scale(n):</div>
+        <div class="trace-line" id="tl3">    factor = 2</div>
+        <div class="trace-line" id="tl4"> </div>
+        <div class="trace-line" id="tl5">    def apply():</div>
+        <div class="trace-line" id="tl6">        result = n * factor * multiplier</div>
+        <div class="trace-line" id="tl7">        return result</div>
+        <div class="trace-line" id="tl8"> </div>
+        <div class="trace-line" id="tl9">    return apply()</div>
+        <div class="trace-line" id="tl10"> </div>
+        <div class="trace-line" id="tl11">print(scale(5))</div>
+      </div>
+      <div class="trace-state">
+        <div class="trace-step-info" id="trace-info">Click "Next →" to begin the LEGB trace.</div>
+        <div class="trace-lookup" id="trace-lookup"></div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Trace Exercise 2 — C scope</h3>
+
+  <div class="activity">
+    <div class="activity-label">✏️ Manual Trace — C scope rules</div>
+    <p style="font-size:14px;color:var(--text);margin-bottom:12px;">For each numbered comment, identify which declaration the name resolves to (by line) and why:</p>
+    <div class="code-block"><pre>#include &lt;stdio.h&gt;
+
+<span class="ck">int</span> score = 100;      <span class="cc">// Line 3: file scope</span>
+
+<span class="ck">int</span> bonus(<span class="ck">int</span> score) { <span class="cc">// Line 5: parameter named "score"</span>
+    <span class="ck">if</span> (score > 50) {
+        <span class="ck">int</span> extra = 10; <span class="cc">// Line 7: block scope</span>
+        score += extra;  <span class="cc">// (1) which "score"? which "extra"?</span>
+    }
+    <span class="ck">return</span> score;        <span class="cc">// (2) which "score"?</span>
+}
+
+<span class="ck">int</span> main() {
+    <span class="ck">int</span> result = bonus(score); <span class="cc">// (3) which "score"?</span>
+    printf(<span class="cs">"%d\n"</span>, result); <span class="cc">// (4) which "result"?</span>
+    <span class="ck">return</span> 0;
+}</pre></div>
+    <button class="reveal-btn" onclick="reveal(this)">See full trace</button>
+    <div class="reveal-content">
+      <p><strong>(1) score → the parameter (line 5), extra → the if-block local (line 7).</strong> Inside <code>bonus()</code>, the name <code>score</code> refers to the parameter, not the global (line 3). The parameter shadows the global. <code>extra</code> is local to the <code>if</code> block and is found immediately.</p>
+      <p style="margin-top:6px;"><strong>(2) score → the parameter (line 5).</strong> We are still inside <code>bonus()</code>. The <code>if</code> block has ended, so <code>extra</code> no longer exists. But <code>score</code> the parameter is still in scope for the entire function body.</p>
+      <p style="margin-top:6px;"><strong>(3) score → the global (line 3).</strong> Inside <code>main()</code>, there is no parameter named <code>score</code> and no local named <code>score</code>. The name resolves to the file-scope global <code>score = 100</code>.</p>
+      <p style="margin-top:6px;"><strong>(4) result → main()'s local.</strong> <code>result</code> is declared as a local variable in <code>main()</code> and that is the only <code>result</code> in any scope at this point.</p>
+    </div>
+  </div>
+
+  <h3>Trace Exercise 3 — C# class scope</h3>
+
+  <div class="activity">
+    <div class="activity-label">✏️ Manual Trace — C# four scope levels</div>
+    <p style="font-size:14px;color:var(--text);margin-bottom:12px;">For each numbered comment, identify the scope level the name comes from:</p>
+    <div class="code-block"><pre><span class="ck">namespace</span> Library {
+    <span class="ck">class</span> Book {
+        <span class="ck">private string</span> title = <span class="cs">"Unknown"</span>; <span class="cc">// class field</span>
+        <span class="ck">private int</span> pageCount = 0;
+
+        <span class="ck">public void</span> Update(<span class="ck">string</span> title, <span class="ck">int</span> pages) {
+            <span class="ck">this</span>.title = title;        <span class="cc">// (1) 'this.title' vs 'title'?</span>
+            pageCount = pages;         <span class="cc">// (2) which 'pageCount'?</span>
+
+            <span class="ck">if</span> (pages > 500) {
+                <span class="ck">string</span> note = <span class="cs">"Long book"</span>; <span class="cc">// (3) scope of 'note'?</span>
+                Console.WriteLine(note);
+            }
+            <span class="cc">// Console.WriteLine(note); // (4) would this work?</span>
+        }
+    }
+}</pre></div>
+    <button class="reveal-btn" onclick="reveal(this)">See full trace</button>
+    <div class="reveal-content">
+      <p><strong>(1)</strong> <code>this.title</code> refers to the class field (class scope). The bare <code>title</code> on the right refers to the method parameter (method scope). The parameter shadows the class field, so <code>this</code> is needed to reach the field explicitly.</p>
+      <p style="margin-top:6px;"><strong>(2)</strong> <code>pageCount</code> refers to the class field. There is no local variable or parameter named <code>pageCount</code>, so the lookup reaches class scope and finds the field.</p>
+      <p style="margin-top:6px;"><strong>(3)</strong> <code>note</code> has block scope — it exists only inside the <code>if</code> block. It is not visible outside that block.</p>
+      <p style="margin-top:6px;"><strong>(4)</strong> No — this would be a compile-time error in C#. <code>note</code> is out of scope; the block that declared it has ended. C# (and C) are consistent here: block-scoped variables are inaccessible outside their block.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 9 — MISCONCEPTIONS -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section" id="s9">
+  <div class="section-label">Section 9</div>
+  <h2>Common Misconceptions About Scope</h2>
+
+  <div class="mc-box">
+    <div class="mc-lbl">❌ Misconception 1</div>
+    <p>"Scope and lifetime are the same thing."</p>
+  </div>
+  <div class="fix-box">
+    <p><strong>✓ Correction:</strong> Scope is WHERE in source code a name is accessible — a static, textual property. Lifetime is HOW LONG during execution the variable exists — a runtime property. A local variable's scope ends at the closing brace (textual), and its lifetime ends when the function returns (runtime). For most local variables they correspond, but they are different concepts and can come apart in edge cases (e.g. <span class="inline-code">static</span> local variables in C have function scope but program-long lifetime).</p>
+  </div>
+
+  <div class="mc-box" style="margin-top:14px;">
+    <div class="mc-lbl">❌ Misconception 2</div>
+    <p>"Python's <span class="inline-code">global</span> keyword makes a variable visible everywhere."</p>
+  </div>
+  <div class="fix-box">
+    <p><strong>✓ Correction:</strong> The <span class="inline-code">global</span> keyword inside a function does <em>not</em> create a new global variable or broadcast visibility. It tells Python: "when I write this name inside this function, resolve it to the <em>existing</em> module-level variable of that name, rather than creating a new local." It is a scope-resolution instruction, not a visibility declaration.</p>
+  </div>
+
+  <div class="mc-box" style="margin-top:14px;">
+    <div class="mc-lbl">❌ Misconception 3</div>
+    <p>"Dynamic scoping and dynamic typing are the same concept."</p>
+  </div>
+  <div class="fix-box">
+    <p><strong>✓ Correction:</strong> These are completely unrelated concepts. Dynamic <em>typing</em> is about when type checking occurs (at runtime rather than compile time) — covered in Chapter 3. Dynamic <em>scoping</em> is about how name resolution works (based on the call stack rather than the source text). Python has dynamic typing but static (lexical) scoping. The word "dynamic" appears in both but refers to different things.</p>
+  </div>
+
+  <div class="mc-box" style="margin-top:14px;">
+    <div class="mc-lbl">❌ Misconception 4</div>
+    <p>"In Python, a function can always see and modify the global variables in its module."</p>
+  </div>
+  <div class="fix-box">
+    <p><strong>✓ Correction:</strong> A function can always <em>read</em> a global variable (via LEGB, G layer). But to <em>assign</em> to a global variable from inside a function, you must declare it with <span class="inline-code">global</span>. Without that declaration, an assignment creates a new local variable with the same name — it does not modify the global. This distinction causes the UnboundLocalError trap described in Section 4.</p>
+  </div>
+
+  <div class="mc-box" style="margin-top:14px;">
+    <div class="mc-lbl">❌ Misconception 5</div>
+    <p>"C# <span class="inline-code">namespace</span> scope is the same as Python's module scope."</p>
+  </div>
+  <div class="fix-box">
+    <p><strong>✓ Correction:</strong> They play a similar organisational role but differ significantly. A Python module corresponds to a single <span class="inline-code">.py</span> file — it is the global scope for everything in that file. A C# namespace can span multiple files, and multiple namespaces can exist in one file. Python's module boundary is always a file; C#'s namespace is an explicit grouping construct that is independent of file structure.</p>
+  </div>
+
+  <div class="mc-box" style="margin-top:14px;">
+    <div class="mc-lbl">❌ Misconception 6</div>
+    <p>"The LEGB rule means Python always checks all four layers for every name."</p>
+  </div>
+  <div class="fix-box">
+    <p><strong>✓ Correction:</strong> Python stops at the first match. If a name is found in the L (Local) scope, Python uses it immediately and never checks E, G, or B. The rule defines the <em>order</em> of search, and the search stops early on success. This is why a local variable with the same name as a built-in (like naming a variable <span class="inline-code">list</span>) shadows the built-in within that function — the local is found first.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 10 — PRACTICE QUESTIONS -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section" id="s10">
+  <div class="section-label">Section 10</div>
+  <h2>Practice Questions</h2>
+
+  <!-- Q1 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q1 of 12 · Scope definition</span> What is scope?</div>
+    <div class="quiz-body">
+      <div class="quiz-q">Which statement best defines <em>scope</em> in programming language design?</div>
+      <div class="quiz-opts">
+        <button class="qopt" onclick="ans(this,'wrong','Q1')"><span class="opt-ltr">A</span>The period during program execution when a variable exists and can be used</button>
+        <button class="qopt" onclick="ans(this,'correct','Q1')"><span class="opt-ltr">B</span>The region of source code in which a name is visible and can be referenced</button>
+        <button class="qopt" onclick="ans(this,'wrong','Q1')"><span class="opt-ltr">C</span>The data structure the compiler uses to track variable names</button>
+        <button class="qopt" onclick="ans(this,'wrong','Q1')"><span class="opt-ltr">D</span>The set of variables accessible at runtime via the call stack</button>
+      </div>
+      <div class="quiz-fb" id="Q1"></div>
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q2 of 12 · Static vs dynamic scoping</span> The core distinction</div>
+    <div class="quiz-body">
+      <div class="quiz-q">What is the key difference between static (lexical) scoping and dynamic scoping?</div>
+      <div class="quiz-opts">
+        <button class="qopt" onclick="ans(this,'wrong','Q2')"><span class="opt-ltr">A</span>Static scoping is faster at runtime; dynamic scoping catches more errors at compile time</button>
+        <button class="qopt" onclick="ans(this,'wrong','Q2')"><span class="opt-ltr">B</span>Static scoping applies only to compiled languages; dynamic scoping applies to interpreted languages</button>
+        <button class="qopt" onclick="ans(this,'correct','Q2')"><span class="opt-ltr">C</span>In static scoping, a name's scope is determined by its position in the source text; in dynamic scoping, by the runtime call stack</button>
+        <button class="qopt" onclick="ans(this,'wrong','Q2')"><span class="opt-ltr">D</span>Static scoping allows reassignment; dynamic scoping does not</button>
+      </div>
+      <div class="quiz-fb" id="Q2"></div>
+    </div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q3 of 12 · LEGB rule</span> Python name resolution</div>
+    <div class="quiz-body">
+      <div class="quiz-q">In Python, what does the "E" in LEGB stand for, and when is it searched?</div>
+      <div class="quiz-opts">
+        <button class="qopt" onclick="ans(this,'wrong','Q3')"><span class="opt-ltr">A</span>Exception — it is the scope created when a try/except block is active</button>
+        <button class="qopt" onclick="ans(this,'wrong','Q3')"><span class="opt-ltr">B</span>External — the scope of names imported from other modules</button>
+        <button class="qopt" onclick="ans(this,'correct','Q3')"><span class="opt-ltr">C</span>Enclosing — the local scope of any enclosing functions, searched after Local but before Global</button>
+        <button class="qopt" onclick="ans(this,'wrong','Q3')"><span class="opt-ltr">D</span>Evaluated — the scope that Python evaluates at import time</button>
+      </div>
+      <div class="quiz-fb" id="Q3"></div>
+    </div>
+  </div>
+
+  <!-- Q4 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q4 of 12 · Python global keyword</span> What it actually does</div>
+    <div class="quiz-body">
+      <div class="quiz-q">What does the <span class="inline-code">global x</span> statement inside a Python function do?</div>
+      <div class="quiz-opts">
+        <button class="qopt" onclick="ans(this,'wrong','Q4')"><span class="opt-ltr">A</span>Creates a new global variable <span class="inline-code">x</span> and makes it visible to all modules</button>
+        <button class="qopt" onclick="ans(this,'wrong','Q4')"><span class="opt-ltr">B</span>Prevents the function from reading the module-level <span class="inline-code">x</span></button>
+        <button class="qopt" onclick="ans(this,'correct','Q4')"><span class="opt-ltr">C</span>Tells Python to resolve the name <span class="inline-code">x</span> in the module-level (G) scope, not create a new local variable</button>
+        <button class="qopt" onclick="ans(this,'wrong','Q4')"><span class="opt-ltr">D</span>Makes <span class="inline-code">x</span> immutable — any assignment to <span class="inline-code">x</span> after this will raise an error</button>
+      </div>
+      <div class="quiz-fb" id="Q4"></div>
+    </div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q5 of 12 · C static keyword</span> Two meanings</div>
+    <div class="quiz-body">
+      <div class="quiz-q">In C, a local variable declared with <span class="inline-code">static</span> (e.g. inside a function) differs from a normal local variable in which way?</div>
+      <div class="quiz-opts">
+        <button class="qopt" onclick="ans(this,'wrong','Q5')"><span class="opt-ltr">A</span>It becomes visible to all other functions in the program</button>
+        <button class="qopt" onclick="ans(this,'correct','Q5')"><span class="opt-ltr">B</span>Its value persists across multiple calls to the function, rather than being re-created each time</button>
+        <button class="qopt" onclick="ans(this,'wrong','Q5')"><span class="opt-ltr">C</span>Its type cannot be changed at compile time</button>
+        <button class="qopt" onclick="ans(this,'wrong','Q5')"><span class="opt-ltr">D</span>It is stored on the heap rather than the stack</button>
+      </div>
+      <div class="quiz-fb" id="Q5"></div>
+    </div>
+  </div>
+
+  <!-- Q6 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q6 of 12 · Shadowing</span> What it means</div>
+    <div class="quiz-body">
+      <div class="quiz-q">What is <em>variable shadowing</em>?</div>
+      <div class="quiz-opts">
+        <button class="qopt" onclick="ans(this,'wrong','Q6')"><span class="opt-ltr">A</span>When a variable is deleted and a reference to it still exists, causing a crash</button>
+        <button class="qopt" onclick="ans(this,'correct','Q6')"><span class="opt-ltr">B</span>When a name in an inner scope is the same as a name in an outer scope, making the outer one inaccessible within that inner scope</button>
+        <button class="qopt" onclick="ans(this,'wrong','Q6')"><span class="opt-ltr">C</span>When two variables share the same memory location</button>
+        <button class="qopt" onclick="ans(this,'wrong','Q6')"><span class="opt-ltr">D</span>When a variable's type is overridden at runtime</button>
+      </div>
+      <div class="quiz-fb" id="Q6"></div>
+    </div>
+  </div>
+
+  <!-- Q7 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q7 of 12 · Predict output</span> Python LEGB trace</div>
+    <div class="quiz-body">
+      <div class="quiz-q">What does this Python program print?
+      <div class="code-block" style="margin:8px 0;"><pre>x = <span class="cs">"G"</span>
+<span class="ck">def</span> outer():
+    x = <span class="cs">"E"</span>
+    <span class="ck">def</span> inner():
+        print(x)
+    inner()
+outer()</pre></div></div>
+      <div class="quiz-opts">
+        <button class="qopt" onclick="ans(this,'wrong','Q7')"><span class="opt-ltr">A</span><span class="inline-code">G</span> — inner() searches global first</button>
+        <button class="qopt" onclick="ans(this,'correct','Q7')"><span class="opt-ltr">B</span><span class="inline-code">E</span> — inner() finds x in the enclosing function outer()</button>
+        <button class="qopt" onclick="ans(this,'wrong','Q7')"><span class="opt-ltr">C</span>A NameError — x is not defined in inner()</button>
+        <button class="qopt" onclick="ans(this,'wrong','Q7')"><span class="opt-ltr">D</span><span class="inline-code">None</span> — inner() has no return value</button>
+      </div>
+      <div class="quiz-fb" id="Q7"></div>
+    </div>
+  </div>
+
+  <!-- Q8 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q8 of 12 · Symbol tables</span> What they store</div>
+    <div class="quiz-body">
+      <div class="quiz-q">What is the primary purpose of a symbol table in a compiler?</div>
+      <div class="quiz-opts">
+        <button class="qopt" onclick="ans(this,'wrong','Q8')"><span class="opt-ltr">A</span>To store the runtime values of all variables during program execution</button>
+        <button class="qopt" onclick="ans(this,'wrong','Q8')"><span class="opt-ltr">B</span>To hold the machine code generated from each function</button>
+        <button class="qopt" onclick="ans(this,'correct','Q8')"><span class="opt-ltr">C</span>To map identifier names to their type, scope, and storage information during compilation</button>
+        <button class="qopt" onclick="ans(this,'wrong','Q8')"><span class="opt-ltr">D</span>To list all built-in functions available to the programmer</button>
+      </div>
+      <div class="quiz-fb" id="Q8"></div>
+    </div>
+  </div>
+
+  <!-- Q9 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q9 of 12 · C# scope</span> Four levels</div>
+    <div class="quiz-body">
+      <div class="quiz-q">C# has four levels of scope that C does not. Which of the following is a scope level that C# supports but C does not?</div>
+      <div class="quiz-opts">
+        <button class="qopt" onclick="ans(this,'wrong','Q9')"><span class="opt-ltr">A</span>Block scope — names visible within a pair of { }</button>
+        <button class="qopt" onclick="ans(this,'wrong','Q9')"><span class="opt-ltr">B</span>File scope — names visible throughout a source file</button>
+        <button class="qopt" onclick="ans(this,'correct','Q9')"><span class="opt-ltr">C</span>Class scope — names declared in a class visible to all methods of that class</button>
+        <button class="qopt" onclick="ans(this,'wrong','Q9')"><span class="opt-ltr">D</span>Function scope — names visible throughout a function body</button>
+      </div>
+      <div class="quiz-fb" id="Q9"></div>
+    </div>
+  </div>
+
+  <!-- Q10 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q10 of 12 · Scope vs lifetime</span> The distinction</div>
+    <div class="quiz-body">
+      <div class="quiz-q">In C, a local variable declared with <span class="inline-code">static int count = 0;</span> inside a function has which unusual combination of properties?</div>
+      <div class="quiz-opts">
+        <button class="qopt" onclick="ans(this,'wrong','Q10')"><span class="opt-ltr">A</span>Global scope and function lifetime</button>
+        <button class="qopt" onclick="ans(this,'correct','Q10')"><span class="opt-ltr">B</span>Function (block) scope and program-long lifetime</button>
+        <button class="qopt" onclick="ans(this,'wrong','Q10')"><span class="opt-ltr">C</span>Block scope and garbage-collected lifetime</button>
+        <button class="qopt" onclick="ans(this,'wrong','Q10')"><span class="opt-ltr">D</span>File scope and function lifetime</button>
+      </div>
+      <div class="quiz-fb" id="Q10"></div>
+    </div>
+  </div>
+
+  <!-- Q11 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q11 of 12 · Python UnboundLocalError</span> Why it happens</div>
+    <div class="quiz-body">
+      <div class="quiz-q">Why does the following Python code raise an <span class="inline-code">UnboundLocalError</span>?
+      <div class="code-block" style="margin:8px 0;"><pre>x = 10
+<span class="ck">def</span> f():
+    print(x)
+    x = 20
+f()</pre></div></div>
+      <div class="quiz-opts">
+        <button class="qopt" onclick="ans(this,'wrong','Q11')"><span class="opt-ltr">A</span>Python doesn't allow functions to read global variables at all</button>
+        <button class="qopt" onclick="ans(this,'wrong','Q11')"><span class="opt-ltr">B</span>print(x) runs before x = 20 is executed, so x doesn't exist yet in any scope</button>
+        <button class="qopt" onclick="ans(this,'correct','Q11')"><span class="opt-ltr">C</span>Python scans the whole function body and sees x = 20, so it treats x as local throughout — reading x before the local assignment is the error</button>
+        <button class="qopt" onclick="ans(this,'wrong','Q11')"><span class="opt-ltr">D</span>The global x = 10 is immutable and Python prevents reading it inside a function</button>
+      </div>
+      <div class="quiz-fb" id="Q11"></div>
+    </div>
+  </div>
+
+  <!-- Q12 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q12 of 12 · Design reasoning</span> Why static scoping won</div>
+    <div class="quiz-body">
+      <div class="quiz-q">Why did most modern programming languages — including C, C#, and Python — choose static (lexical) scoping over dynamic scoping?</div>
+      <div class="quiz-opts">
+        <button class="qopt" onclick="ans(this,'wrong','Q12')"><span class="opt-ltr">A</span>Static scoping is always faster at runtime because it requires fewer lookups</button>
+        <button class="qopt" onclick="ans(this,'wrong','Q12')"><span class="opt-ltr">B</span>Dynamic scoping is impossible to implement in compiled languages</button>
+        <button class="qopt" onclick="ans(this,'correct','Q12')"><span class="opt-ltr">C</span>Static scoping makes the meaning of a name determinable from the source text alone, making code easier to reason about, debug, and compile with type checking</button>
+        <button class="qopt" onclick="ans(this,'wrong','Q12')"><span class="opt-ltr">D</span>Dynamic scoping was invented after static scoping and replaced it in all languages</button>
+      </div>
+      <div class="quiz-fb" id="Q12"></div>
+    </div>
+  </div>
+
+  <!-- SCORE -->
+  <div class="score-wrap">
+    <div style="font-weight:700;font-size:15px;margin-bottom:16px;color:var(--navy);">Quiz Score</div>
+    <div class="score-bar-row">
+      <span class="score-lbl">Correct</span>
+      <div class="score-track"><div class="score-fill" id="scoreFill"></div></div>
+      <span class="score-pct" id="scorePct">0 / 12</span>
+    </div>
+    <p id="scoreMsg" style="font-size:13px;color:var(--muted);margin-top:10px;"></p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION — SCOPE RULES ARE DESIGN DECISIONS -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section" id="s10b">
+  <div class="section-label">Before the Summary</div>
+  <h2>Scope Rules Are Design Decisions</h2>
+
+  <p>Before summarising, let's step back and look at the design questions every language designer must answer about scope and name resolution. These are not implementation details — they are fundamental choices that shape how programmers write and reason about code.</p>
+
+  <div class="g2">
+    <div class="card" style="margin:0;">
+      <h3 style="margin-top:0;color:var(--navy);">The questions</h3>
+      <ul style="font-size:14px;line-height:2;padding-left:18px;color:var(--text);">
+        <li>Should blocks create new scopes?</li>
+        <li>Should nested functions see their enclosing function's variables?</li>
+        <li>Should shadowing be allowed?</li>
+        <li>Should name lookup be based entirely on source structure?</li>
+        <li>How much should the language protect programmers from accidental name conflicts?</li>
+        <li>When should undeclared name errors be reported — at compile time or runtime?</li>
+      </ul>
+    </div>
+    <div class="card" style="margin:0;">
+      <h3 style="margin-top:0;color:var(--navy);">The tradeoffs</h3>
+      <ul style="font-size:14px;line-height:2;padding-left:18px;color:var(--text);">
+        <li><strong>Simplicity</strong> vs expressiveness</li>
+        <li><strong>Flexibility</strong> vs safety</li>
+        <li><strong>Readability</strong> vs implementation complexity</li>
+        <li><strong>Early error detection</strong> vs runtime flexibility</li>
+        <li><strong>Programmer control</strong> vs language-enforced constraints</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <p><strong>There is no single "best" set of scope rules.</strong> C's simple block-scope model is powerful and efficient but requires programmer discipline. Python's LEGB rule makes closures natural but requires the <span class="inline-code">global</span> and <span class="inline-code">nonlocal</span> keywords to avoid surprises. C#'s four-level hierarchy mirrors its object-oriented structure but adds complexity. Each language made deliberate tradeoffs.</p>
+  </div>
+
+  <h3>Three languages, three design choices — summary comparison</h3>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Scope question</th><th><span class="pill pill-c">C</span></th><th><span class="pill pill-cs">C#</span></th><th><span class="pill pill-py">Python</span></th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Scoping model</strong></td>
+          <td>Lexical / static</td>
+          <td>Lexical / static</td>
+          <td>Lexical / static</td>
+        </tr>
+        <tr>
+          <td><strong>Do blocks create scopes?</strong></td>
+          <td>Yes — every <span class="inline-code">{ }</span></td>
+          <td>Yes — every <span class="inline-code">{ }</span></td>
+          <td>No — functions do, most blocks do not</td>
+        </tr>
+        <tr>
+          <td><strong>Nested function scope</strong></td>
+          <td>Limited — no closures in standard C</td>
+          <td>Limited — lambdas can capture, but nested methods are uncommon</td>
+          <td>Yes — Enclosing (E) layer in LEGB, full closures</td>
+        </tr>
+        <tr>
+          <td><strong>Scope lookup concept</strong></td>
+          <td>Nested blocks / file scope</td>
+          <td>Block → method → class → namespace</td>
+          <td>LEGB (Local → Enclosing → Global → Built-in)</td>
+        </tr>
+        <tr>
+          <td><strong>Shadowing of locals</strong></td>
+          <td>Allowed, silent</td>
+          <td>Restricted within the same method</td>
+          <td>Allowed</td>
+        </tr>
+        <tr>
+          <td><strong>Undeclared name error</strong></td>
+          <td>Compile time</td>
+          <td>Compile time</td>
+          <td>Runtime (NameError)</td>
+        </tr>
+        <tr>
+          <td><strong>Implementation concept</strong></td>
+          <td>Symbol tables</td>
+          <td>Symbol tables</td>
+          <td>Symbol tables / environments</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="design-box">
+    <div class="design-box-label">🔧 The Big Picture</div>
+    <p>These languages demonstrate different design choices for organising and resolving names. The purpose of this comparison is not to decide which is "best" — it is to see that <strong>every row in this table represents a decision a language designer made</strong>, with consequences for how programmers write code, what errors the language catches, and how the implementation works. That is what Programming Language Design is about.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SUMMARY + NEXT CHAPTER -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section" id="s11">
+  <div class="section-label">Chapter Summary</div>
+  <h2>What You've Learned</h2>
+
+  <div class="synth-grid">
+    <div class="synth-card" style="border-top:3px solid var(--navy);">
+      <div class="synth-title">Scope</div>
+      <div class="synth-desc">The region of source code where a name is visible. A static, textual property — determined by reading the code, not running it.</div>
+    </div>
+    <div class="synth-card" style="border-top:3px solid #8B5CF6;">
+      <div class="synth-title">Static vs Dynamic</div>
+      <div class="synth-desc">All three of our languages use static (lexical) scoping. Name resolution is based on source structure, not the runtime call stack. This is the predictable, readable choice.</div>
+    </div>
+    <div class="synth-card" style="border-top:3px solid var(--green);">
+      <div class="synth-title">Symbol Tables</div>
+      <div class="synth-desc">The compiler's internal database of names, types, scopes, and storage information. Maintained as a stack of tables, one per scope level.</div>
+    </div>
+  </div>
+
+  <div class="tbl-wrap" style="margin-top:16px;">
+    <table>
+      <thead><tr><th>Design question</th><th><span class="pill pill-c">C</span></th><th><span class="pill pill-cs">C#</span></th><th><span class="pill pill-py">Python</span></th></tr></thead>
+      <tbody>
+        <tr><td><strong>Scoping model</strong></td><td>Lexical / static</td><td>Lexical / static</td><td>Lexical / static</td></tr>
+        <tr><td><strong>Scope lookup name</strong></td><td>Nested block / file</td><td>Block → method → class → namespace</td><td>LEGB rule</td></tr>
+        <tr><td><strong>Do blocks create scopes?</strong></td><td>Yes — every <span class="inline-code">{ }</span></td><td>Yes — every <span class="inline-code">{ }</span></td><td>No — functions do, most blocks do not</td></tr>
+        <tr><td><strong>Nested function scope?</strong></td><td>No</td><td>Limited</td><td>Yes (E in LEGB)</td></tr>
+        <tr><td><strong>Shadowing allowed?</strong></td><td>Yes, silent</td><td>Restricted in same method</td><td>Yes</td></tr>
+        <tr><td><strong>Undeclared name error</strong></td><td>Compile time</td><td>Compile time</td><td>Runtime (NameError)</td></tr>
+        <tr><td><strong>Implementation concept</strong></td><td>Symbol tables</td><td>Symbol tables</td><td>Symbol tables / environments</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="ch-link">
+    <span class="ch-link-icon">←</span>
+    <div>
+      <div class="ch-link-title">Chapter 3 — Variables, Binding & Lifetime</div>
+      <div class="ch-link-desc">Chapter 3 told us what a variable is and how long it exists. Now we know where its name is visible — and how the compiler tracks names across scopes.</div>
+    </div>
+  </div>
+
+  <div class="ch-link" style="margin-top:10px;">
+    <span class="ch-link-icon">→</span>
+    <div>
+      <div class="ch-link-title">Chapter 5 — Static vs Dynamic Typing</div>
+      <div class="ch-link-desc">We now know <em>where</em> names are visible and <em>which</em> variable they refer to. Next, we ask: once the compiler finds the variable, how does it know whether the operations on it are <em>type-correct</em>? That is the type system — and when type checking happens is the central question of Chapter 5.</div>
+    </div>
+  </div>
+
+  <div class="info-box" style="margin-top:16px;">
+    <p><strong>Assignment 2:</strong> Trace the scope of five variables through a given program in all three languages. For each variable, identify: the scope level it is declared at, the region of code where it is visible, and whether it shadows any outer variable. See Canvas for the full specification.</p>
+  </div>
+
+  <div class="card" style="background:var(--navy);border-color:var(--navy);margin-top:16px;">
+    <p style="font-size:13px;font-weight:700;color:'7A90B8';font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;color:#7A90B8;">The Big Idea</p>
+    <p style="font-size:14px;color:#fff;line-height:1.8;margin-bottom:10px;">A programming language does not simply decide how variables are declared. It also defines:</p>
+    <div style="font-family:'DM Mono',monospace;font-size:13px;color:#B8C8F8;line-height:2;margin-bottom:10px;">
+      Where names are visible<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;↓<br>
+      How names are resolved<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;↓<br>
+      What happens when names conflict<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;↓<br>
+      How the implementation tracks declarations
+    </div>
+    <p style="font-size:14px;color:#B8C8F8;line-height:1.65;margin:0;"><strong style="color:#fff;">Scope rules are language-design rules. Symbol tables are one of the important implementation mechanisms used to support those rules.</strong> Understanding both — the design choice and the implementation mechanism — is what it means to study Programming Language Design.</p>
+  </div>
+</div>
+
+</div><!-- end .content -->
+
+<script>
+// ── NAV ────────────────────────────────────────────
+const SEC=['s0','s1','s2','s3','s4','s5','s6','s6b','s7','s8','s9','s10','s10b','s11'];
+function goTo(id,btn){
+  document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'});
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+window.addEventListener('scroll',()=>{
+  let cur=SEC[0];
+  SEC.forEach(id=>{const el=document.getElementById(id);if(el&&window.scrollY>=el.offsetTop-90)cur=id;});
+  document.querySelectorAll('.nav-btn').forEach((b,i)=>b.classList.toggle('active',SEC[i]===cur));
+  const pct=Math.min(100,Math.round((window.scrollY/(document.body.scrollHeight-window.innerHeight))*100));
+  document.getElementById('progFill').style.width=pct+'%';
+  document.getElementById('prog-pct').textContent=pct+'%';
+});
+
+// ── REVEAL ──────────────────────────────────────────
+function reveal(btn){
+  const c=btn.nextElementSibling;
+  c.classList.toggle('show');
+  btn.textContent=c.classList.contains('show')?'Hide explanation':'See explanation';
+  if(btn.textContent==='See answer')btn.textContent=c.classList.contains('show')?'Hide answer':'See answer';
+}
+
+// ── INTERACTIVE TRACE ───────────────────────────────
+const TRACE_STEPS=[
+  {
+    line:0,
+    info:'Line 1: <code>multiplier = 3</code> — this is a module-level assignment. <code>multiplier</code> is added to the Global (G) scope.',
+    rows:[{scope:'G — Global',status:'defined',val:'multiplier = 3'}]
+  },
+  {
+    line:2,
+    info:'Line 3: <code>def scale(n)</code> — the function <code>scale</code> is defined. The name <code>scale</code> is added to G scope. The parameter <code>n</code> will be in scale\'s local scope when the function is called.',
+    rows:[{scope:'G — Global',status:'defined',val:'scale (function)'}]
+  },
+  {
+    line:3,
+    info:'Line 4: <code>factor = 2</code> inside <code>scale()</code>. <code>factor</code> is assigned in the body of <code>scale</code>, so it belongs to scale\'s local scope.',
+    rows:[{scope:'L — Local (scale)',status:'defined',val:'factor = 2'}]
+  },
+  {
+    line:5,
+    info:'Line 6: <code>def apply()</code> inside scale. Python defines <code>apply</code> in scale\'s local scope. Now there is a nested scope chain: apply → scale → global.',
+    rows:[{scope:'L — Local (scale)',status:'defined',val:'apply (function)'}]
+  },
+  {
+    line:6,
+    info:'Line 7: inside <code>apply()</code>, <code>result = n * factor * multiplier</code>. Python must look up three names: n, factor, multiplier.',
+    rows:[
+      {scope:'L — Local (apply)',status:'miss',val:'n not here'},
+      {scope:'E — Enclosing (scale)',status:'found',val:'n = 5 (parameter of scale)'},
+    ]
+  },
+  {
+    line:6,
+    info:'Looking up <code>factor</code> — not in apply\'s local scope, check enclosing (scale):',
+    rows:[
+      {scope:'L — Local (apply)',status:'miss',val:'factor not here'},
+      {scope:'E — Enclosing (scale)',status:'found',val:'factor = 2'},
+    ]
+  },
+  {
+    line:6,
+    info:'Looking up <code>multiplier</code> — not local, not in enclosing (scale), check global:',
+    rows:[
+      {scope:'L — Local (apply)',status:'miss',val:'multiplier not here'},
+      {scope:'E — Enclosing (scale)',status:'miss',val:'multiplier not here'},
+      {scope:'G — Global',status:'found',val:'multiplier = 3'},
+    ]
+  },
+  {
+    line:7,
+    info:'Line 8: <code>return result</code> — result is local to apply(). Found immediately in L scope. apply() returns 5 × 2 × 3 = 30.',
+    rows:[{scope:'L — Local (apply)',status:'found',val:'result = 30'}]
+  },
+  {
+    line:11,
+    info:'Line 12: <code>print(scale(5))</code> — print is not defined anywhere in the program. Python searches L (none), E (none), G (not there), then B — Built-in:',
+    rows:[
+      {scope:'L — Local (module top)',status:'miss',val:'print not defined here'},
+      {scope:'G — Global',status:'miss',val:'print not defined here'},
+      {scope:'B — Built-in',status:'found',val:'print (built-in function)'},
+    ]
+  },
+];
+let traceIdx=-1;
+function traceStep(dir){
+  traceIdx=Math.max(0,Math.min(TRACE_STEPS.length-1,traceIdx+dir));
+  const step=TRACE_STEPS[traceIdx];
+  document.querySelectorAll('.trace-line').forEach(el=>el.classList.remove('active'));
+  const activeLine=document.getElementById('tl'+step.line);
+  if(activeLine)activeLine.classList.add('active');
+  document.getElementById('trace-info').innerHTML=`<strong>Step ${traceIdx+1} of ${TRACE_STEPS.length}:</strong> ${step.info}`;
+  const lu=document.getElementById('trace-lookup');
+  lu.innerHTML=step.rows.map(r=>`
+    <div class="trace-scope-row">
+      <span class="trace-scope-name">${r.scope}</span>
+      <span class="${r.status==='found'?'trace-scope-found':'trace-scope-miss'}">${r.status==='found'?'✓ Found':'✗ Miss'}</span>
+      <span class="trace-scope-val">${r.val}</span>
+    </div>`).join('');
+}
+function traceReset(){
+  traceIdx=-1;
+  document.querySelectorAll('.trace-line').forEach(el=>el.classList.remove('active'));
+  document.getElementById('trace-info').textContent='Click "Next →" to begin the LEGB trace.';
+  document.getElementById('trace-lookup').innerHTML='';
+}
+
+// ── QUIZ ────────────────────────────────────────────
+const TOTAL=12;
+const EXP={
+  Q1:{ok:'Correct. Scope is the region of source code where a name is visible. Note the contrast with lifetime: scope is about WHERE in the text of the code, while lifetime is about HOW LONG during execution. Scope is a static, textual property.',bad:'Not quite. Option A describes lifetime — how long a variable exists during execution. Option C describes a symbol table — the compiler\'s data structure. Option D describes dynamic scoping (call stack), which modern languages don\'t use. Scope is the textual region where a name can be referenced.'},
+  Q2:{ok:'Correct. The core distinction: static scoping uses the source text to determine scope (you can trace it by reading the code), while dynamic scoping uses the runtime call stack (you cannot tell from the code alone). C, C#, and Python all use static scoping.',bad:'Not quite. The distinction is not about performance or compilation. Static scoping = name resolved by textual position in source. Dynamic scoping = name resolved by runtime call chain. Python is interpreted but uses static scoping. The key word is where the resolution rule is applied.'},
+  Q3:{ok:'Correct. E stands for Enclosing — the local scope of any enclosing (outer) functions. It is the layer Python searches after checking the current function\'s local scope but before checking the module-level global scope. This is what allows inner functions to access variables from outer functions without declaring them global.',bad:'Not quite. E in LEGB stands for Enclosing — the scope of any function that textually contains the current function. Python searches Local first, then Enclosing functions (outward from the innermost), then Global (module level), then Built-in.'},
+  Q4:{ok:'Correct. The global keyword is a scope-resolution instruction, not a creation command. It tells Python: "when I use this name in this function, look for it in the module-level (G) scope instead of creating a new local." Without it, assignment creates a new local variable.',bad:'Not quite. The global keyword does not create a new variable or make anything visible to other modules. It tells Python to use the existing module-level variable of that name, rather than creating a local one. Without global x, assignment would create a new local x.'},
+  Q5:{ok:'Correct. A static local variable in C has the same scope as any local variable (visible only within the function), but its lifetime extends for the entire program — its value is preserved between calls. This is the "extended lifetime, same scope" effect of static on a local.',bad:'Not quite. static on a local variable does NOT change its scope — it remains visible only within its function. What changes is lifetime: the variable persists across calls, retaining its value from one call to the next. First call: 1, second call: 2, etc.'},
+  Q6:{ok:'Correct. Shadowing occurs when a name in an inner scope matches a name in an outer scope. The inner declaration takes precedence within that scope — "shadows" the outer one. The outer variable is not deleted; it just cannot be reached by that name from inside the shadowing scope.',bad:'Not quite. Shadowing is specifically about a name in an inner scope hiding a name in an outer scope. The outer variable still exists — it just cannot be accessed by that name from within the inner scope. This is different from deletion, aliasing, or type overriding.'},
+  Q7:{ok:'Correct. Python\'s LEGB search: inner() looks locally — no x. Then checks Enclosing scope — outer() has x = "E". Found! Python stops here and prints "E". It never needs to check Global (x = "G") because the Enclosing scope provided a match.',bad:'Not quite. Python\'s LEGB rule searches innermost scope first. inner() has no local x, so Python checks the Enclosing function outer() — which has x = "E". Python stops here (does not reach Global). Output: E.'},
+  Q8:{ok:'Correct. The symbol table is the compiler\'s internal database of names — mapping identifiers to their type, scope level, and storage information. It is maintained as a stack during compilation, with one table per scope. It enables type checking, name resolution, and duplicate detection.',bad:'Not quite. Symbol tables are a compile-time structure — they do not store runtime values. They map identifier names to compile-time information: type, scope, storage class. They are consulted during compilation to check correctness and resolve names, not during execution.'},
+  Q9:{ok:'Correct. Class scope is the level C# has that C does not. In C#, fields and methods declared in a class are visible to all methods in that class — you can use a field name without qualification from any method in the same class. C has no concept of classes and therefore no class scope.',bad:'Not quite. C supports block scope and file scope. Function scope (for goto labels) also exists. The key scope level C lacks is class scope — because C has no classes. C# adds class scope, method scope, and namespace scope on top of block scope.'},
+  Q10:{ok:'Correct. A static local variable in C demonstrates that scope and lifetime can differ. Its scope is limited to the function (block scope) — no other function can see it by name. But its lifetime extends for the entire program — it is created once when the program starts and persists until it ends, retaining its value between calls.',bad:'Not quite. A static local variable has function (block) scope — only visible inside the function. But its lifetime is program-long — it is not destroyed and re-created on each call. This is the unusual combination: narrow scope, extended lifetime. It shows that scope and lifetime are independent concepts.'},
+  Q11:{ok:'Correct. When Python processes a function, it scans the entire function body for assignments. Finding x = 20, Python decides x is a local variable for the whole function — including the print(x) line that appears before the assignment. Reading a local variable before it is assigned raises UnboundLocalError. Fix: add global x.',bad:'Not quite. Python functions CAN read global variables. The problem is that Python scans the whole function and finds x = 20, which makes x "local" throughout the entire function. The print(x) on the line before the assignment tries to read a local that hasn\'t been assigned yet — that\'s the UnboundLocalError.'},
+  Q12:{ok:'Correct. The key advantage of static scoping: the meaning of a name can be determined by reading the source text alone, without knowing the call history. This makes code dramatically easier to reason about, test, and optimise. With dynamic scoping, a function\'s behaviour depends on who called it — a function cannot be understood in isolation.',bad:'Not quite. The main reason is predictability and reasoning: with static scoping, you can trace a name to its declaration just by reading the source. With dynamic scoping, the same code behaves differently depending on the call stack — making functions impossible to understand in isolation. Both types of scoping can be implemented in compiled or interpreted languages.'},
+};
+let scores={};
+function ans(btn,result,qid){
+  if(scores[qid]!==undefined)return;
+  btn.closest('.quiz-opts').querySelectorAll('.qopt').forEach(o=>{o.onclick=null;o.classList.add('disabled');});
+  btn.classList.add(result);
+  const fb=document.getElementById(qid);
+  fb.classList.add('show',result==='correct'?'ok':'bad');
+  fb.textContent=result==='correct'?EXP[qid].ok:EXP[qid].bad;
+  scores[qid]=result==='correct'?1:0;
+  updateScore();
+}
+function updateScore(){
+  const c=Object.values(scores).reduce((a,b)=>a+b,0);
+  const pct=Math.round((c/TOTAL)*100);
+  document.getElementById('scoreFill').style.width=pct+'%';
+  document.getElementById('scorePct').textContent=c+' / '+TOTAL;
+  const msgs=['Keep going!','Good start.','Building up.','Halfway there.','Solid progress.','Good understanding.','Strong work.','Very strong.','Excellent!','Outstanding!','Near perfect!','Perfect — scope mastered! 🎉',''];
+  document.getElementById('scoreMsg').textContent=msgs[c]||'';
+}
+</script>
+</body>
+</html>

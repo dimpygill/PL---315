@@ -1,0 +1,1825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 3 — Variables, Binding & Lifetime · CSBS 315</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#F4F6FC;--surface:#FFFFFF;--border:#D0DAF0;--code-bg:#EEF1FA;
+  --navy:#1A2B5E;--blue:#2E5BFF;--accent:#4F8EF7;--text:#1E2A3A;--muted:#5A6A82;
+  --pill-c:#E8F0FE;--pill-c-text:#2E5BFF;
+  --pill-py:#FEF3E8;--pill-py-text:#C05E00;
+  --pill-cs:#F3E8FE;--pill-cs-text:#7B2FBE;
+  --green:#1A7A3C;--green-bg:#EAF7EE;
+  --red:#9B1C1C;--red-bg:#FEF2F2;
+  --yellow-bg:#FFFBEB;--yellow-border:#FCD34D;
+  --purple-bg:#F5F3FF;--purple-border:#C4B5FD;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.75;}
+a{color:var(--blue);}
+.hero-wrap{padding:44px 24px 0;max-width:900px;margin:0 auto;}
+.hero{background:linear-gradient(135deg,#1A2B5E 0%,#2E5BFF 100%);border-radius:18px;padding:44px 48px;color:#fff;position:relative;overflow:hidden;}
+.hero::after{content:'';position:absolute;bottom:-80px;right:-60px;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,0.05);}
+.hero-chip{display:inline-block;background:rgba(255,255,255,0.15);border-radius:20px;padding:3px 14px;font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,0.85);margin-bottom:14px;letter-spacing:.04em;}
+.hero h1{font-size:27px;font-weight:700;line-height:1.25;margin-bottom:10px;}
+.hero p{font-size:15px;color:rgba(255,255,255,0.75);max-width:520px;}
+.hero-langs{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap;}
+.lang-badge{padding:4px 14px;border-radius:20px;font-family:'DM Mono',monospace;font-size:12px;font-weight:500;}
+.badge-c{background:var(--pill-c);color:var(--pill-c-text);}
+.badge-cs{background:var(--pill-cs);color:var(--pill-cs-text);}
+.badge-py{background:var(--pill-py);color:var(--pill-py-text);}
+.hero-meta{display:flex;gap:28px;margin-top:22px;flex-wrap:wrap;}
+.hero-stat{display:flex;flex-direction:column;gap:2px;}
+.hero-stat-num{font-size:20px;font-weight:700;}
+.hero-stat-lbl{font-size:11px;color:rgba(255,255,255,0.5);font-family:'DM Mono',monospace;}
+.sticky-nav{position:sticky;top:0;z-index:100;background:rgba(244,246,252,0.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:0 24px;}
+.nav-inner{max-width:900px;margin:0 auto;display:flex;gap:4px;overflow-x:auto;padding:9px 0;scrollbar-width:none;}
+.nav-inner::-webkit-scrollbar{display:none;}
+.nav-btn{background:none;border:1px solid transparent;border-radius:6px;padding:4px 12px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .15s;}
+.nav-btn:hover{background:var(--code-bg);color:var(--blue);border-color:var(--border);}
+.nav-btn.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+.progress-wrap{max-width:900px;margin:22px auto 0;padding:0 24px;}
+.prog-top{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:5px;}
+.prog-bar{height:4px;background:var(--border);border-radius:4px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--navy),var(--blue));border-radius:4px;width:0;transition:width .5s ease;}
+.content{max-width:900px;margin:32px auto 80px;padding:0 24px;display:flex;flex-direction:column;gap:36px;}
+.section{scroll-margin-top:64px;}
+.section-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+.section h2{font-size:21px;font-weight:700;color:var(--navy);margin-bottom:14px;line-height:1.3;}
+.section h3{font-size:16px;font-weight:600;color:var(--text);margin:22px 0 10px;}
+.section p{margin-bottom:12px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:16px;}
+.code-wrap{margin:14px 0;}
+.code-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:4px;display:flex;align-items:center;justify-content:space-between;}
+.copy-btn{background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:2px 8px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);cursor:pointer;transition:all .15s;}
+.copy-btn:hover{background:var(--blue);color:#fff;border-color:var(--blue);}
+.code-block{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px 18px;overflow-x:auto;}
+.code-block pre{font-family:'DM Mono',monospace;font-size:13px;color:var(--navy);line-height:1.65;white-space:pre;}
+.cc{color:#7A90B8;}.ck{color:#5B3EA6;}.cs{color:#1A7A3C;}.cn{color:#B05800;}
+.inline-code{font-family:'DM Mono',monospace;background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:13px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:14px 0;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0;}
+.lang-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:14px 0;}
+.lc{border-radius:10px;padding:16px;font-size:14px;line-height:1.6;}
+.lc-c{background:var(--pill-c);border:1px solid #B8D0F8;}
+.lc-cs{background:var(--pill-cs);border:1px solid #D8B8F8;}
+.lc-py{background:var(--pill-py);border:1px solid #F8D8B8;}
+.lc-title{font-weight:700;font-size:13px;margin-bottom:6px;}
+.lc-c .lc-title{color:var(--pill-c-text);}
+.lc-cs .lc-title{color:var(--pill-cs-text);}
+.lc-py .lc-title{color:var(--pill-py-text);}
+.pill{display:inline-block;padding:2px 9px;border-radius:20px;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;}
+.pill-c{background:var(--pill-c);color:var(--pill-c-text);}
+.pill-cs{background:var(--pill-cs);color:var(--pill-cs-text);}
+.pill-py{background:var(--pill-py);color:var(--pill-py-text);}
+.analogy{background:var(--yellow-bg);border:1px solid var(--yellow-border);border-left:4px solid #F59E0B;border-radius:8px;padding:16px 18px;margin:16px 0;}
+.analogy-title{font-weight:700;font-size:13px;color:#92400E;margin-bottom:6px;}
+.analogy p{font-size:14px;color:#78350F;margin:0;}
+.info-box{background:#EFF6FF;border:1px solid #BFDBFE;border-left:4px solid var(--blue);border-radius:8px;padding:16px 18px;margin:16px 0;}
+.info-box p{font-size:14px;color:#1E3A8A;margin:0;}
+.warn-box{background:#FFF7ED;border:1px solid #FED7AA;border-left:4px solid #F97316;border-radius:8px;padding:16px 18px;margin:16px 0;}
+.warn-box p{font-size:14px;color:#9A3412;margin:0;}
+.misconception-box{background:var(--red-bg);border:1px solid #FCA5A5;border-left:4px solid #EF4444;border-radius:8px;padding:16px 18px;margin:12px 0;}
+.misconception-box .mc-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--red);margin-bottom:4px;font-weight:700;}
+.misconception-box p{font-size:14px;color:#7F1D1D;margin:0;}
+.correction-box{background:var(--green-bg);border:1px solid #6EE7B7;border-left:4px solid #10B981;border-radius:8px;padding:14px 18px;margin-top:8px;}
+.correction-box p{font-size:14px;color:var(--green);margin:0;}
+.think{background:var(--purple-bg);border:1px solid var(--purple-border);border-left:4px solid #8B5CF6;border-radius:10px;padding:18px 20px;margin:18px 0;}
+.think-label{font-family:'DM Mono',monospace;font-size:11px;color:#6D28D9;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+.think p{font-size:14px;color:#4C1D95;margin:0 0 10px 0;}
+.think p:last-child{margin:0;}
+.reveal-btn{background:#8B5CF6;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s;margin-top:6px;}
+.reveal-btn:hover{background:#6D28D9;}
+.reveal-content{display:none;margin-top:12px;padding:12px 14px;background:#fff;border:1px solid var(--purple-border);border-radius:6px;font-size:14px;color:var(--text);line-height:1.6;}
+.reveal-content.show{display:block;}
+.tbl-wrap{overflow-x:auto;margin:14px 0;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th{background:var(--navy);color:#fff;padding:10px 14px;text-align:left;font-weight:600;font-size:12px;}
+td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+tr:nth-child(even) td{background:var(--bg);}
+.quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px;}
+.quiz-header{background:var(--navy);color:#fff;padding:12px 20px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;}
+.quiz-num{font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,0.45);}
+.quiz-body{padding:20px;}
+.quiz-q{font-size:15px;font-weight:500;color:var(--text);margin-bottom:14px;line-height:1.55;}
+.quiz-options{display:flex;flex-direction:column;gap:8px;}
+.quiz-opt{display:flex;align-items:flex-start;gap:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;cursor:pointer;transition:all .15s;font-size:14px;text-align:left;width:100%;font-family:'DM Sans',sans-serif;}
+.quiz-opt:hover{border-color:var(--blue);background:#EEF4FF;}
+.quiz-opt.correct{background:var(--green-bg);border-color:#6EE7B7;color:var(--green);}
+.quiz-opt.wrong{background:var(--red-bg);border-color:#FCA5A5;color:var(--red);}
+.quiz-opt.disabled{cursor:default;}
+.opt-letter{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);background:var(--border);border-radius:4px;padding:1px 6px;flex-shrink:0;margin-top:2px;}
+.quiz-feedback{margin-top:12px;padding:12px 14px;border-radius:8px;font-size:14px;display:none;line-height:1.55;}
+.quiz-feedback.show{display:block;}
+.quiz-feedback.ok{background:var(--green-bg);color:var(--green);border:1px solid #6EE7B7;}
+.quiz-feedback.bad{background:var(--red-bg);color:var(--red);border:1px solid #FCA5A5;}
+.score-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-top:8px;}
+.score-title{font-weight:700;font-size:15px;margin-bottom:16px;color:var(--navy);}
+.score-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.score-lbl{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);min-width:70px;}
+.score-track{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
+.score-fill{height:100%;background:linear-gradient(90deg,var(--navy),var(--blue));border-radius:4px;width:0;transition:width .5s;}
+.score-pct{font-family:'DM Mono',monospace;font-size:12px;color:var(--blue);min-width:36px;text-align:right;}
+/* BINDING DIAGRAM */
+.bind-diagram{background:var(--code-bg);border:1px solid var(--border);border-radius:10px;padding:18px 20px;font-family:'DM Mono',monospace;font-size:13px;color:var(--navy);margin:14px 0;line-height:2;}
+.bind-name{display:inline-block;background:var(--pill-c);color:var(--pill-c-text);padding:2px 10px;border-radius:5px;font-weight:700;}
+.bind-arrow{color:var(--blue);margin:0 8px;}
+.bind-obj{display:inline-block;padding:2px 10px;border-radius:5px;font-weight:700;}
+.bind-int{background:#DCFCE7;color:#166534;}
+.bind-str{background:#FFE4E6;color:#9F1239;}
+.bind-float{background:#FEF9C3;color:#854D0E;}
+.bind-type{font-size:11px;color:var(--muted);margin-left:6px;}
+/* TIMELINE */
+.timeline{margin:16px 0;padding:0 8px;}
+.tl-item{display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;}
+.tl-dot{width:14px;height:14px;border-radius:50%;background:var(--blue);flex-shrink:0;margin-top:4px;}
+.tl-dot.green{background:var(--green);}
+.tl-dot.red{background:var(--red);}
+.tl-dot.muted{background:var(--muted);}
+.tl-line-wrap{display:flex;flex-direction:column;align-items:center;flex-shrink:0;}
+.tl-line{width:2px;height:30px;background:var(--border);margin:2px 6px;}
+.tl-content{flex:1;}
+.tl-title{font-weight:600;font-size:14px;color:var(--navy);}
+.tl-desc{font-size:13px;color:var(--muted);margin-top:2px;}
+/* MEMORY VISUAL */
+.mem-visual{display:flex;gap:16px;margin:16px 0;flex-wrap:wrap;}
+.mem-box{border:2px solid var(--border);border-radius:10px;padding:14px 18px;min-width:140px;}
+.mem-title{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:8px;}
+.mem-slot{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-family:'DM Mono',monospace;font-size:12px;}
+.mem-addr{color:var(--muted);font-size:11px;min-width:28px;}
+.mem-val{background:var(--pill-c);color:var(--pill-c-text);padding:2px 8px;border-radius:4px;font-weight:700;}
+.mem-label{color:var(--muted);font-size:11px;}
+/* ACTIVITY */
+.activity{background:var(--surface);border:2px solid var(--purple-border);border-radius:12px;padding:22px;margin:16px 0;}
+.activity-label{font-family:'DM Mono',monospace;font-size:11px;color:#6D28D9;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
+.designer-opts{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0;}
+.designer-opt{padding:8px 18px;border:2px solid var(--border);border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;transition:all .15s;background:var(--bg);}
+.designer-opt:hover{border-color:var(--blue);background:#EEF4FF;color:var(--blue);}
+.designer-opt.selected{border-color:#8B5CF6;background:var(--purple-bg);color:#4C1D95;}
+.designer-feedback{margin-top:12px;font-size:14px;color:var(--text);line-height:1.6;display:none;}
+.designer-feedback.show{display:block;padding:12px 14px;background:#fff;border:1px solid var(--purple-border);border-radius:6px;}
+/* SUMMARY TREE */
+.sum-tree{font-family:'DM Mono',monospace;font-size:13px;color:var(--navy);background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin:14px 0;line-height:2;}
+.sum-tree .root{font-weight:700;color:var(--navy);}
+.sum-tree .branch{color:var(--blue);}
+.sum-tree .leaf{color:var(--muted);}
+/* CHAPTER LINK */
+.ch-link{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-top:8px;display:flex;align-items:center;gap:14px;}
+.ch-link-icon{font-size:22px;}
+.ch-link-title{font-weight:700;font-size:14px;color:var(--navy);}
+.ch-link-desc{font-size:13px;color:var(--muted);margin-top:2px;}
+.synth-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0;}
+.synth-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;}
+.synth-icon{font-size:24px;margin-bottom:8px;}
+.synth-title{font-weight:700;font-size:13px;color:var(--navy);margin-bottom:4px;}
+.synth-desc{font-size:12px;color:var(--muted);line-height:1.5;}
+.synth-chapter{font-family:'DM Mono',monospace;font-size:10px;color:var(--blue);margin-top:6px;}
+.compare-wrap{background:var(--surface);border:2px solid var(--purple-border);border-radius:12px;padding:24px;margin:16px 0;}
+.compare-title{font-size:15px;font-weight:700;color:#4C1D95;margin-bottom:14px;}
+.compare-q{background:var(--purple-bg);border-radius:8px;padding:12px 14px;font-size:14px;color:#4C1D95;margin-bottom:8px;}
+.compare-q strong{display:block;margin-bottom:4px;}
+@media(max-width:680px){
+  .hero{padding:32px 24px;}.hero h1{font-size:21px;}
+  .g3,.g2,.lang-row,.synth-grid,.mem-visual{grid-template-columns:1fr;flex-direction:column;}
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero-wrap">
+  <div class="hero">
+    <div class="hero-chip">CSBS 315 · Chapter 3 of 12</div>
+    <h1>Variables, Binding &amp; Lifetime</h1>
+    <p>A variable is more than a box holding a value. This chapter unpacks what a language must decide about every variable — and why C, C#, and Python answer those questions so differently.</p>
+    <div class="hero-langs">
+      <span class="lang-badge badge-c">C</span>
+      <span class="lang-badge badge-cs">C#</span>
+      <span class="lang-badge badge-py">Python</span>
+    </div>
+    <div class="hero-meta">
+      <div class="hero-stat"><span class="hero-stat-num">13</span><span class="hero-stat-lbl">Sections</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">12</span><span class="hero-stat-lbl">Practice Qs</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">7</span><span class="hero-stat-lbl">Activities</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">~55</span><span class="hero-stat-lbl">Min read</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="sticky-nav">
+  <div class="nav-inner">
+    <button class="nav-btn active" onclick="goTo('s0',this)">0 · Opening Question</button>
+    <button class="nav-btn" onclick="goTo('s1',this)">1 · Five Questions</button>
+    <button class="nav-btn" onclick="goTo('s1b',this)">1b · Declaration vs Assignment</button>
+    <button class="nav-btn" onclick="goTo('s2',this)">2 · Binding</button>
+    <button class="nav-btn" onclick="goTo('s3',this)">3 · Binding Time</button>
+    <button class="nav-btn" onclick="goTo('s4',this)">4 · Lifetime</button>
+    <button class="nav-btn" onclick="goTo('s5',this)">5 · Stack &amp; Heap</button>
+    <button class="nav-btn" onclick="goTo('s6',this)">6 · C Variables</button>
+    <button class="nav-btn" onclick="goTo('s7',this)">7 · C# Variables</button>
+    <button class="nav-btn" onclick="goTo('s8',this)">8 · Python's Model</button>
+    <button class="nav-btn" onclick="goTo('s9',this)">9 · Comparison</button>
+    <button class="nav-btn" onclick="goTo('s10',this)">10 · Tradeoffs</button>
+    <button class="nav-btn" onclick="goTo('s11',this)">11 · Practice</button>
+  </div>
+</nav>
+
+<!-- PROGRESS -->
+<div class="progress-wrap">
+  <div class="prog-top"><span>Reading progress</span><span id="prog-pct">0%</span></div>
+  <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 0 — OPENING QUESTION -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section" id="s0">
+  <div class="section-label">From Chapter 2 → Chapter 3</div>
+  <h2>What Really Happens When We Create a Variable?</h2>
+
+  <div class="info-box">
+    <p><strong>Where we left off:</strong> Chapter 2 asked <em>how does a language recognise code?</em> — tokens, syntax, grammar. Now we ask the next question: <strong>what does a language mean by a variable, and how does that variable behave?</strong> Languages don't just differ in how code looks. They differ in what program constructs <em>mean</em>.</p>
+  </div>
+
+  <p>Start with one familiar line:</p>
+
+  <div class="code-wrap">
+    <div class="code-label"><span><span class="pill pill-py">Python</span></span></div>
+    <div class="code-block"><pre>age = 25</pre></div>
+  </div>
+
+  <p>You've written lines like this hundreds of times. But let's slow down and ask five questions about it:</p>
+
+  <div class="card">
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;align-items:baseline;gap:10px;">
+        <span style="font-family:'DM Mono',monospace;font-size:18px;font-weight:700;color:var(--blue);min-width:28px;">①</span>
+        <span style="font-size:15px;color:var(--text);">What is <span class="inline-code">age</span>? Just a label? A memory location? Something else?</span>
+      </div>
+      <div style="display:flex;align-items:baseline;gap:10px;">
+        <span style="font-family:'DM Mono',monospace;font-size:18px;font-weight:700;color:var(--blue);min-width:28px;">②</span>
+        <span style="font-size:15px;color:var(--text);">Where is <span class="inline-code">25</span>? In what sense does <span class="inline-code">age</span> "contain" it?</span>
+      </div>
+      <div style="display:flex;align-items:baseline;gap:10px;">
+        <span style="font-family:'DM Mono',monospace;font-size:18px;font-weight:700;color:var(--blue);min-width:28px;">③</span>
+        <span style="font-size:15px;color:var(--text);">Does <span class="inline-code">age</span> have a type? Who decided that, and when?</span>
+      </div>
+      <div style="display:flex;align-items:baseline;gap:10px;">
+        <span style="font-family:'DM Mono',monospace;font-size:18px;font-weight:700;color:var(--blue);min-width:28px;">④</span>
+        <span style="font-size:15px;color:var(--text);">When does Python decide what <span class="inline-code">age</span> refers to?</span>
+      </div>
+      <div style="display:flex;align-items:baseline;gap:10px;">
+        <span style="font-family:'DM Mono',monospace;font-size:18px;font-weight:700;color:var(--blue);min-width:28px;">⑤</span>
+        <span style="font-size:15px;color:var(--text);">How long does <span class="inline-code">age</span> exist?</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="think">
+    <div class="think-label">🤔 Think First</div>
+    <p>Before reading on: write down your best answers to those five questions. Don't worry about being technically precise — just describe what you think is happening.</p>
+    <button class="reveal-btn" onclick="reveal(this)">See the discussion</button>
+    <div class="reveal-content">
+      <p><strong>① What is <code>age</code>?</strong> It's a <em>name</em> — an identifier the programmer chose. In Python, that name is associated (or "bound") with an object. It is not a fixed container the way a labelled box in a warehouse is fixed — the name can be redirected to a different object later.</p>
+      <p style="margin-top:8px;"><strong>② Where is <code>25</code>?</strong> Python creates an object representing the integer 25. The name <code>age</code> refers to (or points at) that object. The object lives somewhere in memory — the programmer doesn't manage exactly where.</p>
+      <p style="margin-top:8px;"><strong>③ Does <code>age</code> have a type?</strong> Yes — but it's the <em>object</em> that has a type (integer), not the name. The name <code>age</code> itself has no type; it can be redirected to an object of any type.</p>
+      <p style="margin-top:8px;"><strong>④ When does Python decide?</strong> At runtime — when that line actually executes. Python does not analyse types before running your code.</p>
+      <p style="margin-top:8px;"><strong>⑤ How long does <code>age</code> exist?</strong> For as long as the scope it lives in is active. If this is at the top level of a script, until the script ends. If inside a function, until the function returns.</p>
+    </div>
+  </div>
+
+  <p>These five questions — name, value, type, when associations are established, and how long they last — are the questions every programming language must answer about every variable. The answers C, C#, and Python give are genuinely different. That's what this chapter is about.</p>
+
+  <div class="info-box">
+    <p><strong>The central idea of this chapter:</strong> A variable is more than just a box containing a value. A programming language must decide what the variable is associated with, when those associations are established, and how long they last.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 1 — ANATOMY OF A VARIABLE -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="section-label">Section 1</div>
+  <h2>Questions a Language Must Answer About Variables</h2>
+
+  <p>Rather than listing attributes as if they were universal rules, let's ask the questions that <em>every programming language designer must answer</em>. C, C#, and Python give different answers — and those differences are the point of this chapter.</p>
+
+  <div class="card">
+    <h3 style="margin-top:0;color:var(--pill-c-text);">Question 1 — What is its name?</h3>
+    <p>How does the programmer refer to it? In <span class="inline-code">age = 25</span>, the name is <span class="inline-code">age</span>. Names must be valid identifiers (recall Chapter 2: identifiers are a token type). The name is the human-readable handle — but it is <strong>not the same as</strong> the value, the type, or the storage location. It is just a label.</p>
+    <div class="info-box" style="margin:10px 0 0 0;"><p>This distinction between a <em>name</em> and what it refers to becomes especially important in Python, where a name can be redirected to refer to a completely different object.</p></div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;color:var(--pill-c-text);">Question 2 — What kind of data can it represent?</h3>
+    <p>Is its type declared by the programmer, inferred by the compiler, or determined dynamically at runtime? Types matter because they determine which operations are valid — and who is responsible for catching type mistakes.</p>
+    <div class="g3">
+      <div>
+        <div class="code-label"><span><span class="pill pill-c">C</span> — programmer declares</span></div>
+        <div class="code-block"><pre><span class="ck">int</span> age = 25;
+<span class="ck">float</span> gpa = 3.8;
+<span class="cc">// Type is in the source code</span></pre></div>
+      </div>
+      <div>
+        <div class="code-label"><span><span class="pill pill-cs">C#</span> — explicit or inferred</span></div>
+        <div class="code-block"><pre><span class="ck">int</span> age = 25;
+<span class="ck">var</span> gpa = 3.8;
+<span class="cc">// var: compiler infers type</span></pre></div>
+      </div>
+      <div>
+        <div class="code-label"><span><span class="pill pill-py">Python</span> — no declaration</span></div>
+        <div class="code-block"><pre>age = 25
+gpa = 3.8
+<span class="cc"># No type token written —
+# but objects still have types!</span></pre></div>
+      </div>
+    </div>
+    <div class="warn-box"><p><strong>Critical:</strong> The absence of a type declaration in Python does <em>not</em> mean the value has no type. Every Python object has a type — <span class="inline-code">type(25)</span> returns <span class="inline-code">&lt;class 'int'&gt;</span>. What Python doesn't have is a place in the syntax where you write it. The design question is: <em>who is responsible for tracking type information, and when?</em></p></div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;color:var(--pill-c-text);">Question 3 — What value does it currently hold?</h3>
+    <p>In <span class="inline-code">age = 25</span>, the current value is <span class="inline-code">25</span>. This can change — <span class="inline-code">age = 26</span> updates it. The value is distinct from the name: the name <span class="inline-code">age</span> is a stable label; <span class="inline-code">25</span> is what it currently represents.</p>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;color:var(--pill-c-text);">Question 4 — How is that value accessed or stored?</h3>
+    <p>When code reads <span class="inline-code">age</span>, the language runtime must somehow locate the data. The details of that mechanism differ between languages: C gives you more direct access to memory locations; C# and Python manage this automatically. You don't need to know the hardware details — just that it exists, and that different languages give you different levels of control over it.</p>
+    <div class="analogy">
+      <div class="analogy-title">💡 Conceptual model</div>
+      <p>Think of it like a contact name in a phone book. The name "Dee" (the variable name) lets you look up a phone number (the actual data). C lets you know which "page" in the book and manipulate it directly. Python and C# manage the lookup for you. The design question is: how much control should the programmer have?</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;color:var(--pill-c-text);">Question 5 — How long does the name or variable exist?</h3>
+    <p>Lifetime is the period during program execution when the variable exists and can be used. It is about <em>time</em>, not <em>place</em>. A variable is created at some point, and at some later point it ceases to exist.</p>
+    <div class="info-box" style="margin:10px 0 0 0;"><p>Scope (Chapter 4) asks <em>where in source code</em> a name is visible. Lifetime asks <em>how long during execution</em> the variable or object exists. These are related but different — keep them separate in your mind from the start.</p></div>
+  </div>
+
+  <div class="info-box">
+    <p><strong>The design connection:</strong> These five questions don't have universally agreed answers. C, C#, and Python each make different choices. Those choices determine how flexible the language is, when errors are caught, how much the programmer must write, and who is responsible for managing resources. That's what we're here to understand.</p>
+  </div>
+
+  <h3>The five questions at a glance</h3>
+  <div class="sum-tree">
+    <span class="root">A variable involves...</span><br>
+    <span class="branch">① </span><span style="color:var(--navy);">Name</span>     <span class="leaf">  ← how the programmer refers to it</span><br>
+    <span class="branch">② </span><span style="color:var(--navy);">Type</span>     <span class="leaf">  ← what kind of data, and who/when determines this</span><br>
+    <span class="branch">③ </span><span style="color:var(--navy);">Value</span>    <span class="leaf">  ← what it currently represents</span><br>
+    <span class="branch">④ </span><span style="color:var(--navy);">Storage</span>  <span class="leaf">  ← how the runtime finds the data</span><br>
+    <span class="branch">⑤ </span><span style="color:var(--navy);">Lifetime</span> <span class="leaf">  ← how long it exists during execution</span>
+  </div>
+
+  <div class="think">
+    <div class="think-label">🔬 Classify</div>
+    <p>For <span class="inline-code">int score = 95;</span> in C, identify the name, type, and value. Then: which of these five questions does the programmer answer explicitly by writing this line?</p>
+    <button class="reveal-btn" onclick="reveal(this)">See answer</button>
+    <div class="reveal-content">
+      <p><strong>Name:</strong> <code>score</code> · <strong>Type:</strong> <code>int</code> · <strong>Value:</strong> <code>95</code></p>
+      <p style="margin-top:8px;">The programmer explicitly answers questions ①, ②, and ③ in this single line. Question ④ (storage) is handled by the compiler automatically. Question ⑤ (lifetime) is determined by where this declaration appears — inside a function means it lives for that function call.</p>
+      <p style="margin-top:8px;">In Python's <code>score = 95</code>, the programmer explicitly answers only ① (name) and ③ (value). Question ② (type) is answered by Python at runtime based on the object. Questions ④ and ⑤ are managed by the runtime. That's two fewer things to write — and a different set of tradeoffs.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 1b — DECLARATION VS ASSIGNMENT -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section" id="s1b">
+  <div class="section-label">Section 1b</div>
+  <h2>Declaration vs. Assignment: What Does Each Language Require?</h2>
+
+  <p>Before going deeper into binding, let's clarify two programming concepts that look similar but are conceptually separate — and that different languages handle very differently.</p>
+
+  <div class="g2">
+    <div class="card" style="margin:0;">
+      <h3 style="margin-top:0;">Declaration</h3>
+      <p>Telling the language that a variable exists, and often what type it holds. In C, you must declare before you use.</p>
+    </div>
+    <div class="card" style="margin:0;">
+      <h3 style="margin-top:0;">Assignment</h3>
+      <p>Giving a variable its value. This can be done at declaration time, or separately later.</p>
+    </div>
+  </div>
+
+  <h3>In C — declaration and assignment are separable</h3>
+  <div class="g2">
+    <div>
+      <div class="code-label"><span>Separate declaration and assignment</span></div>
+      <div class="code-block"><pre><span class="ck">int</span> age;       <span class="cc">// declaration: name + type</span>
+age = 25;      <span class="cc">// assignment: give it a value</span></pre></div>
+    </div>
+    <div>
+      <div class="code-label"><span>Combined (more common)</span></div>
+      <div class="code-block"><pre><span class="ck">int</span> age = 25;  <span class="cc">// declaration + initialization</span></pre></div>
+    </div>
+  </div>
+  <p>In C, the type is always part of the declaration. The programmer must write it. There is no way to create a variable without specifying its type.</p>
+
+  <h3>In C# — same structure, with optional inference</h3>
+  <div class="g3">
+    <div>
+      <div class="code-label"><span>Explicit type</span></div>
+      <div class="code-block"><pre><span class="ck">int</span> age = 25;</pre></div>
+    </div>
+    <div>
+      <div class="code-label"><span>Type inference</span></div>
+      <div class="code-block"><pre><span class="ck">var</span> age = 25;
+<span class="cc">// compiler infers: int</span></pre></div>
+    </div>
+    <div>
+      <div class="code-label"><span>Separate (also valid)</span></div>
+      <div class="code-block"><pre><span class="ck">int</span> age;
+age = 25;</pre></div>
+    </div>
+  </div>
+  <div class="warn-box"><p><strong><span class="inline-code">var</span> does NOT mean "dynamically typed."</strong> The compiler infers that <span class="inline-code">age</span> is an <span class="inline-code">int</span> at compile time — from the value <span class="inline-code">25</span>. After that, the type is fixed. You still cannot assign a string to it later.</p></div>
+
+  <h3>In Python — no declaration syntax</h3>
+  <div class="g2">
+    <div>
+      <div class="code-label"><span>Assignment creates the binding</span></div>
+      <div class="code-block"><pre>age = 25
+<span class="cc"># No separate declaration step</span></pre></div>
+    </div>
+    <div>
+      <div class="code-label"><span>Name can later refer to a different type</span></div>
+      <div class="code-block"><pre>age = 25
+age = <span class="cs">"hello"</span>
+<span class="cc"># Both are valid in Python</span></pre></div>
+    </div>
+  </div>
+  <p>Python does not have a declaration step separate from assignment. When you write <span class="inline-code">age = 25</span>, that assignment <em>is</em> what creates the name. There is no type information to provide — the name is simply bound to an object, and the object carries its own type.</p>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Why didn't all three languages choose the same approach?</h3>
+    <div class="g2">
+      <div>
+        <p style="font-weight:700;font-size:13px;color:var(--navy);margin-bottom:8px;">C and C# require declarations because…</p>
+        <ul style="font-size:14px;line-height:1.9;padding-left:18px;">
+          <li>Explicit type information enables the compiler to check for type errors before running</li>
+          <li>More constraints mean certain bugs are impossible by design</li>
+          <li>Useful in large codebases where clarity matters</li>
+        </ul>
+      </div>
+      <div>
+        <p style="font-weight:700;font-size:13px;color:var(--navy);margin-bottom:8px;">Python skips declarations because…</p>
+        <ul style="font-size:14px;line-height:1.9;padding-left:18px;">
+          <li>Less to write — faster to develop and prototype</li>
+          <li>More flexibility — the same name can refer to different things</li>
+          <li>Type information is handled at runtime rather than write-time</li>
+        </ul>
+      </div>
+    </div>
+    <div class="info-box" style="margin-top:12px;"><p>Neither approach is universally better. They reflect different priorities: <strong>C/C# prioritise compile-time certainty and explicitness. Python prioritises conciseness and runtime flexibility.</strong> Both are valid design choices with different tradeoffs.</p></div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 2 — BINDING -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="section-label">Section 2 — The Most Important Concept</div>
+  <h2>Binding: When Names Get Connected to Things</h2>
+
+  <p>Now that we understand a variable's attributes separately, we can introduce the concept that ties them together.</p>
+
+  <div class="card" style="background:var(--navy);border-color:var(--navy);">
+    <p style="font-size:16px;font-weight:700;color:#fff;line-height:1.5;text-align:center;">Binding is the process of establishing a connection between a program entity and some property, resource, or meaning associated with it.</p>
+  </div>
+
+  <p>That definition sounds abstract, so let's make it concrete. A program has many kinds of entities that need to be connected to things:</p>
+
+  <div class="card">
+    <div class="tbl-wrap" style="margin:0;">
+      <table>
+        <thead><tr><th>Entity</th><th>Connected to</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td>A name</td><td>A variable or storage location</td><td><span class="inline-code">age</span> refers to a particular slot in memory</td></tr>
+          <tr><td>A variable</td><td>A type</td><td><span class="inline-code">age</span> is declared as <span class="inline-code">int</span> in C</td></tr>
+          <tr><td>A variable</td><td>A value</td><td><span class="inline-code">age</span> currently holds <span class="inline-code">25</span></td></tr>
+          <tr><td>A name</td><td>An object (Python)</td><td><span class="inline-code">age</span> refers to the integer object <span class="inline-code">25</span></td></tr>
+          <tr><td>An operator symbol</td><td>Its meaning</td><td><span class="inline-code">+</span> means integer addition when used with integers — a binding the language designer decided</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="info-box" style="margin-top:12px;"><p>The key insight: different programming languages establish these connections at <em>different times</em> — some before you run the program, some as it runs. That "when" has big consequences for programmers.</p></div>
+  </div>
+
+  <p>When a language processes <span class="inline-code">int age = 25;</span>, it creates several bindings at once:</p>
+
+  <div class="card">
+    <div class="tbl-wrap" style="margin:0;">
+      <table>
+        <thead><tr><th>What is connected</th><th>Example connection</th><th>What this binding enables</th></tr></thead>
+        <tbody>
+          <tr><td>Name ↔ Type</td><td><span class="inline-code">age</span> is bound to <span class="inline-code">int</span></td><td>The compiler can check that operations on <span class="inline-code">age</span> are valid for integers</td></tr>
+          <tr><td>Name ↔ Value</td><td><span class="inline-code">age</span> is bound to <span class="inline-code">25</span></td><td>Reading <span class="inline-code">age</span> returns 25</td></tr>
+          <tr><td>Name ↔ Storage</td><td><span class="inline-code">age</span> is bound to a location</td><td>The runtime knows where to read and write the value</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h3>Why Python's rebinding is possible</h3>
+  <p>Now consider this Python code:</p>
+
+  <div class="code-block"><pre>age = 25
+age = <span class="cs">"twenty-five"</span></pre></div>
+
+  <p>In C, the equivalent is impossible:</p>
+
+  <div class="code-block"><pre><span class="ck">int</span> age = 25;
+age = <span class="cs">"twenty-five"</span>;  <span class="cc">/* compile error: incompatible types */</span></pre></div>
+
+  <p>Why can Python do something C cannot? The difference comes from <em>what the name is bound to</em>:</p>
+
+  <div class="g2">
+    <div class="lc lc-c">
+      <div class="lc-title">In C</div>
+      <p>The name <span class="inline-code">age</span> is bound to a specific type (<span class="inline-code">int</span>) at declaration time. That binding is permanent for the lifetime of the variable. Assigning a string to an <span class="inline-code">int</span> variable violates the type binding — the compiler rejects it.</p>
+    </div>
+    <div class="lc lc-py">
+      <div class="lc-title">In Python</div>
+      <p>The name <span class="inline-code">age</span> is not bound to a type. It is bound to an <em>object</em>. The object has a type. When you write <span class="inline-code">age = "twenty-five"</span>, you are not changing the type of <span class="inline-code">age</span> — you are creating a new string object and rebinding the name <span class="inline-code">age</span> to point at it instead.</p>
+    </div>
+  </div>
+
+  <div class="warn-box">
+    <p><strong>Precise language matters here.</strong> Do not say "Python variables change type." The more accurate statement is: <strong>in Python, a name can be rebound to an object of a different type.</strong> The original object does not change its type. The name simply points to a different object.</p>
+  </div>
+
+  <h3>Visualising binding in Python</h3>
+  <div class="bind-diagram">
+    <div>After <span class="inline-code">age = 25</span>:</div>
+    <div style="margin:8px 0;"><span class="bind-name">age</span> <span class="bind-arrow">─────→</span> <span class="bind-obj bind-int">25</span> <span class="bind-type">int object</span></div>
+    <div style="margin-top:14px;">After <span class="inline-code">age = "twenty-five"</span>:</div>
+    <div style="margin:8px 0;"><span class="bind-name">age</span> <span class="bind-arrow">─────→</span> <span class="bind-obj bind-str">"twenty-five"</span> <span class="bind-type">str object</span></div>
+    <div style="margin-top:6px;font-size:12px;color:var(--muted);">The integer object 25 still exists in memory until Python's garbage collector reclaims it. The name <code>age</code> simply no longer refers to it.</div>
+  </div>
+
+  <div class="think">
+    <div class="think-label">🤔 Predict the Output</div>
+    <p>What does this Python program print?</p>
+    <div class="code-block" style="margin:8px 0;"><pre>x = 10
+x = <span class="cs">"hello"</span>
+print(x)</pre></div>
+    <button class="reveal-btn" onclick="reveal(this)">See answer</button>
+    <div class="reveal-content">
+      <p><strong>Output:</strong> <code>hello</code></p>
+      <p style="margin-top:8px;">First, <code>x</code> is bound to the integer object <code>10</code>. Then <code>x</code> is rebound to the string object <code>"hello"</code>. When <code>print(x)</code> runs, <code>x</code> refers to the string, so <code>"hello"</code> is printed.</p>
+      <p style="margin-top:8px;">Notice: the integer object <code>10</code> is not destroyed immediately — Python's garbage collector handles memory. But the name <code>x</code> no longer refers to it. For all practical purposes, once nothing refers to an object, it can be reclaimed.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 3 — BINDING TIME -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="section-label">Section 3</div>
+  <h2>Binding Time: When Are Connections Established?</h2>
+
+  <p>We now know that binding means establishing a connection. But connections don't all have to be established at the same time. <strong>Binding time</strong> answers a simple question:</p>
+
+  <div class="card" style="background:var(--navy);border-color:var(--navy);">
+    <p style="font-size:16px;font-weight:700;color:#fff;line-height:1.5;text-align:center;">When is a relationship determined?</p>
+  </div>
+
+  <p>Some relationships are fixed early — even before the program runs. Others are established only when the code actually executes. A language can decide different relationships at different times.</p>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Types of binding time</h3>
+    <div class="tbl-wrap" style="margin:0;">
+      <table>
+        <thead><tr><th>When binding occurs</th><th>Called</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td>When the language is designed</td><td>Language-design time</td><td>The meaning of <span class="inline-code">+</span> for integers is fixed by the language itself</td></tr>
+          <tr><td>When the program is compiled</td><td>Compile time</td><td>In C, <span class="inline-code">int age</span> binds the name to the type <span class="inline-code">int</span> at compile time</td></tr>
+          <tr><td>When the program starts running</td><td>Load time / link time</td><td>Global variables in C get storage allocated when the program loads</td></tr>
+          <tr><td>When a specific line executes</td><td>Runtime</td><td>In Python, <span class="inline-code">x = 10</span> creates the binding when that line runs</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h3>Static binding — connections established early</h3>
+  <p>A binding is <strong>static</strong> when it is determined before execution — most commonly at compile time. The connection is fixed and does not change while the program runs.</p>
+
+  <div class="code-wrap">
+    <div class="code-label"><span><span class="pill pill-c">C</span> — static type binding</span></div>
+    <div class="code-block"><pre><span class="ck">int</span> age = 25;
+<span class="cc">// The binding of "age" to type "int" is established at compile time.
+// No matter what happens at runtime, age is always an int.</span></pre></div>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-label"><span><span class="pill pill-cs">C#</span> — type binding at compile time (even with var)</span></div>
+    <div class="code-block"><pre><span class="ck">var</span> age = 25;
+<span class="cc">// The compiler infers: age is an int.
+// That binding is fixed at compile time — age cannot be rebound to a string later.</span></pre></div>
+  </div>
+
+  <h3>Dynamic binding — connections established at runtime</h3>
+  <p>A binding is <strong>dynamic</strong> when it is determined during execution. The connection can potentially be different each time the code runs, or change as the program runs.</p>
+
+  <div class="code-wrap">
+    <div class="code-label"><span><span class="pill pill-py">Python</span> — runtime binding</span></div>
+    <div class="code-block"><pre>x = 10
+x = <span class="cs">"hello"</span>
+<span class="cc"># The binding of "x" to an object is established at runtime,
+# when each assignment statement executes.</span></pre></div>
+  </div>
+
+  <div class="warn-box">
+    <p><strong>⚠ Don't confuse these — students mix them up constantly:</strong></p>
+  </div>
+  <div class="card">
+    <div class="tbl-wrap" style="margin:0;">
+      <table>
+        <thead><tr><th>Concept</th><th>Main question</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Binding time</strong></td>
+            <td>When is any particular relationship established?</td>
+            <td>C binds a name to its type at compile time; Python binds a name to an object at runtime</td>
+          </tr>
+          <tr>
+            <td><strong>Static typing</strong></td>
+            <td>When are type rules checked?</td>
+            <td>C and C# check types at compile time — before the program runs</td>
+          </tr>
+          <tr>
+            <td><strong>Dynamic typing</strong></td>
+            <td>Are type checks deferred to runtime?</td>
+            <td>Python checks types at runtime — when the code actually executes</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="info-box" style="margin-top:12px;"><p>Typing (static vs dynamic) is a specific dimension of binding time — it is about when type relationships are checked. But binding time is a broader concept: it applies to names, storage, values, and other relationships too. Don't use one term as a synonym for the other.</p></div>
+  </div>
+
+  <div class="think">
+    <div class="think-label">🤔 Classify the Binding</div>
+    <p>For each of the following, is the binding of the name to its type <em>static</em> or <em>dynamic</em>?</p>
+    <p>A: <span class="inline-code">int count = 0;</span> (C)<br>B: <span class="inline-code">var count = 0;</span> (C#)<br>C: <span class="inline-code">count = 0</span> (Python)</p>
+    <button class="reveal-btn" onclick="reveal(this)">See answer</button>
+    <div class="reveal-content">
+      <p><strong>A — Static.</strong> The name <code>count</code> is explicitly bound to type <code>int</code> at compile time. The compiler enforces this binding throughout the program.</p>
+      <p style="margin-top:6px;"><strong>B — Static.</strong> Even though you used <code>var</code>, the compiler infers that <code>count</code> is an <code>int</code> from the value <code>0</code>. That type binding is established at compile time, not at runtime. <code>var</code> is shorthand for the compiler, not a runtime decision.</p>
+      <p style="margin-top:6px;"><strong>C — Dynamic.</strong> The binding of the name <code>count</code> to the integer object <code>0</code> is established when that line executes at runtime. There is no compile-time determination of type.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 4 — LIFETIME -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="section-label">Section 4</div>
+  <h2>Variable Lifetime: How Long Does It Exist?</h2>
+
+  <p>The <strong>lifetime</strong> of a variable is the period during program execution when the variable exists and can be used. Variables are created, used, and eventually cease to exist.</p>
+
+  <h3>Lifetime with a simple function</h3>
+  <p>The clearest way to see lifetime is with a local variable inside a function:</p>
+
+  <div class="g3">
+    <div>
+      <div class="code-label"><span><span class="pill pill-c">C</span></span></div>
+      <div class="code-block"><pre><span class="ck">void</span> greet() {
+    <span class="ck">int</span> age = 25;
+    printf(<span class="cs">"%d"</span>, age);
+} <span class="cc">// age ends here</span></pre></div>
+    </div>
+    <div>
+      <div class="code-label"><span><span class="pill pill-cs">C#</span></span></div>
+      <div class="code-block"><pre><span class="ck">void</span> Greet() {
+    <span class="ck">int</span> age = 25;
+    Console.WriteLine(age);
+} <span class="cc">// age ends here</span></pre></div>
+    </div>
+    <div>
+      <div class="code-label"><span><span class="pill pill-py">Python</span></span></div>
+      <div class="code-block"><pre><span class="ck">def</span> greet():
+    age = 25
+    print(age)
+<span class="cc"># age ends when greet() returns</span></pre></div>
+    </div>
+  </div>
+
+  <h3>The lifetime timeline</h3>
+  <div class="timeline">
+    <div class="tl-item">
+      <div style="display:flex;flex-direction:column;align-items:center;">
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-content">
+        <div class="tl-title">Function is called</div>
+        <div class="tl-desc">Execution enters <span class="inline-code">greet()</span></div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div style="display:flex;flex-direction:column;align-items:center;">
+        <div class="tl-dot green"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-content">
+        <div class="tl-title">Variable is created</div>
+        <div class="tl-desc"><span class="inline-code">age</span> comes into existence — storage is allocated, the binding is established</div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div style="display:flex;flex-direction:column;align-items:center;">
+        <div class="tl-dot"></div>
+        <div class="tl-line"></div>
+      </div>
+      <div class="tl-content">
+        <div class="tl-title">Variable is used</div>
+        <div class="tl-desc"><span class="inline-code">age</span> is read, printed, or modified</div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div style="display:flex;flex-direction:column;align-items:center;">
+        <div class="tl-dot red"></div>
+      </div>
+      <div class="tl-content">
+        <div class="tl-title">Function returns — lifetime ends</div>
+        <div class="tl-desc"><span class="inline-code">age</span> ceases to exist. Any attempt to access it after this point is an error.</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Scope vs Lifetime — a critical distinction</h3>
+  <div class="card">
+    <div class="g2" style="margin:0;">
+      <div style="padding-right:16px;">
+        <div style="font-weight:700;font-size:14px;color:var(--navy);margin-bottom:8px;">Scope</div>
+        <p style="font-size:14px;line-height:1.6;margin:0;">Where in the <em>source code</em> a name can be accessed. Scope is a static, textual property — you can determine it by reading the code, before running it.</p>
+        <p style="font-size:13px;color:var(--muted);margin-top:8px;margin-bottom:0;">Covered fully in <strong>Chapter 4</strong>.</p>
+      </div>
+      <div style="border-left:1px solid var(--border);padding-left:16px;">
+        <div style="font-weight:700;font-size:14px;color:var(--navy);margin-bottom:8px;">Lifetime</div>
+        <p style="font-size:14px;line-height:1.6;margin:0;">How long during <em>execution</em> the variable exists. Lifetime is a dynamic, runtime property — it depends on what actually happens when the program runs.</p>
+        <p style="font-size:13px;color:var(--muted);margin-top:8px;margin-bottom:0;">Covered in <strong>this chapter</strong>.</p>
+      </div>
+    </div>
+    <div class="info-box" style="margin-top:16px;">
+      <p>They often correspond — a local variable is usually both inaccessible outside its function (scope) and doesn't exist outside its function call (lifetime). But they are conceptually separate, and in some cases they come apart. For now, keep the definitions distinct.</p>
+    </div>
+  </div>
+
+  <h3>Global variables — a different lifetime</h3>
+  <div class="g2">
+    <div>
+      <div class="code-label"><span><span class="pill pill-c">C</span> — global variable</span></div>
+      <div class="code-block"><pre><span class="ck">int</span> globalCount = 0;
+<span class="cc">// Lives for the entire
+// program execution</span>
+
+<span class="ck">void</span> increment() {
+    globalCount++;
+}</pre></div>
+    </div>
+    <div>
+      <div class="code-label"><span><span class="pill pill-py">Python</span> — module-level name</span></div>
+      <div class="code-block"><pre>count = 0
+<span class="cc"># Lives while the module
+# is loaded</span>
+
+<span class="ck">def</span> increment():
+    <span class="ck">global</span> count
+    count += 1</pre></div>
+    </div>
+  </div>
+  <p>Global variables have a lifetime that spans the entire program run — they are created when the program starts and cease to exist when it ends. Local variables have a shorter lifetime tied to a specific function call.</p>
+
+  <h3>Important: A name's lifetime ≠ an object's lifetime</h3>
+  <p>In Python especially, there is a distinction that surprises many programmers: the name that refers to an object can stop being accessible while the object itself continues to exist.</p>
+
+  <div class="code-block"><pre><span class="ck">def</span> create_person():
+    person = {<span class="cs">"name"</span>: <span class="cs">"Dee"</span>}
+    <span class="ck">return</span> person
+
+p = create_person()</pre></div>
+
+  <div class="card">
+    <p style="font-size:14px;line-height:1.7;margin:0;">
+      Inside <span class="inline-code">create_person()</span>, the name <span class="inline-code">person</span> refers to the dictionary object. When the function finishes, the local name <span class="inline-code">person</span> is no longer accessible — it no longer exists as a local name.<br><br>
+      But the dictionary object <em>continues to exist</em> — because <span class="inline-code">p</span> in the outer scope now refers to it. Python's runtime keeps the object alive as long as something still refers to it.
+    </p>
+    <div class="info-box" style="margin-top:12px;"><p><strong>The key lesson:</strong> In Python, the lifetime of a name/binding and the lifetime of the object it refers to are not necessarily the same. A name can disappear while the object lives on — as long as another name still refers to it.</p></div>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-title">💡 Analogy</div>
+    <p>Imagine a document shared between coworkers. If one colleague deletes their shortcut to it, the document is not gone — others still have access. The object (document) outlives the reference (shortcut) that one person held. Python's memory model works similarly: objects persist as long as at least one reference to them exists.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 5 — STACK AND HEAP -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section" id="s5">
+  <div class="section-label">Section 5</div>
+  <h2>Stack &amp; Heap: Where Do Variables Live?</h2>
+
+  <div class="warn-box">
+    <p><strong>Conceptual model alert:</strong> This section presents a simplified but useful model of how memory works. The actual behaviour of any particular language or compiler may be more complex. The goal here is to understand enough to reason about variable lifetime and language design — not to learn systems programming.</p>
+  </div>
+
+  <p>When a program runs, its data has to be stored somewhere in memory. Two common conceptual regions are the <strong>stack</strong> and the <strong>heap</strong>. Different languages give programmers different levels of control over which is used.</p>
+
+  <div class="g2">
+    <div class="card">
+      <h3 style="margin-top:0;">The Stack</h3>
+      <p>A region typically associated with function calls. When a function is called, space is allocated for its local data. When the function returns, that space is freed. The lifetime of stack-allocated data is tied to the function call.</p>
+      <div class="info-box" style="margin-top:12px;"><p>Stack allocation is fast and automatic — no programmer action needed. The tradeoff: the data cannot outlive the function call that created it.</p></div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0;">The Heap</h3>
+      <p>A region used for data that needs to outlive a specific function call, or whose size isn't known at compile time. Heap memory can be explicitly requested (in C, via <span class="inline-code">malloc</span>) or allocated automatically by a runtime (Python, C#).</p>
+      <div class="info-box" style="margin-top:12px;"><p>Heap allocation is more flexible — data can exist as long as needed. The tradeoff: someone must manage the memory, either the programmer (C) or the language runtime (C#, Python).</p></div>
+    </div>
+  </div>
+
+  <h3>How our three languages approach memory management</h3>
+  <p>Rather than saying "which variables go where," the more useful question is: <em>who manages memory, and how much control does the programmer have?</em></p>
+  <div class="lang-row">
+    <div class="lc lc-c">
+      <div class="lc-title">C</div>
+      <p>Programmers have significant control over memory. Local data within a function is handled automatically. But to create data that outlives a function call, the programmer must explicitly request memory (<span class="inline-code">malloc</span>) and explicitly release it (<span class="inline-code">free</span>). Missing a <span class="inline-code">free</span> causes a memory leak; accessing memory after freeing it causes a crash.</p>
+    </div>
+    <div class="lc lc-cs">
+      <div class="lc-title">C#</div>
+      <p>The managed runtime handles most memory automatically. Local data in functions is handled for you. Objects are managed by a garbage collector, which reclaims memory when it is no longer needed. You don't call <span class="inline-code">free</span>. The tradeoff is less direct control and some runtime overhead from the GC.</p>
+    </div>
+    <div class="lc lc-py">
+      <div class="lc-title">Python</div>
+      <p>The runtime manages objects and memory automatically. Programmers never explicitly allocate or free memory. Python uses reference counting and a garbage collector to clean up objects when they are no longer reachable. This simplifies code considerably at the cost of some runtime overhead.</p>
+    </div>
+  </div>
+  <div class="info-box" style="margin-top:12px;"><p><strong>Looking ahead:</strong> Memory management — garbage collection, reference counting, and how languages reclaim memory — is an important topic in its own right. We will return to it in later chapters. For now, the key design question is: how much control should the programmer have, and what are the tradeoffs?</p></div>
+
+  <div class="misconception-box" style="margin-top:16px;">
+    <div class="mc-label">❌ Oversimplification to avoid</div>
+    <p>"Value types always go on the stack; reference types always go on the heap."</p>
+  </div>
+  <div class="correction-box">
+    <p><strong>✓ Better:</strong> Stack and heap are useful ways to think about how runtimes may organise memory, but they are implementation concepts — not universal rules about categories of variables. The same language may store the same kind of data differently in different contexts. What matters for this course is the <em>design question</em>: who manages memory, and what are the tradeoffs for programmers?</p>
+  </div>
+
+  <div class="misconception-box" style="margin-top:10px;">
+    <div class="mc-label">❌ Another common mistake</div>
+    <p>"Garbage collection means memory is freed immediately when a variable goes out of scope."</p>
+  </div>
+  <div class="correction-box">
+    <p><strong>✓ Better:</strong> Garbage collection means the runtime will <em>eventually</em> reclaim memory that is no longer reachable — timing is not guaranteed to be immediate. In Python, reference counting frees many objects quickly, but objects in reference cycles require a separate collector. The object may also persist if any reference to it still exists, even after the local name that created it has gone away (as in the <code>create_person()</code> example in Section 4).</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 6 — C VARIABLES -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section" id="s6">
+  <div class="section-label">Section 6</div>
+  <h2>C: Explicit Control Over Every Attribute</h2>
+
+  <p>C gives the programmer more direct control over variables than almost any other mainstream language. This comes with both power and responsibility.</p>
+
+  <div class="code-wrap">
+    <div class="code-label"><span><span class="pill pill-c">C</span> — basic variable declarations</span></div>
+    <div class="code-block"><pre><span class="ck">int</span>   age   = 25;    <span class="cc">// integer, 4 bytes</span>
+<span class="ck">float</span> gpa   = 3.8;   <span class="cc">// floating point, 4 bytes</span>
+<span class="ck">char</span>  grade = <span class="cs">'A'</span>;   <span class="cc">// single character, 1 byte</span></pre></div>
+  </div>
+
+  <p>In every C declaration, the programmer must state the type explicitly. The type is bound at compile time and cannot change. Assignment must be compatible with the declared type — the compiler enforces this.</p>
+
+  <h3>Local vs dynamic memory in C</h3>
+  <div class="g2">
+    <div>
+      <div class="code-label"><span>Local variable — stack lifetime</span></div>
+      <div class="code-block"><pre><span class="ck">void</span> process() {
+    <span class="ck">int</span> score = 95;
+    <span class="cc">// score exists until
+    // process() returns</span>
+}</pre></div>
+      <p style="font-size:13px;color:var(--muted);margin-top:6px;">The lifetime of <span class="inline-code">score</span> is tied to the function call. Created when <span class="inline-code">process()</span> is called, gone when it returns.</p>
+    </div>
+    <div>
+      <div class="code-label"><span>Dynamic memory — heap lifetime</span></div>
+      <div class="code-block"><pre><span class="ck">int</span> *nums =
+  malloc(5 * <span class="ck">sizeof</span>(<span class="ck">int</span>));
+<span class="cc">// nums points to heap memory
+// Must call free(nums) later</span>
+free(nums);</pre></div>
+      <p style="font-size:13px;color:var(--muted);margin-top:6px;">The programmer controls when heap memory is created (<span class="inline-code">malloc</span>) and destroyed (<span class="inline-code">free</span>). Miss the <span class="inline-code">free</span> → memory leak. Access after <span class="inline-code">free</span> → crash.</p>
+    </div>
+  </div>
+
+  <h3>The concept of uninitialized variables</h3>
+  <p>One specific consequence of C's explicit control: C allows you to declare a variable without initializing it. This is legal syntax — but reading an uninitialized variable produces <strong>undefined behavior</strong>.</p>
+
+  <div class="g2">
+    <div>
+      <div class="code-label"><span><span class="pill pill-c">C</span> — uninitialized variable</span></div>
+      <div class="code-block"><pre><span class="ck">int</span> score;
+<span class="cc">// score exists — but contains
+// whatever happened to be in
+// that memory slot. Could be 0,
+// could be 42839, could be
+// anything.</span>
+printf(<span class="cs">"%d
+"</span>, score); <span class="cc">// ⚠</span></pre></div>
+    </div>
+    <div>
+      <div class="code-label"><span><span class="pill pill-cs">C#</span> — prevents this</span></div>
+      <div class="code-block"><pre><span class="ck">int</span> score;
+<span class="cc">// C# compiler gives an error:
+// "Use of unassigned local
+// variable 'score'"
+// Prevents this class of bug
+// at compile time.</span></pre></div>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <p><strong>Design lesson:</strong> C's choice to allow uninitialized variables gives the programmer flexibility (sometimes useful for performance). C# chose to make this a compile-time error — trading that flexibility for safety. Python cannot have this problem at all, because a name only exists after it has been assigned. This is another concrete example of how a design decision about variables shapes the bugs that are possible in a language.</p>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">The language design question</h3>
+    <p>C's approach raises a fundamental design question: <em>What does giving the programmer this level of control make possible — and what risks does it introduce?</em></p>
+    <div class="g2" style="margin-top:12px;">
+      <div>
+        <div style="font-weight:700;font-size:13px;color:var(--green);margin-bottom:6px;">✓ What it makes possible</div>
+        <p style="font-size:14px;margin:0;">Precise control over when memory is used and freed. Predictable performance — no garbage collector pausing at unexpected moments. Ability to write operating systems, device drivers, and real-time systems where exact timing matters.</p>
+      </div>
+      <div>
+        <div style="font-weight:700;font-size:13px;color:var(--red);margin-bottom:6px;">✗ What risks it introduces</div>
+        <p style="font-size:14px;margin:0;">Memory leaks (forgot to free). Use-after-free (accessed freed memory). Buffer overflows (wrote past the end of an array). Uninitialized variables. These are among the most common and most serious bugs in C programs — and many are impossible in Python and C# because those languages were designed to prevent them.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 7 — C# VARIABLES -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section" id="s7">
+  <div class="section-label">Section 7</div>
+  <h2>C#: Static Types with Convenience and Safety</h2>
+
+  <p>C# keeps static typing (types determined at compile time) but adds two important features: type inference via <span class="inline-code">var</span>, and automatic memory management via garbage collection.</p>
+
+  <h3>Explicit type vs type inference</h3>
+  <div class="g2">
+    <div>
+      <div class="code-label"><span>Explicit type declaration</span></div>
+      <div class="code-block"><pre><span class="ck">int</span> age = 25;
+<span class="ck">string</span> name = <span class="cs">"Alice"</span>;
+<span class="cc">// Type written by programmer</span></pre></div>
+    </div>
+    <div>
+      <div class="code-label"><span>Type inference with <span class="inline-code">var</span></span></div>
+      <div class="code-block"><pre><span class="ck">var</span> age = 25;
+<span class="ck">var</span> name = <span class="cs">"Alice"</span>;
+<span class="cc">// Compiler infers: int, string</span></pre></div>
+    </div>
+  </div>
+
+  <div class="warn-box">
+    <p><strong><span class="inline-code">var</span> in C# does NOT mean "dynamically typed."</strong> When you write <span class="inline-code">var age = 25;</span>, the compiler infers that <span class="inline-code">age</span> is an <span class="inline-code">int</span> at compile time. That type binding is just as static as if you had written <span class="inline-code">int age = 25;</span>. The difference is only in what you type — the compiler does the work of figuring out the type.</p>
+  </div>
+
+  <h3>The proof: var is statically typed</h3>
+  <div class="code-block"><pre><span class="ck">var</span> age = 25;
+age = 30;          <span class="cc">// ✓ valid — both ints</span>
+
+<span class="cc">// age = "hello";  // ✗ compile-time error
+// Cannot implicitly convert type 'string' to 'int'</span></pre></div>
+  <p>If <span class="inline-code">var</span> meant dynamic typing, the second assignment would work. It doesn't. The name <span class="inline-code">age</span> is permanently bound to the type <span class="inline-code">int</span> at compile time — the compiler just figured out that type for you.</p>
+
+  <h3>C# vs Python: the crucial comparison</h3>
+  <div class="g2">
+    <div>
+      <div class="code-label"><span><span class="pill pill-cs">C#</span> — type binding is static</span></div>
+      <div class="code-block"><pre><span class="ck">var</span> x = 10;
+<span class="cc">// x is now int, forever.
+// x = "hello"; → error</span></pre></div>
+    </div>
+    <div>
+      <div class="code-label"><span><span class="pill pill-py">Python</span> — name can be rebound</span></div>
+      <div class="code-block"><pre>x = 10
+x = <span class="cs">"hello"</span>  <span class="cc"># perfectly valid</span>
+print(x)    <span class="cc"># prints: hello</span></pre></div>
+    </div>
+  </div>
+  <p>Both look similar on the first line. But in C#, the compiler infers an <span class="inline-code">int</span> type for <span class="inline-code">x</span> and that binding cannot be changed. In Python, <span class="inline-code">x</span> is not bound to any type — it refers to an object, and can be rebound to any object.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 8 — PYTHON'S VARIABLE MODEL -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section" id="s8">
+  <div class="section-label">Section 8 — Key Conceptual Section</div>
+  <h2>Python's Variable Model: Names and Objects</h2>
+
+  <p>Python's approach to variables is fundamentally different from C and C#. Understanding the difference is one of the most important conceptual takeaways of this chapter.</p>
+
+  <h3>The classic mental model (for C and C#)</h3>
+  <p>In C and C#, it's reasonable to think of a variable as a <em>typed box</em>:</p>
+  <div class="bind-diagram">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">C mental model:</div>
+    <div>┌──────────────────────┐</div>
+    <div>│   age   [type: int]  │  ← 25</div>
+    <div>└──────────────────────┘</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:6px;">The box is typed. You can change the number inside, but you cannot put a string in an int box.</div>
+  </div>
+
+  <h3>Python's actual model: names refer to objects</h3>
+  <p>In Python, the model is different. Names are not typed boxes — they are labels that can be attached to any object:</p>
+  <div class="bind-diagram">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">After <code>age = 25</code>:</div>
+    <div><span class="bind-name">age</span> <span class="bind-arrow">────→</span> <span class="bind-obj bind-int">25</span> <span class="bind-type">[object, type: int]</span></div>
+    <br>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">After <code>age = "hello"</code>:</div>
+    <div><span class="bind-name">age</span> <span class="bind-arrow">────→</span> <span class="bind-obj bind-str">"hello"</span> <span class="bind-type">[object, type: str]</span></div>
+    <br>
+    <div style="font-size:12px;color:var(--muted);">The name <code>age</code> is just a label. Objects have types. Labels can point to any object. When you "reassign" age, you redirect the label — the old object is unchanged.</div>
+  </div>
+
+  <h3>Names can point to the same object</h3>
+  <div class="code-block"><pre>x = 10
+y = x
+<span class="cc"># Now both x and y refer to the same integer object 10</span>
+<span class="cc"># x is y → True (they point to the same object)</span>
+
+x = 20
+<span class="cc"># Now x refers to 20. y still refers to 10.</span>
+<span class="cc"># Rebinding x does NOT change y.</span></pre></div>
+
+  <div class="think">
+    <div class="think-label">🤔 Predict the Output</div>
+    <p>What does this print? Think through the name-to-object binding carefully.</p>
+    <div class="code-block" style="margin:8px 0;"><pre>x = 10
+y = x
+x = 20
+print(y)</pre></div>
+    <button class="reveal-btn" onclick="reveal(this)">See answer</button>
+    <div class="reveal-content">
+      <p><strong>Output: <code>10</code></strong></p>
+      <p style="margin-top:8px;">Step 1: <code>x</code> is bound to the integer object <code>10</code>.</p>
+      <p>Step 2: <code>y</code> is bound to the same object that <code>x</code> refers to — also <code>10</code>.</p>
+      <p>Step 3: <code>x</code> is rebound to the integer object <code>20</code>. This does NOT affect <code>y</code> — <code>y</code> still refers to <code>10</code>.</p>
+      <p>Step 4: <code>print(y)</code> prints <code>10</code>.</p>
+      <p style="margin-top:8px;">If you expected <code>20</code>, you were using the "box" mental model. In the box model, <code>y = x</code> would mean "make y share x's box," so changing x would change y too. But Python doesn't work that way — assignment rebinds names to objects, it doesn't link boxes together.</p>
+    </div>
+  </div>
+
+  <h3>Why objects have types — names do not</h3>
+  <div class="code-block"><pre>x = 42
+print(type(x))       <span class="cc"># &lt;class 'int'&gt;</span>
+x = <span class="cs">"hello"</span>
+print(type(x))       <span class="cc"># &lt;class 'str'&gt;</span></pre></div>
+  <p>When you call <span class="inline-code">type(x)</span>, Python is not reporting the type of the name <span class="inline-code">x</span>. It is reporting the type of the <em>object</em> that <span class="inline-code">x</span> currently refers to. The name <span class="inline-code">x</span> has no type — it is just a label.</p>
+
+  <h3>When two names refer to the same object — aliasing</h3>
+  <p>Because names in Python are references to objects, multiple names can refer to the same object. This is called <strong>aliasing</strong>, and it has consequences that the "box" mental model doesn't prepare you for.</p>
+
+  <div class="code-block"><pre>a = [1, 2, 3]
+b = a            <span class="cc"># b refers to the SAME list object as a</span>
+
+b.append(4)      <span class="cc"># modifying the object through b...</span>
+
+print(a)         <span class="cc"># [1, 2, 3, 4] — visible through a too!</span></pre></div>
+
+  <div class="card">
+    <p style="font-size:14px;line-height:1.7;margin:0;">
+      When you write <span class="inline-code">b = a</span>, you are not copying the list. You are creating a second name (<span class="inline-code">b</span>) that refers to the <em>same list object</em>. When <span class="inline-code">b.append(4)</span> modifies that object, the change is visible through <span class="inline-code">a</span> as well — because they both refer to the same thing.
+    </p>
+  </div>
+
+  <div class="g2">
+    <div>
+      <div class="code-label"><span>Aliasing — both names share the object</span></div>
+      <div class="code-block"><pre>a = [1, 2, 3]
+b = a
+b.append(4)
+print(a)  <span class="cc"># [1, 2, 3, 4]</span>
+<span class="cc"># Modifying through b
+# affects a too</span></pre></div>
+    </div>
+    <div>
+      <div class="code-label"><span>Rebinding — not the same as aliasing</span></div>
+      <div class="code-block"><pre>a = 5
+b = a
+a = 10
+print(b)  <span class="cc"># 5</span>
+<span class="cc"># Rebinding a to 10 does
+# NOT change b</span></pre></div>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <p><strong>Why these behave differently:</strong> In the second example, <span class="inline-code">a = 10</span> creates a <em>new binding</em> — it redirects <span class="inline-code">a</span> to point at a different object. It doesn't modify the object <span class="inline-code">5</span> itself (integers in Python are immutable anyway). <span class="inline-code">b</span> still refers to <span class="inline-code">5</span>. But in the first example, <span class="inline-code">b.append(4)</span> <em>mutates</em> the list object that both names refer to — so both see the change.</p>
+  </div>
+
+  <div class="think">
+    <div class="think-label">🤔 Predict</div>
+    <p>What does this print, and why?</p>
+    <div class="code-block" style="margin:8px 0;"><pre>a = [1, 2, 3]
+b = a
+b = [4, 5, 6]
+print(a)</pre></div>
+    <button class="reveal-btn" onclick="reveal(this)">See answer</button>
+    <div class="reveal-content">
+      <p><strong>Output: <code>[1, 2, 3]</code></strong></p>
+      <p style="margin-top:8px;">Here, <code>b = [4, 5, 6]</code> is a rebinding — it makes <code>b</code> point to a brand new list. It does not modify the original list object. <code>a</code> still refers to <code>[1, 2, 3]</code>. Compare with the earlier example where <code>b.append(4)</code> mutated the shared object — that is a very different operation.</p>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <p><strong>The key insight:</strong> Python is strongly typed — every object has a definite type and Python enforces type rules (you cannot add a string to an integer). But Python uses <em>dynamic binding</em> — names are not bound to types, only to objects, and names can be rebound at any time. These two facts together explain why Python behaves the way it does.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 9 — SIDE-BY-SIDE COMPARISON -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section" id="s9">
+  <div class="section-label">Section 9</div>
+  <h2>Side-by-Side: The Same Operations, Three Languages</h2>
+
+  <h3>Declaration</h3>
+  <div class="g3">
+    <div>
+      <div class="code-label"><span><span class="pill pill-c">C</span></span></div>
+      <div class="code-block"><pre><span class="ck">int</span> x = 10;</pre></div>
+      <p style="font-size:13px;color:var(--muted);margin-top:6px;">Type declared by programmer. Binding of name to type happens at compile time.</p>
+    </div>
+    <div>
+      <div class="code-label"><span><span class="pill pill-cs">C#</span></span></div>
+      <div class="code-block"><pre><span class="ck">int</span> x = 10;
+<span class="cc">// or:</span> <span class="ck">var</span> x = 10;</pre></div>
+      <p style="font-size:13px;color:var(--muted);margin-top:6px;">Type explicit or inferred. Either way, type binding is at compile time.</p>
+    </div>
+    <div>
+      <div class="code-label"><span><span class="pill pill-py">Python</span></span></div>
+      <div class="code-block"><pre>x = 10</pre></div>
+      <p style="font-size:13px;color:var(--muted);margin-top:6px;">No type declaration. Name is bound to an int object at runtime when this line executes.</p>
+    </div>
+  </div>
+
+  <h3>Reassignment to the same type</h3>
+  <div class="g3">
+    <div>
+      <div class="code-label"><span><span class="pill pill-c">C</span></span></div>
+      <div class="code-block"><pre><span class="ck">int</span> x = 10;
+x = 20; <span class="cc">// ✓ valid</span></pre></div>
+    </div>
+    <div>
+      <div class="code-label"><span><span class="pill pill-cs">C#</span></span></div>
+      <div class="code-block"><pre><span class="ck">var</span> x = 10;
+x = 20; <span class="cc">// ✓ valid</span></pre></div>
+    </div>
+    <div>
+      <div class="code-label"><span><span class="pill pill-py">Python</span></span></div>
+      <div class="code-block"><pre>x = 10
+x = 20  <span class="cc"># ✓ valid</span></pre></div>
+    </div>
+  </div>
+
+  <h3>Rebinding to a different type — the key difference</h3>
+  <div class="g3">
+    <div>
+      <div class="code-label"><span><span class="pill pill-c">C</span></span></div>
+      <div class="code-block"><pre><span class="ck">int</span> x = 10;
+<span class="cc">/* x = "hello";
+   COMPILE ERROR
+   incompatible types */</span></pre></div>
+      <p style="font-size:13px;color:var(--red);margin-top:6px;">❌ Not allowed. The name is bound to type <span class="inline-code">int</span> permanently.</p>
+    </div>
+    <div>
+      <div class="code-label"><span><span class="pill pill-cs">C#</span></span></div>
+      <div class="code-block"><pre><span class="ck">var</span> x = 10;
+<span class="cc">// x = "hello";
+// COMPILE ERROR
+// Cannot convert string to int</span></pre></div>
+      <p style="font-size:13px;color:var(--red);margin-top:6px;">❌ Not allowed. Even though <span class="inline-code">var</span> was used, the compiler bound <span class="inline-code">x</span> to <span class="inline-code">int</span>.</p>
+    </div>
+    <div>
+      <div class="code-label"><span><span class="pill pill-py">Python</span></span></div>
+      <div class="code-block"><pre>x = 10
+x = <span class="cs">"hello"</span>  <span class="cc"># ✓ valid</span>
+print(x)
+<span class="cc"># Output: hello</span></pre></div>
+      <p style="font-size:13px;color:var(--green);margin-top:6px;">✓ Allowed. The name <span class="inline-code">x</span> is rebound to a new string object.</p>
+    </div>
+  </div>
+
+  <h3>Summary comparison</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Question about variables</th><th><span class="pill pill-c">C</span></th><th><span class="pill pill-cs">C#</span></th><th><span class="pill pill-py">Python</span></th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Declaration required?</td>
+          <td>Yes — always explicit</td>
+          <td>Yes, or use <span class="inline-code">var</span></td>
+          <td>No declaration — just assign</td>
+        </tr>
+        <tr>
+          <td>When is type determined?</td>
+          <td>Compile time</td>
+          <td>Compile time (even with <span class="inline-code">var</span>)</td>
+          <td>Runtime — per object, not per name</td>
+        </tr>
+        <tr>
+          <td>Can name rebind to different type?</td>
+          <td>No — type binding is permanent</td>
+          <td>No — type is fixed at compile time</td>
+          <td>Yes — names rebind freely</td>
+        </tr>
+        <tr>
+          <td>Who manages memory?</td>
+          <td>Programmer (malloc / free)</td>
+          <td>Runtime (GC)</td>
+          <td>Runtime (reference counting + GC)</td>
+        </tr>
+        <tr>
+          <td>Uninitialized variable possible?</td>
+          <td>Yes — and dangerous</td>
+          <td>No — compile-time error</td>
+          <td>No — name doesn't exist until assigned</td>
+        </tr>
+        <tr>
+          <td>Primary design priority</td>
+          <td>Control and explicitness</td>
+          <td>Safety + productivity</td>
+          <td>Conciseness and flexibility</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="compare-wrap">
+    <div class="compare-title">🔎 Design Analysis Activity</div>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:14px;">Work through these questions about the comparison above. Expand each to check your thinking.</p>
+    <div class="compare-q">
+      <strong>Q1 — Why can Python rebind a name to a different type when C and C# cannot?</strong>
+      <button class="reveal-btn" style="margin-top:8px;display:block;" onclick="reveal(this)">See answer</button>
+      <div class="reveal-content">In Python, names are not bound to types — they are bound to objects, and objects have types. Because the name itself carries no type information, it can be redirected to an object of any type. In C and C#, the variable declaration binds the name to a specific type at compile time, and that binding cannot be changed.</div>
+    </div>
+    <div class="compare-q">
+      <strong>Q2 — C# uses <span class="inline-code">var</span> and Python uses no declaration. Are these the same thing?</strong>
+      <button class="reveal-btn" style="margin-top:8px;display:block;" onclick="reveal(this)">See answer</button>
+      <div class="reveal-content">No. <code>var</code> in C# means "infer the type at compile time and then treat it as statically typed." The compiler figures out the type from the right-hand side. Python's lack of declaration means "bind the name to an object at runtime; no type is associated with the name." The result looks similar in source code but the behavior is fundamentally different — C#'s <code>var</code> is still statically typed, Python's is dynamically typed.</div>
+    </div>
+    <div class="compare-q">
+      <strong>Q3 — Both C and C# prevent rebinding to a different type. What design goal does this serve?</strong>
+      <button class="reveal-btn" style="margin-top:8px;display:block;" onclick="reveal(this)">See answer</button>
+      <div class="reveal-content">Static type binding enables the compiler to catch type errors before the program runs. If you accidentally assign a string to an integer variable, you get an error immediately at compile time — not after the program has been running for hours and suddenly crashes. This is especially valuable in large codebases where a type mistake might only be triggered in a rare code path.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 10 — DESIGN TRADEOFFS -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section" id="s10">
+  <div class="section-label">Section 10</div>
+  <h2>Design Tradeoffs: Why No Single "Best" Variable Model</h2>
+
+  <p>Think like a language designer. Each approach to variables reflects deliberate choices about what to prioritise. Here is the honest case for each.</p>
+
+  <div class="card">
+    <div class="lc-title" style="color:var(--pill-c-text);font-size:15px;margin-bottom:12px;"><span class="pill pill-c">C</span> — Explicit, Static, Programmer-Controlled</div>
+    <div class="g2">
+      <div>
+        <p style="font-weight:700;font-size:13px;color:var(--green);margin-bottom:8px;">✓ Advantages</p>
+        <ul style="font-size:14px;line-height:2;padding-left:18px;color:var(--text);">
+          <li>Maximum control over memory layout and lifetime</li>
+          <li>Predictable performance — no GC pauses</li>
+          <li>Types checked at compile time — many errors caught early</li>
+          <li>Suitable for operating systems, embedded systems, real-time software</li>
+        </ul>
+      </div>
+      <div>
+        <p style="font-weight:700;font-size:13px;color:var(--red);margin-bottom:8px;">✗ Costs</p>
+        <ul style="font-size:14px;line-height:2;padding-left:18px;color:var(--text);">
+          <li>Programmer responsible for memory management — bugs are serious</li>
+          <li>More verbose — every type must be stated</li>
+          <li>No safety net for memory errors (leaks, use-after-free)</li>
+          <li>Longer development time for many tasks</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="lc-title" style="color:var(--pill-cs-text);font-size:15px;margin-bottom:12px;"><span class="pill pill-cs">C#</span> — Static Types + Safety + Inference</div>
+    <div class="g2">
+      <div>
+        <p style="font-weight:700;font-size:13px;color:var(--green);margin-bottom:8px;">✓ Advantages</p>
+        <ul style="font-size:14px;line-height:2;padding-left:18px;color:var(--text);">
+          <li>Static type checking catches errors at compile time</li>
+          <li>Type inference reduces verbosity without losing safety</li>
+          <li>Automatic memory management (GC) prevents most memory bugs</li>
+          <li>Good balance for large teams building complex software</li>
+        </ul>
+      </div>
+      <div>
+        <p style="font-weight:700;font-size:13px;color:var(--red);margin-bottom:8px;">✗ Costs</p>
+        <ul style="font-size:14px;line-height:2;padding-left:18px;color:var(--text);">
+          <li>GC overhead — runtime performance slightly less predictable</li>
+          <li>More complex language with many features to learn</li>
+          <li>Less control over exactly when memory is freed</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="lc-title" style="color:var(--pill-py-text);font-size:15px;margin-bottom:12px;"><span class="pill pill-py">Python</span> — Dynamic Binding + Flexibility</div>
+    <div class="g2">
+      <div>
+        <p style="font-weight:700;font-size:13px;color:var(--green);margin-bottom:8px;">✓ Advantages</p>
+        <ul style="font-size:14px;line-height:2;padding-left:18px;color:var(--text);">
+          <li>Concise — no type declarations to write</li>
+          <li>Flexible — names can refer to any object</li>
+          <li>Rapid prototyping and scripting</li>
+          <li>Automatic memory management</li>
+        </ul>
+      </div>
+      <div>
+        <p style="font-weight:700;font-size:13px;color:var(--red);margin-bottom:8px;">✗ Costs</p>
+        <ul style="font-size:14px;line-height:2;padding-left:18px;color:var(--text);">
+          <li>Type errors only discovered at runtime</li>
+          <li>No compile-time type enforcement</li>
+          <li>Performance overhead from dynamic binding and GC</li>
+          <li>Harder to reason about types in large codebases</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Designer Activity -->
+  <div class="activity">
+    <div class="activity-label">🎯 Think Like a Language Designer</div>
+    <p style="font-size:14px;color:var(--text);margin-bottom:10px;">If you were designing a new programming language, would you require programmers to declare variable types? Select your preference:</p>
+    <div class="designer-opts">
+      <button class="designer-opt" onclick="designerChoice(this,'always')">Always require</button>
+      <button class="designer-opt" onclick="designerChoice(this,'never')">Never require</button>
+      <button class="designer-opt" onclick="designerChoice(this,'optional')">Make it optional</button>
+      <button class="designer-opt" onclick="designerChoice(this,'context')">Depends on context</button>
+    </div>
+    <div class="designer-feedback" id="designer-fb"></div>
+  </div>
+
+  <div class="info-box">
+    <p><strong>The bottom line:</strong> There is no universally "best" variable model. The right design depends on the domain (systems programming vs web scripting), the team size, the performance requirements, and what kinds of errors are most dangerous. Programming language design is about understanding these tradeoffs — not finding the one correct answer.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 11 — COMMON MISCONCEPTIONS -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section" id="s11a">
+  <div class="section-label">Before the Quiz</div>
+  <h2>Common Misconceptions</h2>
+
+  <div class="misconception-box">
+    <div class="mc-label">❌ Misconception 1</div>
+    <p>"Python variables have no type."</p>
+  </div>
+  <div class="correction-box">
+    <p><strong>✓ Correction:</strong> Python values (objects) always have a type. <span class="inline-code">type(25)</span> is <span class="inline-code">int</span>. <span class="inline-code">type("hello")</span> is <span class="inline-code">str</span>. What Python doesn't have is a type declaration attached to the name. The name has no type — the object does. Python is <em>strongly</em> typed but <em>dynamically</em> typed.</p>
+  </div>
+
+  <div class="misconception-box" style="margin-top:14px;">
+    <div class="mc-label">❌ Misconception 2</div>
+    <p>"<span class="inline-code">var</span> in C# means dynamically typed — just like Python."</p>
+  </div>
+  <div class="correction-box">
+    <p><strong>✓ Correction:</strong> <span class="inline-code">var</span> is type inference, not dynamic typing. The C# compiler determines the type at compile time from the right-hand side of the assignment. The variable is then statically typed for its entire lifetime. <span class="inline-code">var x = 25;</span> means "compiler, figure out the type" — not "this variable can hold any type at runtime."</p>
+  </div>
+
+  <div class="misconception-box" style="margin-top:14px;">
+    <div class="mc-label">❌ Misconception 3</div>
+    <p>"A variable is just a box containing a value."</p>
+  </div>
+  <div class="correction-box">
+    <p><strong>✓ Correction:</strong> A variable has multiple attributes: name, type, value, location, and lifetime. In Python especially, the "box" model is misleading — a name is a reference to an object, not a container. When you write <span class="inline-code">y = x</span>, you're pointing both names at the same object, not copying the box.</p>
+  </div>
+
+  <div class="misconception-box" style="margin-top:14px;">
+    <div class="mc-label">❌ Misconception 4</div>
+    <p>"Scope and lifetime are the same thing."</p>
+  </div>
+  <div class="correction-box">
+    <p><strong>✓ Correction:</strong> Scope is where in the <em>source code</em> a name is visible. Lifetime is how long during <em>execution</em> the variable exists. They often correspond for local variables, but they are separate concepts. A variable can have ended its lifetime but still technically be "in scope" in edge cases, and vice versa in some language designs.</p>
+  </div>
+
+  <div class="misconception-box" style="margin-top:14px;">
+    <div class="mc-label">❌ Misconception 5</div>
+    <p>"Dynamic typing means Python has weak typing."</p>
+  </div>
+  <div class="correction-box">
+    <p><strong>✓ Correction:</strong> <em>Dynamic</em> typing means types are checked at runtime (not compile time). <em>Weak</em> typing means the language silently converts between incompatible types. Python is dynamically typed but strongly typed — it will raise a <span class="inline-code">TypeError</span> if you try to add a string to an integer. JavaScript is weakly typed — it silently produces <span class="inline-code">"hello5"</span> from <span class="inline-code">"hello" + 5</span>.</p>
+  </div>
+
+  <div class="misconception-box" style="margin-top:14px;">
+    <div class="mc-label">❌ Misconception 6</div>
+    <p>"When a Python name is rebound to a different type, the object itself changed type."</p>
+  </div>
+  <div class="correction-box">
+    <p><strong>✓ Correction:</strong> Objects in Python do not change type. When you write <span class="inline-code">x = "hello"</span> after <span class="inline-code">x = 25</span>, the integer object <span class="inline-code">25</span> is unchanged — it is still an int. The name <span class="inline-code">x</span> was rebound to point at a different object (the string). The original object still exists until garbage-collected.</p>
+  </div>
+
+  <div class="misconception-box" style="margin-top:14px;">
+    <div class="mc-label">❌ Misconception 7</div>
+    <p>"All local variables are always physically stored on the stack."</p>
+  </div>
+  <div class="correction-box">
+    <p><strong>✓ Correction:</strong> Stack and heap are useful conceptual models for reasoning about memory, but they are not universal implementation rules. In Python, all objects are heap-allocated. Compilers optimise variable storage in ways that may not match a simple stack model. Always treat stack/heap as a thinking tool, not a strict guarantee about where any particular variable lives.</p>
+  </div>
+
+  <div class="misconception-box" style="margin-top:14px;">
+    <div class="mc-label">❌ Misconception 8</div>
+    <p>"<span class="inline-code">b = a</span> in Python copies the value of <span class="inline-code">a</span> into <span class="inline-code">b</span>."</p>
+  </div>
+  <div class="correction-box">
+    <p><strong>✓ Correction:</strong> <span class="inline-code">b = a</span> makes <span class="inline-code">b</span> refer to the <em>same object</em> that <span class="inline-code">a</span> refers to. If that object is mutable (like a list), then changes made through either name are visible to the other — because they share one object. For immutable objects (like integers or strings), this distinction rarely matters in practice, but the model is still: two labels, one object — not a copy.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 11 — PRACTICE QUESTIONS -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section" id="s11">
+  <div class="section-label">Section 11</div>
+  <h2>Practice Questions</h2>
+
+  <!-- Q1 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q1 of 12 — Variable anatomy</span> Name, type, value</div>
+    <div class="quiz-body">
+      <div class="quiz-q">In the C declaration <span class="inline-code">float gpa = 3.8;</span>, which of the following correctly identifies all three: the <em>name</em>, the <em>type</em>, and the <em>value</em>?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q1')"><span class="opt-letter">A</span>Name: float · Type: gpa · Value: 3.8</button>
+        <button class="quiz-opt" onclick="ans(this,'correct','Q1')"><span class="opt-letter">B</span>Name: gpa · Type: float · Value: 3.8</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q1')"><span class="opt-letter">C</span>Name: gpa · Type: 3.8 · Value: float</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q1')"><span class="opt-letter">D</span>Name: float · Type: 3.8 · Value: gpa</button>
+      </div>
+      <div class="quiz-feedback" id="Q1"></div>
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q2 of 12 — Python types</span> Objects always have types</div>
+    <div class="quiz-body">
+      <div class="quiz-q">In Python, after writing <span class="inline-code">x = 42</span>, which of the following is most accurate?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q2')"><span class="opt-letter">A</span>The variable <span class="inline-code">x</span> has no type because Python is dynamically typed</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q2')"><span class="opt-letter">B</span>The variable <span class="inline-code">x</span> has type <span class="inline-code">int</span>, determined when the program was compiled</button>
+        <button class="quiz-opt" onclick="ans(this,'correct','Q2')"><span class="opt-letter">C</span>The name <span class="inline-code">x</span> refers to an integer object, and the object has type <span class="inline-code">int</span> — the name itself has no type</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q2')"><span class="opt-letter">D</span>Python infers that <span class="inline-code">x</span> is type <span class="inline-code">int</span> at compile time, like C# does with <span class="inline-code">var</span></button>
+      </div>
+      <div class="quiz-feedback" id="Q2"></div>
+    </div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q3 of 12 — Binding</span> What binding means</div>
+    <div class="quiz-body">
+      <div class="quiz-q">In programming language design, <em>binding</em> most precisely refers to:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q3')"><span class="opt-letter">A</span>The process of compiling source code into machine code</button>
+        <button class="quiz-opt" onclick="ans(this,'correct','Q3')"><span class="opt-letter">B</span>A connection between a name and something associated with it, such as a type, value, or storage location</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q3')"><span class="opt-letter">C</span>The process of allocating memory for a variable</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q3')"><span class="opt-letter">D</span>The mechanism by which Python converts types at runtime</button>
+      </div>
+      <div class="quiz-feedback" id="Q3"></div>
+    </div>
+  </div>
+
+  <!-- Q4 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q4 of 12 — Static vs dynamic typing</span> Don't mix these up</div>
+    <div class="quiz-body">
+      <div class="quiz-q">Which of the following correctly distinguishes <em>static typing</em> from <em>dynamic typing</em>?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q4')"><span class="opt-letter">A</span>Static typing means the language uses explicit type declarations; dynamic typing means types are inferred</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q4')"><span class="opt-letter">B</span>Static typing means the language is compiled; dynamic typing means the language is interpreted</button>
+        <button class="quiz-opt" onclick="ans(this,'correct','Q4')"><span class="opt-letter">C</span>Static typing means types are checked at compile time; dynamic typing means types are checked at runtime</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q4')"><span class="opt-letter">D</span>Static typing means types never change; dynamic typing means types can change at any time</button>
+      </div>
+      <div class="quiz-feedback" id="Q4"></div>
+    </div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q5 of 12 — C# var</span> Type inference is not dynamic typing</div>
+    <div class="quiz-body">
+      <div class="quiz-q">A C# developer writes <span class="inline-code">var score = 95;</span> and then <span class="inline-code">score = "excellent";</span>. What happens?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q5')"><span class="opt-letter">A</span>It works — <span class="inline-code">var</span> allows the variable to hold any type, like Python</button>
+        <button class="quiz-opt" onclick="ans(this,'correct','Q5')"><span class="opt-letter">B</span>Compile-time error — the compiler inferred <span class="inline-code">score</span> as <span class="inline-code">int</span> when it saw <span class="inline-code">95</span>, and <span class="inline-code">string</span> is not compatible</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q5')"><span class="opt-letter">C</span>Runtime error — the program compiles but crashes when it reaches the second line</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q5')"><span class="opt-letter">D</span>It works but <span class="inline-code">score</span> silently becomes a string, like JavaScript</button>
+      </div>
+      <div class="quiz-feedback" id="Q5"></div>
+    </div>
+  </div>
+
+  <!-- Q6 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q6 of 12 — Python rebinding</span> What actually happens</div>
+    <div class="quiz-body">
+      <div class="quiz-q">After executing this Python code, what does <span class="inline-code">print(type(x))</span> output?
+      <div class="code-block" style="margin:8px 0;"><pre>x = 100
+x = <span class="cs">"hello"</span>
+print(type(x))</pre></div></div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q6')"><span class="opt-letter">A</span><span class="inline-code">&lt;class 'int'&gt;</span> — x was originally an int and objects don't change type</button>
+        <button class="quiz-opt" onclick="ans(this,'correct','Q6')"><span class="opt-letter">B</span><span class="inline-code">&lt;class 'str'&gt;</span> — x now refers to the string object "hello"</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q6')"><span class="opt-letter">C</span>A TypeError — Python doesn't allow rebinding to a different type</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q6')"><span class="opt-letter">D</span><span class="inline-code">&lt;class 'NoneType'&gt;</span> — the original int binding was destroyed</button>
+      </div>
+      <div class="quiz-feedback" id="Q6"></div>
+    </div>
+  </div>
+
+  <!-- Q7 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q7 of 12 — Lifetime</span> When does a variable exist?</div>
+    <div class="quiz-body">
+      <div class="quiz-q">A local variable declared inside a C function. When does its lifetime begin, and when does it end?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q7')"><span class="opt-letter">A</span>Begins when the program starts; ends when the program terminates</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q7')"><span class="opt-letter">B</span>Begins when the variable is first read; ends when it is last read</button>
+        <button class="quiz-opt" onclick="ans(this,'correct','Q7')"><span class="opt-letter">C</span>Begins when the function is called and that declaration is reached; ends when the function returns</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q7')"><span class="opt-letter">D</span>Begins at compile time; ends when the program finishes compiling</button>
+      </div>
+      <div class="quiz-feedback" id="Q7"></div>
+    </div>
+  </div>
+
+  <!-- Q8 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q8 of 12 — Scope vs Lifetime</span> Two different things</div>
+    <div class="quiz-body">
+      <div class="quiz-q">Which statement correctly describes the difference between <em>scope</em> and <em>lifetime</em>?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q8')"><span class="opt-letter">A</span>Scope and lifetime are synonyms — both describe how long a variable exists</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q8')"><span class="opt-letter">B</span>Scope is a property of runtime execution; lifetime is a property of source code structure</button>
+        <button class="quiz-opt" onclick="ans(this,'correct','Q8')"><span class="opt-letter">C</span>Scope describes where in the source code a name can be accessed; lifetime describes how long during execution the variable exists</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q8')"><span class="opt-letter">D</span>Scope applies only to global variables; lifetime applies only to local variables</button>
+      </div>
+      <div class="quiz-feedback" id="Q8"></div>
+    </div>
+  </div>
+
+  <!-- Q9 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q9 of 12 — Predict output</span> Python name model</div>
+    <div class="quiz-body">
+      <div class="quiz-q">What does this Python code print?
+      <div class="code-block" style="margin:8px 0;"><pre>a = 5
+b = a
+a = 10
+print(b)</pre></div></div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q9')"><span class="opt-letter">A</span>10 — b "follows" a because they were linked</button>
+        <button class="quiz-opt" onclick="ans(this,'correct','Q9')"><span class="opt-letter">B</span>5 — b refers to the original integer object 5; rebinding a doesn't affect b</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q9')"><span class="opt-letter">C</span>An error — you cannot have two names refer to the same object</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q9')"><span class="opt-letter">D</span>None — b is undefined after a is rebound</button>
+      </div>
+      <div class="quiz-feedback" id="Q9"></div>
+    </div>
+  </div>
+
+  <!-- Q10 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q10 of 12 — Binding time</span> When is the type determined?</div>
+    <div class="quiz-body">
+      <div class="quiz-q">For <span class="inline-code">var x = 3.14;</span> in C#, when is the type of <span class="inline-code">x</span> determined?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q10')"><span class="opt-letter">A</span>At runtime, when the line executes — same as Python</button>
+        <button class="quiz-opt" onclick="ans(this,'correct','Q10')"><span class="opt-letter">B</span>At compile time — the compiler infers <span class="inline-code">double</span> from the literal <span class="inline-code">3.14</span></button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q10')"><span class="opt-letter">C</span>It is never determined — <span class="inline-code">var</span> means untyped</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q10')"><span class="opt-letter">D</span>When the variable is first read</button>
+      </div>
+      <div class="quiz-feedback" id="Q10"></div>
+    </div>
+  </div>
+
+  <!-- Q11 -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q11 of 12 — Dynamic typing vs weak typing</span> Important distinction</div>
+    <div class="quiz-body">
+      <div class="quiz-q">Python raises a <span class="inline-code">TypeError</span> when you try to execute <span class="inline-code">"hello" + 5</span>. What does this tell you about Python's type system?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q11')"><span class="opt-letter">A</span>Python is weakly typed — it should convert the types silently but there is a bug</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q11')"><span class="opt-letter">B</span>Python is statically typed — it detected this at compile time</button>
+        <button class="quiz-opt" onclick="ans(this,'correct','Q11')"><span class="opt-letter">C</span>Python is dynamically and strongly typed — types are checked at runtime but incompatible operations are rejected</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q11')"><span class="opt-letter">D</span>Python has no type system — this error comes from the interpreter, not the language</button>
+      </div>
+      <div class="quiz-feedback" id="Q11"></div>
+    </div>
+  </div>
+
+  <!-- Q12 — Final question -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q12 of 12 — Big picture</span> Why Python allows what C doesn't</div>
+    <div class="quiz-body">
+      <div class="quiz-q">In Python you can write <span class="inline-code">x = 10</span> and then <span class="inline-code">x = "hello"</span>. In C, you cannot assign a string to an integer variable. What is the fundamental language design reason for this difference?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q12')"><span class="opt-letter">A</span>Python is a newer language and has fixed C's limitations — all modern languages work like Python</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q12')"><span class="opt-letter">B</span>C is a compiled language and Python is interpreted, so Python has more flexibility at runtime</button>
+        <button class="quiz-opt" onclick="ans(this,'correct','Q12')"><span class="opt-letter">C</span>In C, a variable name is statically bound to a specific type at compile time. In Python, a name is bound to an object at runtime, not to a type — so it can be rebound to an object of any type</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q12')"><span class="opt-letter">D</span>C doesn't support string types, so the comparison is invalid</button>
+      </div>
+      <div class="quiz-feedback" id="Q12"></div>
+    </div>
+  </div>
+
+  <!-- Score -->
+  <div class="score-wrap">
+    <div class="score-title">Quiz Score</div>
+    <div class="score-bar-row">
+      <span class="score-lbl">Correct</span>
+      <div class="score-track"><div class="score-fill" id="scoreFill"></div></div>
+      <span class="score-pct" id="scorePct">0 / 12</span>
+    </div>
+    <p id="scoreMsg" style="font-size:13px;color:var(--muted);margin-top:10px;"></p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SECTION 12 — SUMMARY + NEXT CHAPTER -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="section" id="s12">
+  <div class="section-label">Chapter Summary</div>
+  <h2>What You've Learned</h2>
+
+  <div class="sum-tree">
+    <span class="root">Questions every language must answer about variables</span><br>
+    <span class="branch">① </span><span style="color:var(--navy);">Name</span>     <span class="leaf">  ← how the programmer refers to it; not the same as its type or value</span><br>
+    <span class="branch">② </span><span style="color:var(--navy);">Type</span>     <span class="leaf">  ← who decides (programmer/compiler/runtime) and when (compile/run time)</span><br>
+    <span class="branch">③ </span><span style="color:var(--navy);">Value</span>    <span class="leaf">  ← current data; can change; distinct from the variable itself</span><br>
+    <span class="branch">④ </span><span style="color:var(--navy);">Storage</span>  <span class="leaf">  ← who manages memory; how much control does the programmer have</span><br>
+    <span class="branch">⑤ </span><span style="color:var(--navy);">Lifetime</span> <span class="leaf">  ← how long the variable or object exists during execution</span>
+  </div>
+
+  <div class="card" style="margin-top:14px;">
+    <p style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:10px;">Key concepts introduced</p>
+    <div class="tbl-wrap" style="margin:0;">
+      <table>
+        <thead><tr><th>Concept</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Binding</strong></td><td>Establishing a connection between a program entity and something associated with it</td></tr>
+          <tr><td><strong>Static binding</strong></td><td>Connection established before execution (e.g. compile time)</td></tr>
+          <tr><td><strong>Dynamic binding</strong></td><td>Connection established at runtime, during execution</td></tr>
+          <tr><td><strong>Aliasing</strong></td><td>Two or more names referring to the same object</td></tr>
+          <tr><td><strong>Lifetime</strong></td><td>How long during execution the variable or object exists</td></tr>
+          <tr><td><strong>Scope</strong></td><td>Where in source code a name is visible (Chapter 4)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="synth-grid" style="margin-top:16px;">
+    <div class="synth-card" style="border-top:3px solid var(--pill-c-text);">
+      <div class="synth-title">C</div>
+      <div class="synth-desc">Explicit declarations. Static typing. Programmer controls memory. Maximum control, maximum responsibility.</div>
+    </div>
+    <div class="synth-card" style="border-top:3px solid var(--pill-cs-text);">
+      <div class="synth-title">C#</div>
+      <div class="synth-desc">Static typing with optional inference (var). Managed memory via GC. Safety plus productivity.</div>
+    </div>
+    <div class="synth-card" style="border-top:3px solid var(--pill-py-text);">
+      <div class="synth-title">Python</div>
+      <div class="synth-desc">Names bound to objects. No type declarations. Dynamic binding. Automatic memory. Maximum flexibility.</div>
+    </div>
+  </div>
+
+  <div class="info-box" style="margin-top:8px;">
+    <p><strong>The central lesson:</strong> Programming language design is about choices and tradeoffs. C, C#, and Python each make different choices about what a variable is, when its associations are determined, and how long it exists. Understanding those choices — and why they matter — is what this course is about.</p>
+  </div>
+
+  <h3>What connects to what you already know</h3>
+  <div class="ch-link">
+    <span class="ch-link-icon">←</span>
+    <div>
+      <div class="ch-link-title">Chapter 2 — Syntax, Tokens, and Grammars</div>
+      <div class="ch-link-desc">Chapter 2 explained how a language recognises code. Now you know what some of those recognised constructs — variable declarations — actually mean and how they behave.</div>
+    </div>
+  </div>
+
+  <h3>What comes next</h3>
+  <div class="ch-link">
+    <span class="ch-link-icon">→</span>
+    <div>
+      <div class="ch-link-title">Chapter 4 — Scope Rules &amp; Symbol Tables</div>
+      <div class="ch-link-desc">You now know what a variable is and how long it may exist. Next chapter asks a different question: <strong>where in the source code can a name be accessed, and what happens when two variables have the same name?</strong> Scope is where the syntactic structure of a program and the runtime behaviour of names intersect.</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end .content -->
+
+<script>
+// NAV
+const SEC=['s0','s1','s1b','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s11a','s12'];
+function goTo(id,btn){
+  document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'});
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+window.addEventListener('scroll',()=>{
+  let cur=SEC[0];
+  SEC.forEach(id=>{const el=document.getElementById(id);if(el&&window.scrollY>=el.offsetTop-90)cur=id;});
+  document.querySelectorAll('.nav-btn').forEach((b,i)=>b.classList.toggle('active',SEC[i]===cur));
+  const pct=Math.min(100,Math.round((window.scrollY/(document.body.scrollHeight-window.innerHeight))*100));
+  document.getElementById('progFill').style.width=pct+'%';
+  document.getElementById('prog-pct').textContent=pct+'%';
+});
+
+// REVEAL
+function reveal(btn){
+  const c=btn.nextElementSibling;
+  c.classList.toggle('show');
+  btn.textContent=c.classList.contains('show')?'Hide explanation':'See explanation';
+}
+
+// DESIGNER ACTIVITY
+const designerText={
+  always:`<strong>Always require type declarations:</strong> This gives you the most compile-time safety. Errors are caught early. Self-documenting code. Easier for large teams to reason about. The cost: verbosity, and a higher barrier to quick scripting. This is essentially the C and C# philosophy.`,
+  never:`<strong>Never require type declarations:</strong> Code is concise and flexible. Rapid prototyping is fast. But the compiler cannot catch type errors — you only discover them when code runs. This is Python's approach. Works very well for scripting, data science, and exploratory work.`,
+  optional:`<strong>Optional type declarations:</strong> This is a real design choice — many modern languages (Python 3 with type hints, TypeScript, Kotlin) allow declarations to be optional or gradual. You get flexibility early, and can add type information as code matures. The cost is language complexity — two modes to understand.`,
+  context:`<strong>Depends on context:</strong> Some languages (like Rust) infer types in most cases but require declarations in function signatures. Others require declaration for public APIs but allow inference internally. This is arguably the most nuanced choice — and many production language designers land here.`
+};
+function designerChoice(btn,choice){
+  document.querySelectorAll('.designer-opt').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  const fb=document.getElementById('designer-fb');
+  fb.innerHTML=`<p>${designerText[choice]}</p><p style="margin-top:8px;color:var(--muted);font-size:13px;">There is no correct answer here — this is a genuine design decision. Real language designers weigh exactly these tradeoffs. Your choice reflects what you would prioritise.</p>`;
+  fb.classList.add('show');
+}
+
+// QUIZ
+const TOTAL=12;
+const EXP={
+  Q1:{ok:'Correct. gpa is the name (the identifier the programmer wrote), float is the type (declaring what kind of data it holds), and 3.8 is the value (the data currently associated with the variable).',bad:'Not quite. In a C declaration, the type comes first (float), then the name (gpa), then the value after = (3.8). The type keyword describes what kind of data can be held; the name is the identifier the programmer chose.'},
+  Q2:{ok:'Correct. Python objects always have types — type(42) returns int. But the name x has no type; it is a reference to an object. The key distinction: the object carries the type, not the name. This is why x can be rebound to a string later.',bad:'Not quite. Python objects always have types — calling type(42) returns int. The name x has no type (it is not bound to a type, only to an object). Python is dynamically typed — types are checked at runtime, not compile time. And crucially: Python\'s binding happens at runtime when the line executes, not via compile-time inference like C# var.'},
+  Q3:{ok:'Correct. Binding is the connection between a name and something associated with it — a type, a value, a storage location. It is the general term for these associations, which can be established at different times (compile time, runtime, etc.).',bad:'Not quite. Binding is not about compilation or memory allocation specifically — it is the broader concept of the connection between a name and its associated attributes (type, value, location). These connections can be established at different times and in different ways.'},
+  Q4:{ok:'Correct. Static typing means the type system checks types at compile time — before the program runs. Dynamic typing means the type system checks types at runtime — when the code actually executes. C and C# are statically typed; Python is dynamically typed.',bad:'Not quite. The static/dynamic distinction is about WHEN type checking occurs, not about explicit declarations or interpretation. C# with var is still statically typed (type inferred at compile time). A compiled language can be dynamically typed in principle. Static = type checking at compile time; Dynamic = type checking at runtime.'},
+  Q5:{ok:'Correct. var in C# is type inference, not dynamic typing. The compiler sees 95 and infers int at compile time. The type binding is just as static as writing int score = 95;. Trying to assign a string to an int variable produces a compile-time error.',bad:'Not quite. var in C# means the compiler infers the type at compile time — it does NOT mean the variable can hold any type. Once the compiler infers int from 95, the variable is statically typed as int for its entire lifetime. Assigning a string to it is a compile-time error, not a runtime error.'},
+  Q6:{ok:'Correct. After x = "hello", the name x refers to the string object "hello". type(x) reports the type of the object the name currently refers to — str. The integer object 100 still exists in memory somewhere until garbage-collected, but x no longer refers to it.',bad:'Not quite. After x = "hello", the name x refers to the string object "hello". type(x) asks: what is the type of the object x currently refers to? The answer is str. The integer 100 is not destroyed — but x no longer refers to it. Python is strongly typed: objects have definite types that never change.'},
+  Q7:{ok:'Correct. Local variables in C (and C# and Python) have a lifetime tied to the function call. They come into existence when the function is called and that declaration is reached, and cease to exist when the function returns.',bad:'Not quite. Local variables do not exist for the entire program run — that would be a global variable. They are created when the function is called (specifically, when execution reaches the declaration), and they cease to exist when the function returns. This is the standard lifetime for stack-allocated local data.'},
+  Q8:{ok:'Correct. Scope is a textual/structural property of the source code — it describes where in the code a name is visible, and you can determine it by reading the code without running it. Lifetime is a runtime property — it describes how long during execution the variable actually exists.',bad:'Not quite. These are two distinct concepts. Scope (covered in Chapter 4) is about WHERE in source code a name is accessible — it is a structural property you can read from the code. Lifetime is about WHEN during execution the variable exists — it is a runtime property. They often correspond for local variables but are conceptually separate.'},
+  Q9:{ok:'Correct. When b = a executes, b is bound to the same object that a refers to — the integer 5. Then a = 10 rebinds a to the integer 10. This does not affect b — Python assignment rebinds names, it does not link them together. b still refers to 5.',bad:'Not quite. In Python, b = a means "bind b to the same object that a currently refers to" — not "link b to a permanently." When a is rebound to 10, that has no effect on b. b still refers to the integer object 5. Output: 5.'},
+  Q10:{ok:'Correct. Even when you use var in C#, the type is determined at compile time. The compiler looks at the right-hand side (3.14) and infers double. This is type inference — not runtime dynamic binding. The resulting type is just as static as if you had written double x = 3.14;',bad:'Not quite. var in C# is compile-time type inference. The compiler examines 3.14 and infers the type double at compile time. The variable is then statically typed — not dynamically typed like Python. Runtime determines nothing about the type here.'},
+  Q11:{ok:'Correct. Python is dynamically typed (types are checked at runtime, not compile time) AND strongly typed (incompatible operations are rejected, not silently coerced). The TypeError you get from "hello" + 5 is evidence of strong typing. Compare with JavaScript (weakly typed), which would silently produce "hello5".',bad:'Not quite. This error tells you Python is strongly typed — it refuses to silently coerce incompatible types. The error occurs at runtime (not compile time), which is evidence of dynamic typing. Weak typing would mean Python silently converted the types and produced a result. It does not. Python is dynamically AND strongly typed.'},
+  Q12:{ok:'Correct. The fundamental difference: in C, declaring int x binds the name x to the type int at compile time — that binding is permanent. In Python, a name is bound to an object at runtime, not to a type. Because names carry no type information, a name can be rebound to an object of any type. This is the core design difference in their variable models.',bad:'Not quite. The real reason is about binding: in C, the name is bound to a type at compile time and that binding is permanent. In Python, names are bound to objects (not types) at runtime, and can be rebound to any object. The compiled/interpreted distinction is not the key factor — the key is the type of binding each language uses for variable names.'},
+};
+let scores={};
+function ans(btn,result,qid){
+  if(scores[qid]!==undefined)return;
+  btn.closest('.quiz-options').querySelectorAll('.quiz-opt').forEach(o=>{o.onclick=null;o.classList.add('disabled');});
+  btn.classList.add(result);
+  const fb=document.getElementById(qid);
+  fb.classList.add('show',result==='correct'?'ok':'bad');
+  fb.textContent=result==='correct'?EXP[qid].ok:EXP[qid].bad;
+  scores[qid]=result==='correct'?1:0;
+  updateScore();
+}
+function updateScore(){
+  const correct=Object.values(scores).reduce((a,b)=>a+b,0);
+  const pct=Math.round((correct/TOTAL)*100);
+  document.getElementById('scoreFill').style.width=pct+'%';
+  document.getElementById('scorePct').textContent=correct+' / '+TOTAL;
+  const msgs=['Keep going!','Good start.','Making progress.','Halfway there.','Good understanding building.','Strong work.','Very strong.','Excellent!','Outstanding!','Near perfect!','Almost there!','Perfect score!','Perfect score — variable model mastered! 🎉'];
+  document.getElementById('scoreMsg').textContent=msgs[correct]||'';
+}
+</script>
+</body>
+</html>
