@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chapter 1 — Why Programming Languages Exist</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#F4F6FC;--surface:#FFFFFF;--border:#D0DAF0;--code-bg:#EEF1FA;
+  --navy:#1A2B5E;--blue:#2E5BFF;--accent:#4F8EF7;--text:#1E2A3A;--muted:#5A6A82;
+  --pill-c:#E8F0FE;--pill-c-text:#2E5BFF;
+  --pill-py:#FEF3E8;--pill-py-text:#C05E00;
+  --pill-cs:#F3E8FE;--pill-cs-text:#7B2FBE;
+  --green:#1A7A3C;--green-bg:#EAF7EE;
+  --red:#9B1C1C;--red-bg:#FEF2F2;
+  --yellow-bg:#FFFBEB;--yellow-border:#FCD34D;
+  --purple-bg:#F5F3FF;--purple-border:#C4B5FD;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.75;}
+a{color:var(--blue);}
+
+/* HERO */
+.hero-wrap{padding:44px 24px 0;max-width:900px;margin:0 auto;}
+.hero{background:linear-gradient(135deg,#1A2B5E 0%,#2E5BFF 100%);border-radius:18px;padding:44px 48px;color:#fff;position:relative;overflow:hidden;}
+.hero::after{content:'';position:absolute;bottom:-80px;right:-60px;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,0.05);}
+.hero-chip{display:inline-block;background:rgba(255,255,255,0.15);border-radius:20px;padding:3px 14px;font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,0.85);margin-bottom:14px;letter-spacing:.04em;}
+.hero h1{font-size:27px;font-weight:700;line-height:1.25;margin-bottom:10px;}
+.hero p{font-size:15px;color:rgba(255,255,255,0.75);max-width:520px;}
+.hero-meta{display:flex;gap:28px;margin-top:22px;flex-wrap:wrap;}
+.hero-stat{display:flex;flex-direction:column;gap:2px;}
+.hero-stat-num{font-size:20px;font-weight:700;}
+.hero-stat-lbl{font-size:11px;color:rgba(255,255,255,0.5);font-family:'DM Mono',monospace;}
+
+/* STICKY NAV */
+.sticky-nav{position:sticky;top:0;z-index:100;background:rgba(244,246,252,0.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:0 24px;}
+.nav-inner{max-width:900px;margin:0 auto;display:flex;gap:4px;overflow-x:auto;padding:9px 0;scrollbar-width:none;}
+.nav-inner::-webkit-scrollbar{display:none;}
+.nav-btn{background:none;border:1px solid transparent;border-radius:6px;padding:4px 12px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .15s;}
+.nav-btn:hover{background:var(--code-bg);color:var(--blue);border-color:var(--border);}
+.nav-btn.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+
+/* PROGRESS */
+.progress-wrap{max-width:900px;margin:22px auto 0;padding:0 24px;}
+.prog-top{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:5px;}
+.prog-bar{height:4px;background:var(--border);border-radius:4px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--navy),var(--blue));border-radius:4px;width:0;transition:width .5s ease;}
+
+/* CONTENT */
+.content{max-width:900px;margin:32px auto 80px;padding:0 24px;display:flex;flex-direction:column;gap:36px;}
+
+/* SECTION */
+.section{scroll-margin-top:64px;}
+.section-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+.section h2{font-size:21px;font-weight:700;color:var(--navy);margin-bottom:14px;line-height:1.3;}
+.section h3{font-size:16px;font-weight:600;color:var(--text);margin:22px 0 10px;}
+.section p{margin-bottom:12px;}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:16px;}
+
+/* CODE */
+.code-wrap{margin:14px 0;}
+.code-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:4px;display:flex;align-items:center;justify-content:space-between;}
+.copy-btn{background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:2px 8px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);cursor:pointer;transition:all .15s;}
+.copy-btn:hover{background:var(--blue);color:#fff;border-color:var(--blue);}
+.code-block{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px 18px;overflow-x:auto;}
+.code-block pre{font-family:'DM Mono',monospace;font-size:13px;color:var(--navy);line-height:1.65;white-space:pre;}
+.cc{color:#7A90B8;}
+.inline-code{font-family:'DM Mono',monospace;background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:13px;}
+
+/* GRIDS */
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:14px 0;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0;}
+
+/* LANG ROW */
+.lang-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:14px 0;}
+.lc{border-radius:10px;padding:16px;font-size:14px;line-height:1.6;}
+.lc-c{background:var(--pill-c);border:1px solid #B8D0F8;}
+.lc-cs{background:var(--pill-cs);border:1px solid #D8B8F8;}
+.lc-py{background:var(--pill-py);border:1px solid #F8D8B8;}
+.lc-title{font-weight:700;font-size:13px;margin-bottom:6px;}
+.lc-c .lc-title{color:var(--pill-c-text);}
+.lc-cs .lc-title{color:var(--pill-cs-text);}
+.lc-py .lc-title{color:var(--pill-py-text);}
+
+/* PILL */
+.pill{display:inline-block;padding:2px 9px;border-radius:20px;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;}
+.pill-c{background:var(--pill-c);color:var(--pill-c-text);}
+.pill-cs{background:var(--pill-cs);color:var(--pill-cs-text);}
+.pill-py{background:var(--pill-py);color:var(--pill-py-text);}
+
+/* BOXES */
+.analogy{background:var(--yellow-bg);border:1px solid var(--yellow-border);border-left:4px solid #F59E0B;border-radius:8px;padding:16px 18px;margin:16px 0;}
+.analogy-title{font-weight:700;font-size:13px;color:#92400E;margin-bottom:6px;}
+.analogy p{font-size:14px;color:#78350F;margin:0;}
+.info-box{background:#EFF6FF;border:1px solid #BFDBFE;border-left:4px solid var(--blue);border-radius:8px;padding:16px 18px;margin:16px 0;}
+.info-box p{font-size:14px;color:#1E3A8A;margin:0;}
+.warn-box{background:#FFF7ED;border:1px solid #FED7AA;border-left:4px solid #F97316;border-radius:8px;padding:16px 18px;margin:16px 0;}
+.warn-box p{font-size:14px;color:#9A3412;margin:0;}
+.question-box{background:var(--purple-bg);border:1px solid var(--purple-border);border-left:4px solid #8B5CF6;border-radius:8px;padding:16px 18px;margin:16px 0;}
+.question-box p{font-size:14px;color:#4C1D95;margin:0;}
+.misconception-box{background:var(--red-bg);border:1px solid #FCA5A5;border-left:4px solid #EF4444;border-radius:8px;padding:16px 18px;margin:12px 0;}
+.misconception-box .mc-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--red);margin-bottom:4px;font-weight:700;}
+.misconception-box p{font-size:14px;color:#7F1D1D;margin:0;}
+.correction-box{background:var(--green-bg);border:1px solid #6EE7B7;border-left:4px solid #10B981;border-radius:8px;padding:14px 18px;margin-top:8px;}
+.correction-box p{font-size:14px;color:var(--green);margin:0;}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;margin:14px 0;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th{background:var(--navy);color:#fff;padding:10px 14px;text-align:left;font-weight:600;font-size:12px;}
+td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+tr:nth-child(even) td{background:var(--bg);}
+
+/* TIMELINE */
+.timeline{display:flex;flex-direction:column;gap:0;margin:16px 0;}
+.tl-item{display:flex;gap:16px;}
+.tl-line{display:flex;flex-direction:column;align-items:center;}
+.tl-dot{width:14px;height:14px;border-radius:50%;background:var(--blue);flex-shrink:0;margin-top:4px;}
+.tl-bar{width:2px;background:var(--border);flex:1;min-height:24px;}
+.tl-item:last-child .tl-bar{display:none;}
+.tl-content{padding-bottom:22px;}
+.tl-year{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:3px;}
+.tl-title{font-weight:700;font-size:14px;color:var(--navy);}
+.tl-desc{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.6;}
+.tl-gain{font-size:12px;margin-top:6px;padding:6px 10px;background:var(--green-bg);border-radius:6px;color:var(--green);}
+.tl-cost{font-size:12px;margin-top:4px;padding:6px 10px;background:var(--red-bg);border-radius:6px;color:var(--red);}
+
+/* ABSTRACTION LADDER */
+.ladder{display:flex;flex-direction:column;gap:4px;margin:16px 0;}
+.ladder-rung{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:8px;}
+.ladder-rung-1{background:#E8F0FE;}
+.ladder-rung-2{background:#EEF4FF;}
+.ladder-rung-3{background:#F3EBFF;}
+.ladder-rung-4{background:#FEF3E8;}
+.ladder-rung-5{background:#EAF7EE;}
+.lr-num{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);min-width:22px;}
+.lr-name{font-weight:700;font-size:14px;color:var(--navy);min-width:175px;}
+.lr-desc{font-size:13px;color:var(--muted);}
+
+/* QUIZ */
+.quiz-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px;}
+.quiz-header{background:var(--navy);color:#fff;padding:12px 20px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;}
+.quiz-num{font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,0.45);}
+.quiz-body{padding:20px;}
+.quiz-q{font-size:15px;font-weight:500;color:var(--text);margin-bottom:14px;line-height:1.55;}
+.quiz-sub{font-size:13px;color:var(--muted);margin-bottom:14px;font-style:italic;}
+.quiz-options{display:flex;flex-direction:column;gap:8px;}
+.quiz-opt{display:flex;align-items:flex-start;gap:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;cursor:pointer;transition:all .15s;font-size:14px;text-align:left;width:100%;font-family:'DM Sans',sans-serif;}
+.quiz-opt:hover{border-color:var(--blue);background:#EEF4FF;}
+.quiz-opt.correct{background:var(--green-bg);border-color:#6EE7B7;color:var(--green);}
+.quiz-opt.wrong{background:var(--red-bg);border-color:#FCA5A5;color:var(--red);}
+.opt-letter{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);background:var(--border);border-radius:4px;padding:1px 6px;flex-shrink:0;margin-top:2px;}
+.quiz-feedback{margin-top:12px;padding:12px 14px;border-radius:8px;font-size:14px;display:none;line-height:1.55;}
+.quiz-feedback.show{display:block;}
+.quiz-feedback.ok{background:var(--green-bg);color:var(--green);border:1px solid #6EE7B7;}
+.quiz-feedback.bad{background:var(--red-bg);color:var(--red);border:1px solid #FCA5A5;}
+
+/* SCORE */
+.score-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;margin-top:8px;}
+.score-title{font-weight:700;font-size:15px;margin-bottom:16px;color:var(--navy);}
+.score-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.score-lbl{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);min-width:70px;}
+.score-track{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
+.score-fill{height:100%;background:linear-gradient(90deg,var(--navy),var(--blue));border-radius:4px;width:0;transition:width .5s;}
+.score-pct{font-family:'DM Mono',monospace;font-size:12px;color:var(--blue);min-width:36px;text-align:right;}
+
+/* ACTIVITY */
+.activity{background:var(--surface);border:2px dashed var(--blue);border-radius:12px;padding:24px;margin:16px 0;}
+.activity-title{font-size:14px;font-weight:700;color:var(--blue);margin-bottom:10px;}
+.activity textarea{width:100%;border:1px solid var(--border);border-radius:8px;padding:12px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--bg);color:var(--text);resize:vertical;margin-top:8px;min-height:100px;}
+.activity textarea:focus{outline:none;border-color:var(--blue);}
+.reveal-btn{margin-top:10px;background:var(--blue);color:#fff;border:none;border-radius:8px;padding:8px 18px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:background .15s;}
+.reveal-btn:hover{background:var(--navy);}
+.reveal-answer{margin-top:12px;display:none;}
+.reveal-answer.show{display:block;}
+
+/* EXPLANATION BOX */
+.expl-box{background:#F0FDF4;border:1px solid #BBF7D0;border-left:4px solid #16A34A;border-radius:8px;padding:18px;margin:0;}
+.expl-box p,.expl-box li{font-size:14px;color:#14532D;line-height:1.6;}
+.expl-box ul{padding-left:18px;margin-top:6px;}
+.expl-box p+p{margin-top:8px;}
+
+/* CHECKLIST */
+.checklist{list-style:none;display:flex;flex-direction:column;gap:6px;margin:12px 0;}
+.checklist li{display:flex;align-items:flex-start;gap:10px;font-size:14px;}
+.checklist li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0;margin-top:1px;}
+
+/* DESIGN YOUR OWN LANGUAGE */
+.dyl-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0;}
+.dyl-card{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;}
+.dyl-card h4{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:8px;}
+.dyl-card select,.dyl-card input{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--surface);color:var(--text);margin-top:4px;}
+.dyl-card select:focus,.dyl-card input:focus{outline:none;border-color:var(--blue);}
+.dyl-output{background:var(--code-bg);border:1px solid var(--border);border-radius:10px;padding:18px;margin-top:16px;font-size:14px;line-height:1.7;min-height:80px;}
+.gen-btn{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:10px 22px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-top:12px;transition:background .15s;}
+.gen-btn:hover{background:var(--navy);}
+
+/* SYNTHESIS */
+.synth-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0;}
+.synth-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;}
+.synth-icon{font-size:24px;margin-bottom:8px;}
+.synth-title{font-weight:700;font-size:13px;color:var(--navy);margin-bottom:4px;}
+.synth-desc{font-size:12px;color:var(--muted);line-height:1.5;}
+.synth-chapter{font-family:'DM Mono',monospace;font-size:10px;color:var(--blue);margin-top:6px;}
+
+/* FLOW DIAGRAM */
+.flow{display:flex;flex-direction:column;align-items:center;gap:0;margin:20px 0;}
+.flow-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 24px;text-align:center;max-width:480px;width:100%;}
+.flow-box strong{color:var(--navy);font-size:14px;}
+.flow-box p{font-size:13px;color:var(--muted);margin:4px 0 0;}
+.flow-arrow{font-size:20px;color:var(--blue);margin:6px 0;line-height:1;}
+
+@media(max-width:680px){
+  .hero{padding:32px 24px;}
+  .hero h1{font-size:21px;}
+  .g3,.g2,.lang-row,.dyl-grid,.synth-grid{grid-template-columns:1fr;}
+  .lr-name{min-width:120px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ HERO ═══════════ -->
+<div class="hero-wrap">
+  <div class="hero">
+    <div class="hero-chip">CSBS 315 · Chapter 1</div>
+    <h1>Why Programming Languages Exist</h1>
+    <p>We had a problem. We invented abstractions to solve it. Those abstractions created trade-offs. Different designers made different choices. This chapter tells that story — from the beginning.</p>
+    <div class="hero-meta">
+      <div class="hero-stat"><span class="hero-stat-num">9</span><span class="hero-stat-lbl">Sections</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">8</span><span class="hero-stat-lbl">Quiz Questions</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">4</span><span class="hero-stat-lbl">Activities</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">~50</span><span class="hero-stat-lbl">Min read</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ NAV ═══════════ -->
+<nav class="sticky-nav">
+  <div class="nav-inner">
+    <button class="nav-btn active" onclick="goTo('s0',this)">0 · The Problem</button>
+    <button class="nav-btn" onclick="goTo('s1',this)">1 · What Computers Understand</button>
+    <button class="nav-btn" onclick="goTo('s2',this)">2 · Why Languages Exist</button>
+    <button class="nav-btn" onclick="goTo('s3',this)">3 · Evolution</button>
+    <button class="nav-btn" onclick="goTo('s4',this)">4 · Abstraction</button>
+    <button class="nav-btn" onclick="goTo('s5',this)">5 · Design Goals</button>
+    <button class="nav-btn" onclick="goTo('s6',this)">6 · Our Three Languages</button>
+    <button class="nav-btn" onclick="goTo('s7',this)">7 · Why These Three?</button>
+    <button class="nav-btn" onclick="goTo('s8',this)">8 · Practice</button>
+    <button class="nav-btn" onclick="goTo('s9',this)">9 · Synthesis</button>
+  </div>
+</nav>
+
+<!-- PROGRESS -->
+<div class="progress-wrap">
+  <div class="prog-top"><span id="prog-label">Reading progress</span><span id="prog-pct">0%</span></div>
+  <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
+</div>
+
+<!-- ═══════════ CONTENT ═══════════ -->
+<div class="content">
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- SECTION 0 — START WITH THE PROBLEM -->
+<!-- ══════════════════════════════════════════════════ -->
+<div class="section" id="s0">
+  <div class="section-label">Section 0 — The Opening Question</div>
+  <h2>If computers only understand machine instructions, how did we get from flipping switches to writing programs that look almost like English?</h2>
+
+  <p>That is the question this entire chapter is designed to answer. Before we look at any programming language — before we look at any code at all — let's start with a thought experiment.</p>
+
+  <p>Before we define anything, consider this: every task you take for granted in a modern programming language had to be invented from scratch. The examples below show exactly what each task required before programming languages existed — and what a language gives you instead.</p>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Task 1 — Adding two numbers</h3>
+    <p>You want to compute 5 + 3. Here is what that required before programming languages, and what it looks like today:</p>
+    <div class="g2">
+      <div>
+        <div class="code-label"><span>Before languages — raw binary signals (1940s)</span></div>
+        <div class="code-block"><pre>10111000 00000101 00000000 00000000 00000000
+10111011 00000011 00000000 00000000 00000000
+00000001 11011000
+11000011</pre></div>
+        <p style="font-size:13px;color:var(--muted);margin-top:8px;">These are the actual binary signals sent to the CPU to add 5 + 3. Four separate operations. No names. No structure. One wrong bit anywhere and the program crashes — with no error message.</p>
+      </div>
+      <div>
+        <div class="code-label"><span>With Python — same result</span></div>
+        <div class="code-block"><pre>print(5 + 3)
+
+<span class="cc"># Output: 8</span></pre></div>
+        <p style="font-size:13px;color:var(--muted);margin-top:8px;">One line. The language handles every low-level detail — which CPU slots to use, how to store numbers, how to display the result.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Task 2 — Storing a name</h3>
+    <p>You want to store the word "Hello". Memory is simply a long row of numbered storage slots. Without a language, you place each character manually as a number (H=72, e=101, l=108, l=108, o=111), track the address yourself, and set an end-marker:</p>
+    <div class="g2">
+      <div>
+        <div class="code-label"><span>Before languages — manual character-by-character storage</span></div>
+        <div class="code-block"><pre>Address 1000 → 72   <span class="cc">// 'H'</span>
+Address 1001 → 101  <span class="cc">// 'e'</span>
+Address 1002 → 108  <span class="cc">// 'l'</span>
+Address 1003 → 108  <span class="cc">// 'l'</span>
+Address 1004 → 111  <span class="cc">// 'o'</span>
+Address 1005 → 0    <span class="cc">// end marker</span>
+<span class="cc">// You track: starts at 1000, length 5
+// Type more than 5 chars → silent corruption</span></pre></div>
+      </div>
+      <div>
+        <div class="code-label"><span>With Python — same result</span></div>
+        <div class="code-block"><pre>greeting = "Hello"
+print(greeting)
+
+<span class="cc"># Output: Hello
+# Length: automatic
+# Memory: automatic
+# Overflow: impossible</span></pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Task 3 — Making a decision (if/else)</h3>
+    <p>You want: "if the score is above 50, print Pass." The CPU has no concept of "if" — it only jumps to a different location in the program based on a comparison. You had to manually count exactly how many bytes to jump:</p>
+    <div class="g2">
+      <div>
+        <div class="code-label"><span>Before languages — manual jump calculation</span></div>
+        <div class="code-block"><pre><span class="cc">// Compare score to 50</span>
+compare score_slot, 50
+<span class="cc">// If NOT greater, jump forward exactly 7 bytes
+// (count those bytes yourself — wrong count = crash)</span>
+jump_if_not_greater  +7
+<span class="cc">// Now print "Pass" — which is another
+// 10+ operations of operating system calls...</span></pre></div>
+      </div>
+      <div>
+        <div class="code-label"><span>With Python — same logic</span></div>
+        <div class="code-block"><pre>score = 75
+
+if score > 50:
+    print("Pass")
+else:
+    print("Fail")
+
+<span class="cc"># Output: Pass</span></pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Task 4 — Repeating something ten times (loops)</h3>
+    <p>You want to print "Hello" ten times. The CPU has no concept of "repeat." You manually store a counter, subtract one each time, and jump backward to the start — to exactly the right byte address:</p>
+    <div class="g2">
+      <div>
+        <div class="code-label"><span>Before languages — manual counter and jump</span></div>
+        <div class="code-block"><pre><span class="cc">// Store 10 in a counter slot</span>
+store 10 → counter_slot
+<span class="cc">// --- repeat from here (byte address: 14) ---</span>
+<span class="cc">// ... print Hello (10+ more operations) ...</span>
+<span class="cc">// Subtract 1 from counter</span>
+subtract 1 from counter_slot
+<span class="cc">// If counter is not 0, jump back to byte 14
+// One wrong byte address → infinite loop</span>
+jump_if_not_zero  14</pre></div>
+      </div>
+      <div>
+        <div class="code-label"><span>With Python — same result</span></div>
+        <div class="code-block"><pre>for i in range(10):
+    print("Hello")
+
+<span class="cc"># Prints Hello ten times.
+# Counter, jump, subtract —
+# all invisible.</span></pre></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <p><strong>What these examples show:</strong> Everything a programming language does for you automatically — arithmetic, storing values, decisions, loops — had to be done manually before languages existed. And when done manually, mistakes produced no error messages. The machine just continued with wrong data. Programming languages were invented because humans cannot reliably work at that level of detail. Every language feature you will study in this course exists to solve one of the problems shown above.</p>
+  </div>
+
+  <p style="margin-top:8px;">With that picture in mind, the natural next question is: what does a computer <em>actually</em> understand at its core? Let's look at that precisely — only as much as we need to understand why languages were necessary.</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- SECTION 1 — WHAT COMPUTERS UNDERSTAND -->
+<!-- ══════════════════════════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="section-label">Section 1</div>
+  <h2>What Does a Computer Actually Understand?</h2>
+
+  <p>This is a programming language design course, not a computer architecture course — so we won't go deep into hardware. But you need a clear mental model of what is happening at the machine level, because programming languages exist precisely to hide that level from you.</p>
+
+  <h3>The four things a CPU actually does</h3>
+
+  <div class="card">
+    <div class="tbl-wrap" style="margin:0;">
+      <table>
+        <thead><tr><th>Component</th><th>What it is</th><th>Simple analogy</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Binary</strong></td><td>The only language the CPU speaks — sequences of 0s and 1s, representing off/on electrical signals</td><td>Like a light switch: either off (0) or on (1)</td></tr>
+          <tr><td><strong>Machine instructions</strong></td><td>Specific binary patterns that tell the CPU to perform one primitive operation: move data, add numbers, compare values, jump to a different instruction</td><td>Individual steps in a recipe: "crack egg," "add flour," not "bake a cake"</td></tr>
+          <tr><td><strong>Registers</strong></td><td>Tiny, ultra-fast storage slots inside the CPU itself — usually 8 to 32 of them, each holding a small number</td><td>The CPU's "hands" — it can only work with what it's currently holding</td></tr>
+          <tr><td><strong>Memory (RAM)</strong></td><td>A large array of numbered byte slots — the CPU reads from and writes to specific addresses</td><td>A very long street where every house has an address — the CPU fetches packages from specific house numbers</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h3>What the machine actually sees</h3>
+  <p>When any program runs — Python, C#, C, or anything else — it is ultimately translated into simple numerical codes the CPU follows one at a time. Here is the kind of thing the CPU is actually executing when you write <span class="inline-code">print(5 + 3)</span>:</p>
+
+  <div class="g2">
+    <div>
+      <div class="code-label"><span>What you write (Python)</span></div>
+      <div class="code-block"><pre>print(5 + 3)</pre></div>
+      <p style="font-size:13px;color:var(--muted);margin-top:6px;">One line. Expresses exactly what you mean. Readable to any programmer.</p>
+    </div>
+    <div>
+      <div class="code-label"><span>What the machine actually executes (simplified)</span></div>
+      <div class="code-block"><pre>Move 5 into slot A
+Move 3 into slot B
+Add slot A and slot B
+Store result
+Find print function address
+Call print function
+Return</pre></div>
+      <p style="font-size:13px;color:var(--muted);margin-top:6px;">Seven separate operations — and this is a massive simplification. The real machine instructions are numbers like <span class="inline-code">B8 05 00 00 00</span> with no names at all.</p>
+    </div>
+  </div>
+
+  <p>You don't need to understand machine instructions to use this course. The point is simply this: the CPU is very literal and very primitive. It needs everything spelled out step by step, in numbers. Programming languages exist to let humans work at a human level while the language handles the translation.</p>
+
+  <div class="analogy">
+    <div class="analogy-title">💡 The gap we need to bridge</div>
+    <p>A human programmer thinks: <em>"Add the user's age to ten and print the result."</em><br>The CPU thinks: <em>"Move a number into slot A. Move another number into slot B. Add them. Store the result at address 4096. Call the print routine at address 8320..."</em><br>These two levels of thinking are completely incompatible. Something must translate between them. That something is a programming language.</p>
+  </div>
+
+  <div class="question-box">
+    <p><strong>The bridge question:</strong> So how do we get from human intent — "add these numbers," "store this name," "repeat until done" — to the binary instructions the CPU can execute? That is exactly what programming languages solve. And answering that question is what the rest of this chapter is about.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- SECTION 2 — WHY PROGRAMMING LANGUAGES EXIST -->
+<!-- ══════════════════════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="section-label">Section 2</div>
+  <h2>Why Programming Languages Exist</h2>
+
+  <p>A programming language is a structured notation that lets humans express computational ideas — algorithms, logic, data transformations — in a form that can ultimately be translated into machine instructions the computer can execute.</p>
+
+  <p>That sounds abstract, so let's be concrete about why writing machine code directly is impractical:</p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Problem with Machine Code</th><th>What this means in practice</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Complexity</strong></td><td>A single "print a line of text" operation in a modern program involves dozens of machine instructions. A full application has millions. No human can manage that volume of detail reliably.</td></tr>
+        <tr><td><strong>Error-proneness</strong></td><td>One wrong byte in machine code can silently corrupt memory, jump to the wrong instruction, or crash the system — with no indication of what went wrong or where.</td></tr>
+        <tr><td><strong>No readability</strong></td><td><span class="inline-code">B8 05 00 00 00 BB 03 00 00 00 01 D8</span> tells you nothing about intent. A colleague reading your code six months later has no idea what the program does.</td></tr>
+        <tr><td><strong>Unmaintainable</strong></td><td>Changing what a program does requires recalculating memory addresses, instruction offsets, and register assignments by hand. A small change can require rewriting dozens of surrounding instructions.</td></tr>
+        <tr><td><strong>Hardware-dependent</strong></td><td>Machine code written for an Intel x86 processor will not run on an ARM processor in your phone. Every chip family has a different instruction set. Code cannot be reused across hardware.</td></tr>
+        <tr><td><strong>Low productivity</strong></td><td>Writing even simple programs in machine code takes days or weeks. Building modern software — which might have millions of lines of logic — would be completely impossible at human scale.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-title">💡 A useful analogy</div>
+    <p>Writing a modern application in machine code would be like building a skyscraper by personally shaping every atom in every steel beam. The physics is correct — atoms are what everything is made of — but no human can work at that level of detail at useful scale. Programming languages are the engineering tools that let you work at the right level of abstraction for the task at hand.</p>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">What working without languages actually produced</h3>
+    <p>These are not hypothetical problems. They are the real consequences that drove each generation of language design:</p>
+    <div class="tbl-wrap" style="margin-top:10px;">
+      <table>
+        <thead><tr><th>Problem</th><th>Real-world consequence</th><th>What a language gives you instead</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Productivity</strong></td>
+            <td>A feature that takes a Python developer 2 hours could take weeks in binary. Teams could ship perhaps one small program per year.</td>
+            <td>Python's <span class="inline-code">sorted(students, key=lambda s: s.grade)</span> replaces 50+ machine operations written manually.</td>
+          </tr>
+          <tr>
+            <td><strong>Silent bugs</strong></td>
+            <td>One wrong bit corrupts memory. The program keeps running — producing wrong results — and only crashes somewhere completely unrelated, with no clue where the actual mistake was.</td>
+            <td>C# raises an <span class="inline-code">IndexOutOfRangeException</span> immediately at the exact line. Python raises an <span class="inline-code">IndexError</span>. You know exactly what went wrong and where.</td>
+          </tr>
+          <tr>
+            <td><strong>Hardware lock-in</strong></td>
+            <td>Binary code written for one CPU type does not run on another. Every new hardware platform means rewriting everything — from scratch, in different codes.</td>
+            <td>Python runs unchanged on Intel, ARM, and Apple Silicon. C# runs on Windows, Mac, and Linux via .NET. Write once, run on many platforms.</td>
+          </tr>
+          <tr>
+            <td><strong>No collaboration</strong></td>
+            <td>Binary code has no variable names, no function names, no structure a colleague can read. Knowledge cannot be transferred or reviewed. Teams cannot share work.</td>
+            <td>Code like <span class="inline-code">def calculate_grade(score): return "Pass" if score >= 50 else "Fail"</span> is self-explanatory. Teams can read, review, and build on each other's work.</td>
+          </tr>
+          <tr>
+            <td><strong>Security</strong></td>
+            <td>Without automatic bounds checking, writing more data than a storage area holds silently overwrites adjacent memory. This remains one of the most exploited security vulnerabilities in computing history — and it exists because C trusts the programmer to stay within bounds.</td>
+            <td>Python and C# prevent this by design. Strings and arrays manage their own memory. The vulnerability is impossible at the language level.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <p><strong>The formal definition:</strong> A programming language provides a structured abstraction layer between human intent and machine execution. It lets programmers express <em>what</em> they want to compute, while the compiler or interpreter handles the translation to <em>how</em> the hardware does it.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- SECTION 3 — EVOLUTION -->
+<!-- ══════════════════════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="section-label">Section 3</div>
+  <h2>The Evolution of Programming Languages</h2>
+
+  <p>Programming languages didn't appear fully formed. Each generation solved the most painful problem of the one before it — and each solution introduced new problems that the next generation then solved. The key question at every step is not <em>what changed</em> but <em>what problem did this solve, and what did solving it cost?</em></p>
+
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-line"><div class="tl-dot"></div><div class="tl-bar"></div></div>
+      <div class="tl-content">
+        <div class="tl-year">1940s</div>
+        <div class="tl-title">Machine Code — Toggle switches and punch cards</div>
+        <div class="tl-desc">Programs entered as raw binary or hex, sometimes by physically setting switches on the hardware. The ENIAC (1945) was programmed by rewiring patch cables. No abstraction whatsoever — you were directly commanding electrical circuits.</div>
+        <div class="tl-gain">✓ Gained: Direct hardware control, maximum speed</div>
+        <div class="tl-cost">✗ Problem: Catastrophically error-prone, unreadable, non-portable, impossible to scale</div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-line"><div class="tl-dot"></div><div class="tl-bar"></div></div>
+      <div class="tl-content">
+        <div class="tl-year">1950s</div>
+        <div class="tl-title">Assembly Language — Human-readable mnemonics</div>
+        <div class="tl-desc">Instead of <span class="inline-code">B8 05</span>, write <span class="inline-code">MOV EAX, 5</span>. An <strong>assembler</strong> program translates mnemonics to machine code automatically. Still a 1-to-1 relationship: one assembly instruction = one machine instruction. Still CPU-specific. But humans could at least read what was happening.</div>
+        <div class="tl-gain">✓ Solved: Readability improved enormously. Fewer transcription errors.</div>
+        <div class="tl-cost">✗ New problem: Still hardware-specific. Still required knowing every register and instruction. No portable code. Extremely verbose.</div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-line"><div class="tl-dot"></div><div class="tl-bar"></div></div>
+      <div class="tl-content">
+        <div class="tl-year">1957–1970</div>
+        <div class="tl-title">First High-Level Languages — FORTRAN, COBOL, LISP</div>
+        <div class="tl-desc">FORTRAN (1957, IBM) let scientists write <span class="inline-code">Y = A*X + B</span> instead of pages of assembly. One statement compiled into dozens of machine instructions automatically. COBOL (1959) brought English-like syntax for business programs. Programs became portable across different machines for the first time.</div>
+        <div class="tl-gain">✓ Solved: Portability. Dramatic productivity gains. Mathematical notation preserved. Code could be read by non-experts.</div>
+        <div class="tl-cost">✗ New problem: Compilers were slow. Programmers lost fine-grained control. Generated machine code was sometimes inefficient. A layer of translation now stood between programmer intent and execution.</div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-line"><div class="tl-dot"></div><div class="tl-bar"></div></div>
+      <div class="tl-content">
+        <div class="tl-year">1972</div>
+        <div class="tl-title">C — Systems programming meets human readability</div>
+        <div class="tl-desc">Dennis Ritchie at Bell Labs designed C to write the Unix operating system. C found a deliberate middle ground: high-level enough to be readable and maintainable, low-level enough to have direct memory access and generate fast machine code. The Unix kernel, written in C, was the first major OS written in a high-level language.</div>
+        <div class="tl-gain">✓ Solved: Systems programmers could now write maintainable, portable code without sacrificing hardware control or speed.</div>
+        <div class="tl-cost">✗ New problem: Manual memory management meant buffer overflows, memory leaks, and segfaults were programmer errors with no safety net.</div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-line"><div class="tl-dot"></div><div class="tl-bar"></div></div>
+      <div class="tl-content">
+        <div class="tl-year">1980s–1990s</div>
+        <div class="tl-title">Object-Oriented Languages — C++, Java, and organizing complexity</div>
+        <div class="tl-desc">As programs grew to millions of lines, procedural code became hard to organize. C++ (1985) added classes and objects to C. Java (1995) added automatic memory management and "write once, run anywhere" via the JVM. The focus shifted from hardware efficiency to managing human complexity at scale.</div>
+        <div class="tl-gain">✓ Solved: Code organization at large scale. Memory safety (Java). Portability (JVM). Reusable component libraries.</div>
+        <div class="tl-cost">✗ New problem: Runtime overhead from garbage collectors and virtual machines. More abstraction = less direct control. Verbose syntax for simple tasks.</div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-line"><div class="tl-dot"></div><div class="tl-bar"></div></div>
+      <div class="tl-content">
+        <div class="tl-year">1991–2000</div>
+        <div class="tl-title">Modern Languages — Python, C#, and developer experience</div>
+        <div class="tl-desc">Python (1991) pushed abstraction as far as it could go toward human readability — interpreted, dynamically typed, garbage collected, with a library for almost everything. C# (2000) combined Java's safety and OOP with a rich type system and tight platform integration. Both recognized that programmer productivity was itself a first-class design goal.</div>
+        <div class="tl-gain">✓ Solved: Fastest time from idea to working program. Safety through GC and type systems. Huge standard libraries. Readable syntax that matches how humans think.</div>
+        <div class="tl-cost">✗ New problem: Less raw speed. Less control over memory. Runtime errors instead of compile-time errors (Python). Type system complexity (C#).</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="info-box">
+    <p><strong>The pattern:</strong> Every generation of language design solved the worst problem of the previous generation — and created new problems that the next generation then addressed. There is no endpoint. Rust (2010) is solving memory safety problems that C left unsolved. This evolution is ongoing.</p>
+  </div>
+
+  <h3>The same task, across four eras</h3>
+  <p>Print the sum of 5 and 3. Identical goal — radically different effort:</p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Era</th><th>How you write "print 5 + 3"</th><th>What the programmer must know</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>1940s</strong><br><span style="font-size:12px;color:var(--muted);">Machine code</span></td>
+          <td><span class="inline-code">10111000 00000101 ...</span><br><span style="font-size:12px;color:var(--muted);">Raw binary — 12+ bytes of numbers</span></td>
+          <td>CPU instruction codes, register names, memory addresses, byte ordering — all memorised</td>
+        </tr>
+        <tr>
+          <td><strong>1950s</strong><br><span style="font-size:12px;color:var(--muted);">Assembly</span></td>
+          <td><span class="inline-code">MOV EAX,5 / MOV EBX,3 / ADD EAX,EBX</span><br><span style="font-size:12px;color:var(--muted);">Readable names, but still 15+ lines</span></td>
+          <td>Same knowledge as machine code, but with readable names. Still CPU-specific. Still no printing without 10 more lines.</td>
+        </tr>
+        <tr>
+          <td><strong>1972</strong><br><span style="font-size:12px;color:var(--muted);">C</span></td>
+          <td><span class="inline-code">printf("%d
+", 5 + 3);</span><br><span style="font-size:12px;color:var(--muted);">One line — compiler handles the rest</span></td>
+          <td>The language syntax and library. The compiler figures out registers, memory, and machine instructions automatically.</td>
+        </tr>
+        <tr>
+          <td><strong>1991</strong><br><span style="font-size:12px;color:var(--muted);">Python</span></td>
+          <td><span class="inline-code">print(5 + 3)</span><br><span style="font-size:12px;color:var(--muted);">One line — nothing else needed</span></td>
+          <td>The word "print" and basic arithmetic. No types, no memory, no machine details. The language hides everything.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>The same arithmetic, printing the same number. The progression from 1940s to 1991 is not about adding features — it is about progressively hiding complexity that the programmer no longer needs to manage manually.</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- SECTION 4 — ABSTRACTION -->
+<!-- ══════════════════════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="section-label">Section 4</div>
+  <h2>Abstraction: The Core Idea Behind All of This</h2>
+
+  <p><strong>Abstraction</strong> is the mechanism that made all of the above possible. It means managing complexity by hiding lower-level details behind a simpler interface. Every step up the evolution ladder was a new abstraction — a new decision about what to hide from the programmer, and what to leave exposed.</p>
+
+  <div class="analogy">
+    <div class="analogy-title">💡 A genuinely useful analogy</div>
+    <p>When you press the gas pedal in a car, you don't think about fuel injectors, combustion timing, crankshaft rotation, or the transmission. The pedal is an abstraction — it hides all of that mechanical complexity behind a simple interface: "press harder to go faster." Programming languages work the same way. <span class="inline-code">print("Hello")</span> is the gas pedal. The OS system call, the file descriptor, the terminal driver, and the screen buffer are the engine.</p>
+  </div>
+
+  <h3>The abstraction ladder — one task, five levels</h3>
+  <p>Every level below hides the complexity of the levels beneath it. Every level above is only possible because of what the levels below it do automatically.</p>
+
+  <div class="ladder">
+    <div class="ladder-rung ladder-rung-5">
+      <span class="lr-num">5</span>
+      <span class="lr-name">Application library</span>
+      <span class="lr-desc">You call <span class="inline-code">print("Hello")</span>. The string, the newline, the output stream — all handled.</span>
+    </div>
+    <div class="ladder-rung ladder-rung-4">
+      <span class="lr-num">4</span>
+      <span class="lr-name">High-level language</span>
+      <span class="lr-desc">Python, C#: manages memory, checks types, provides rich data structures. You focus on logic.</span>
+    </div>
+    <div class="ladder-rung ladder-rung-3">
+      <span class="lr-num">3</span>
+      <span class="lr-name">Systems language (C)</span>
+      <span class="lr-desc">You call <span class="inline-code">printf()</span>. The compiler translates it and links to OS libraries for you.</span>
+    </div>
+    <div class="ladder-rung ladder-rung-2">
+      <span class="lr-num">2</span>
+      <span class="lr-name">Assembly language</span>
+      <span class="lr-desc">You write <span class="inline-code">SYSCALL</span>. Each mnemonic maps 1-to-1 to a machine instruction.</span>
+    </div>
+    <div class="ladder-rung ladder-rung-1">
+      <span class="lr-num">1</span>
+      <span class="lr-name">Hardware</span>
+      <span class="lr-desc">Billions of transistors switching between 0V and 5V execute raw binary instructions at nanosecond speed.</span>
+    </div>
+  </div>
+
+  <h3>Every abstraction involves a trade-off</h3>
+  <p>This is the fundamental insight of this course: <strong>every abstraction hides something, and hiding things has costs.</strong></p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Moving Up a Level</th><th>What You Gain</th><th>What You Give Up</th></tr></thead>
+      <tbody>
+        <tr><td>Machine code → Assembly</td><td>Readability, fewer transcription errors</td><td>1-to-1 instruction control, raw byte precision</td></tr>
+        <tr><td>Assembly → C</td><td>Portability, structured control flow, readable syntax</td><td>Direct register control, instruction-level precision</td></tr>
+        <tr><td>C → C# / Java</td><td>Automatic memory management, type safety, rich OOP</td><td>Manual memory control, slight runtime overhead from GC</td></tr>
+        <tr><td>C# → Python</td><td>Dynamic flexibility, concise syntax, faster prototyping</td><td>Compile-time type checking, raw execution speed</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="info-box">
+    <p><strong>Why this matters:</strong> This is why C, C#, and Python all still exist. C sits low on the ladder — maximum control, minimum automatic behavior. Python sits high — maximum automation, minimum manual work. C# is a deliberate engineering choice of where to stand on that ladder for a specific class of problems. Different rungs serve different purposes. No rung is universally "best."</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- SECTION 5 — DESIGN GOALS & TRADE-OFFS -->
+<!-- ══════════════════════════════════════════════════ -->
+<div class="section" id="s5">
+  <div class="section-label">Section 5</div>
+  <h2>What Should a Programming Language Optimize For?</h2>
+
+  <p>Now that you understand the problem, the evolution, and the concept of abstraction — you're ready to think like a language designer. Every programming language is designed with explicit goals. The goals a designer chooses determine every feature the language ends up with.</p>
+
+  <p>Here are the eight most important design goals, each with a definition, an analogy, and a small example:</p>
+
+  <div class="card">
+    <h3 style="margin-top:0;">1 — Readability</h3>
+    <p><strong>Definition:</strong> How easily can a human read and understand existing code?</p>
+    <p><strong>Why it matters:</strong> Studies show programmers spend 70–80% of their time reading code, not writing it. A language that is hard to read produces bugs during maintenance.</p>
+    <div class="analogy" style="margin:10px 0 0;"><div class="analogy-title">💡 Analogy</div><p>A legal contract written in plain English vs. one written in dense legalese. Both are technically valid. One you can actually read and check for errors.</p></div>
+    <div class="activity" style="margin-top:12px;border-width:1px;">
+      <div class="activity-title">❓ Quick question</div>
+      <p style="font-size:14px;">Between <span class="inline-code">(*ptr)++</span> (C) and <span class="inline-code">value += 1</span> (Python/C#), which is more readable to a new team member? What does the C version actually do?</p>
+      <button class="reveal-btn" onclick="revealAnswer(this)">Show answer</button>
+      <div class="reveal-answer"><div class="expl-box"><p><span class="inline-code">(*ptr)++</span> dereferences a pointer (goes to the memory address stored in ptr) and then increments the value there. It is equivalent to <span class="inline-code">value += 1</span> in effect, but requires understanding pointers to read. C prioritizes control and compactness over readability; Python and C# prioritize readability.</p></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">2 — Writability</h3>
+    <p><strong>Definition:</strong> How quickly and naturally can a programmer express a solution to a problem?</p>
+    <p><strong>Why it matters:</strong> Less boilerplate, fewer lines, better abstractions = more ideas per hour. This directly affects how fast software gets built.</p>
+    <div class="g3" style="margin-top:12px;">
+      <div><div class="code-label"><span>C — read a file</span></div><div class="code-block"><pre>FILE *f=fopen("f.txt","r");
+char line[256];
+while(fgets(line,256,f))
+  printf("%s",line);
+fclose(f);</pre></div></div>
+      <div><div class="code-label"><span>C# — same task</span></div><div class="code-block"><pre>foreach(var line in
+  File.ReadLines("f.txt"))
+  Console.WriteLine(line);</pre></div></div>
+      <div><div class="code-label"><span>Python — same task</span></div><div class="code-block"><pre>with open("f.txt") as f:
+  for line in f:
+    print(line)</pre></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">3 — Reliability</h3>
+    <p><strong>Definition:</strong> How well does the language help programmers write programs that behave correctly, and catch errors before they reach users?</p>
+    <div class="tbl-wrap" style="margin-top:10px;">
+      <table>
+        <thead><tr><th>Error Type</th><th>C</th><th>C#</th><th>Python</th></tr></thead>
+        <tbody>
+          <tr><td>Type mismatch</td><td>Partial, compile-time</td><td>Compile-time ✓</td><td>Runtime ✗</td></tr>
+          <tr><td>Null/None access</td><td>Runtime crash (segfault)</td><td>Compile warning ✓</td><td>Runtime error ✗</td></tr>
+          <tr><td>Array out of bounds</td><td>Silent corruption ✗</td><td>Runtime exception</td><td>Runtime IndexError</td></tr>
+          <tr><td>Memory leak</td><td>Silent, your problem ✗</td><td>GC prevents it ✓</td><td>GC prevents it ✓</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">4 — Safety</h3>
+    <p><strong>Definition:</strong> Does the language prevent operations that could corrupt memory, crash the system, or create security vulnerabilities?</p>
+    <div class="g2" style="margin-top:10px;">
+      <div><div class="code-label"><span>C — buffer overflow: silent and dangerous</span></div><div class="code-block"><pre>char name[5];
+strcpy(name, "Alexander");
+<span class="cc">// 10 chars into 5-char buffer</span>
+<span class="cc">// Adjacent memory corrupted</span>
+<span class="cc">// No error. No warning.</span></pre></div></div>
+      <div><div class="code-label"><span>Python — same attempt: fully safe</span></div><div class="code-block"><pre>name = "Alexander"
+<span class="cc"># Strings are immutable objects</span>
+<span class="cc"># Memory managed by runtime</span>
+<span class="cc"># No overflow possible — ever</span>
+print(name)</pre></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">5 — Performance</h3>
+    <p><strong>Definition:</strong> How fast does the program run? How efficiently does it use CPU and memory?</p>
+    <div class="analogy" style="margin-top:10px;"><div class="analogy-title">💡 Real-world benchmark</div><p>Processing 10 million numbers: C finishes in ~0.1 seconds. C# in ~0.3 seconds. Python in ~15 seconds. C is 150× faster — but Python took 5× fewer lines to write. That gap is the language designer's core dilemma.</p></div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">6, 7, 8 — Portability, Maintainability, Expressiveness</h3>
+    <p><strong>Portability:</strong> Can the same code run on different operating systems and hardware without modification? Python runs anywhere. C requires recompilation per architecture. C# runs on Windows, Mac, and Linux via .NET.</p>
+    <p><strong>Maintainability:</strong> Can a team read, modify, and extend the code safely six months after it was written? Related to readability, but also about structure — modules, namespaces, interfaces.</p>
+    <p><strong>Expressiveness:</strong> Can complex ideas be expressed concisely and naturally? Python's list comprehensions and C#'s LINQ are examples of expressive features that let you say a lot in a small amount of code.</p>
+  </div>
+
+  <h3>Why these goals conflict: the designer's dilemma</h3>
+  <p>Here is the crucial insight: <strong>these goals pull in opposite directions.</strong> You cannot maximize all of them simultaneously. Every language is a set of negotiated compromises.</p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Tension</th><th>Optimize for…</th><th>You sacrifice…</th></tr></thead>
+      <tbody>
+        <tr><td>Control ↔ Safety</td><td>Low-level hardware control</td><td>Memory safety and bounds checking</td></tr>
+        <tr><td>Speed ↔ Productivity</td><td>Raw execution speed</td><td>Developer time and writability</td></tr>
+        <tr><td>Static ↔ Dynamic typing</td><td>Compile-time error detection</td><td>Flexibility and conciseness</td></tr>
+        <tr><td>Abstraction ↔ Transparency</td><td>High-level, convenient abstractions</td><td>Understanding of what the machine actually does</td></tr>
+        <tr><td>Safety ↔ Flexibility</td><td>Strong safety guarantees</td><td>The ability to do unusual or low-level things</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">Design goals in action — the same goal list, two completely different outcomes</h3>
+    <p>These are two real software domains. They use different languages because they prioritise different goals:</p>
+    <div class="g2" style="margin-top:14px;">
+      <div style="background:var(--red-bg);border:1px solid #FCA5A5;border-radius:10px;padding:16px;">
+        <div style="font-weight:700;font-size:13px;color:var(--red);margin-bottom:8px;">Medical device / aircraft control</div>
+        <p style="font-size:13px;line-height:1.6;margin-bottom:8px;">Software runs inside a pacemaker or a flight controller. A bug is not a bad user experience — it ends lives.</p>
+        <p style="font-size:13px;line-height:1.6;"><strong>Goals that win:</strong> Reliability and Safety above all. Performance must be predictable — a garbage collector that pauses 200ms cannot be allowed when the software is controlling brakes. Writability is sacrificed — verbose, explicit code is fine if it guarantees correct behavior.</p>
+        <p style="font-size:13px;color:var(--muted);margin-top:8px;line-height:1.6;"><strong>Language used:</strong> C (or Rust). No garbage collector, no hidden pauses, direct hardware control.</p>
+        <div class="code-block" style="margin-top:10px;"><pre style="font-size:12px;"><span class="cc">// C — explicit, predictable, no surprises</span>
+void apply_brake(int pressure) {
+  if (pressure > MAX_SAFE)
+    pressure = MAX_SAFE;
+  write_register(BRAKE_CTRL, pressure);
+}</pre></div>
+      </div>
+      <div style="background:var(--green-bg);border:1px solid #6EE7B7;border-radius:10px;padding:16px;">
+        <div style="font-weight:700;font-size:13px;color:var(--green);margin-bottom:8px;">Data science / AI research</div>
+        <p style="font-size:13px;line-height:1.6;margin-bottom:8px;">A data scientist explores datasets, trains models, and visualises results. Speed of iteration matters — a wrong direction should be discovered in minutes, not days.</p>
+        <p style="font-size:13px;line-height:1.6;"><strong>Goals that win:</strong> Writability and Expressiveness. Getting from idea to running experiment quickly. Raw performance is sacrificed — if a model takes 3 seconds instead of 0.3, that is fine. GC means no memory bugs to chase.</p>
+        <p style="font-size:13px;color:var(--muted);margin-top:8px;line-height:1.6;"><strong>Language used:</strong> Python. The entire machine learning ecosystem (PyTorch, TensorFlow, scikit-learn) is built on it.</p>
+        <div class="code-block" style="margin-top:10px;"><pre style="font-size:12px;"><span class="cc"># Python — readable, fast to write</span>
+model = RandomForestClassifier()
+model.fit(X_train, y_train)
+print(model.score(X_test, y_test))</pre></div>
+      </div>
+    </div>
+    <div class="info-box" style="margin-top:14px;">
+      <p><strong>The lesson:</strong> Neither language choice is wrong. Each made different trade-off decisions for different contexts. The ability to recognise which trade-offs matter for a given domain is the central skill this course develops.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- SECTION 6 — INTRODUCE THE THREE LANGUAGES -->
+<!-- ══════════════════════════════════════════════════ -->
+<div class="section" id="s6">
+  <div class="section-label">Section 6</div>
+  <h2>Now: Introducing Our Three Languages</h2>
+
+  <p>You now understand why programming languages exist, how they evolved, what abstraction means, and what design goals language designers must balance. With that foundation in place, we can introduce the three languages this course will use as case studies.</p>
+
+  <p>These were not chosen because they are the "best" languages, or even the most popular. They were chosen because they make <strong>genuinely different design decisions</strong> — decisions that give us rich material for comparison throughout every chapter of this course.</p>
+
+  <div class="card">
+    <h3 style="margin-top:0;color:var(--pill-c-text);">C — "Trust the programmer"</h3>
+    <p>Created in 1972 by Dennis Ritchie at Bell Labs to write the Unix operating system. C's design philosophy is deliberate: give the programmer complete control, and trust them to use it correctly. C does almost nothing automatically. It does not manage your memory. It does not check your array bounds. It does not verify your types at runtime.</p>
+    <p>This is not an oversight — it is a design choice. Every automatic check adds overhead, and C was built for systems where that overhead was unacceptable.</p>
+    <p><strong>We will use C to explore:</strong> manual memory management, pointer arithmetic, procedural programming, close relationships between code and machine instructions, and the consequences of giving programmers maximum control.</p>
+    <div class="code-wrap" style="margin-top:12px;">
+      <div class="code-label"><span>C — explicit control over everything</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <div class="code-block"><pre>int *numbers = malloc(5 * sizeof(int));  <span class="cc">// You allocate memory</span>
+numbers[2] = 42;
+printf("%d\n", numbers[2]);
+free(numbers);                           <span class="cc">// You free it — forget this and it leaks forever</span>
+numbers = NULL;                          <span class="cc">// Best practice after freeing</span></pre></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;color:var(--pill-cs-text);">C# — "Productive and safe"</h3>
+    <p>Created in 2000 by Anders Hejlsberg at Microsoft. C# was designed to make large-scale software development safer and more productive, without sacrificing the static typing and performance that C-family languages provide. It added garbage collection (no manual memory management), a rich object-oriented type system, and excellent tooling.</p>
+    <p>C# represents a deliberate engineering trade-off: accept some runtime overhead from GC and a JIT compiler, in exchange for dramatically reduced bugs and faster development cycles.</p>
+    <p><strong>We will use C# to explore:</strong> static typing with type inference, garbage collection, object-oriented design, structured exception handling, and how language features can prevent entire classes of bugs that C permits.</p>
+    <div class="code-wrap" style="margin-top:12px;">
+      <div class="code-label"><span>C# — automatic memory, rich type system</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <div class="code-block"><pre>var numbers = new List&lt;int&gt; { 1, 2, 3, 4, 5 };  <span class="cc">// GC manages memory</span>
+numbers.Add(42);
+var evens = numbers.Where(n =&gt; n % 2 == 0).ToList();
+Console.WriteLine(string.Join(", ", evens));      <span class="cc">// No free() needed — ever</span></pre></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;color:var(--pill-py-text);">Python — "Readability counts"</h3>
+    <p>Created in 1991 by Guido van Rossum. Python's design philosophy is codified in PEP 20, "The Zen of Python" — a set of aphorisms that prioritize human readability above almost everything else. Python assumes that programmer time is more valuable than CPU time. It is dynamically typed, interpreted, garbage collected, and ships with a library for almost every task imaginable.</p>
+    <p>Python made a radical bet: that the productivity gained from readable, writable code would outweigh the performance cost of interpretation and dynamic typing. For most application domains, that bet paid off.</p>
+    <p><strong>We will use Python to explore:</strong> dynamic typing, duck typing, indentation-based syntax, multiple programming paradigms in one language, and the design philosophy of prioritizing human expressiveness over machine efficiency.</p>
+    <div class="code-wrap" style="margin-top:12px;">
+      <div class="code-label"><span>Python — maximum readability, minimum ceremony</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <div class="code-block"><pre>numbers = [1, 2, 3, 4, 5, 42]
+evens = [n for n in numbers if n % 2 == 0]
+print(", ".join(str(n) for n in evens))  <span class="cc"># No types, no memory, no boilerplate</span></pre></div>
+    </div>
+  </div>
+
+  <div class="warn-box">
+    <p><strong>Important caveat:</strong> Avoid reducing these languages to stereotypes. Saying "C = low level, C# = middle, Python = high" is too simplistic and misleading. C# has low-level features like unsafe pointers. Python can call C libraries directly. The differences are about <em>design philosophy and default behavior</em>, not absolute capability. Throughout this course, we will always ask: <em>what choice did this language make here, and why?</em></p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- SECTION 7 — WHY THESE THREE / COMPARISON -->
+<!-- ══════════════════════════════════════════════════ -->
+<div class="section" id="s7">
+  <div class="section-label">Section 7</div>
+  <h2>Why These Three Make a Good Comparison</h2>
+
+  <p>The value of comparing C, C#, and Python is not in ranking them. It is in the fact that on almost every important dimension of language design, they give <em>different answers</em>. That makes them ideal lenses for understanding the design space.</p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Design Dimension</th><th>C</th><th>C#</th><th>Python</th></tr></thead>
+      <tbody>
+        <tr><td>Typing</td><td>Static, explicit</td><td>Static + type inference</td><td>Dynamic</td></tr>
+        <tr><td>Type checking</td><td>Compile time (partial)</td><td>Compile time (strong)</td><td>Runtime</td></tr>
+        <tr><td>Memory management</td><td>Manual (malloc/free)</td><td>Garbage collected</td><td>Garbage collected</td></tr>
+        <tr><td>Primary paradigm</td><td>Procedural</td><td>Object-oriented</td><td>Multi-paradigm</td></tr>
+        <tr><td>Error handling</td><td>Return codes</td><td>Structured exceptions</td><td>Structured exceptions</td></tr>
+        <tr><td>Safety model</td><td>Unsafe by default</td><td>Safe by default</td><td>Safe by default</td></tr>
+        <tr><td>Execution model</td><td>Compiled to machine code</td><td>JIT-compiled bytecode</td><td>Interpreted bytecode</td></tr>
+        <tr><td>Performance</td><td>Fastest</td><td>Fast</td><td>Slowest</td></tr>
+        <tr><td>Writability</td><td>Low</td><td>High</td><td>Highest</td></tr>
+        <tr><td>Control over hardware</td><td>Maximum</td><td>Moderate</td><td>Minimal</td></tr>
+        <tr><td>Core philosophy</td><td>Trust the programmer</td><td>Safe and productive</td><td>Readability counts</td></tr>
+        <tr><td>Year created</td><td>1972</td><td>2000</td><td>1991</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="info-box">
+    <p><strong>The question this course asks:</strong> For every row in that table — why did this language make that choice? What problem were they solving? What trade-off were they accepting? That question, applied to syntax, types, scope, memory, and paradigms, is the entire curriculum of this course.</p>
+  </div>
+
+  <!-- Design Your Own Language Activity -->
+  <div class="card" style="margin-top:8px;">
+    <h3 style="margin-top:0;">🛠 Design Your Own Language</h3>
+    <p style="font-size:14px;">Now that you understand design goals and all three languages, design your own language for a specific domain. Make deliberate choices — then see what existing language your design most resembles.</p>
+    <div class="dyl-grid">
+      <div class="dyl-card">
+        <h4>1. Target Domain</h4>
+        <p style="font-size:13px;color:var(--muted);">What will your language be used for?</p>
+        <select id="dyl-domain">
+          <option value="">Select domain...</option>
+          <option value="medical">Medical device software</option>
+          <option value="game">Video game engine</option>
+          <option value="data">Data science &amp; AI</option>
+          <option value="web">Web applications</option>
+          <option value="embedded">Embedded / IoT hardware</option>
+          <option value="education">Teaching beginners</option>
+        </select>
+      </div>
+      <div class="dyl-card">
+        <h4>2. Typing System</h4>
+        <p style="font-size:13px;color:var(--muted);">When are types checked?</p>
+        <select id="dyl-typing">
+          <option value="">Select typing...</option>
+          <option value="static">Static — at compile time (like C, C#)</option>
+          <option value="dynamic">Dynamic — at runtime (like Python)</option>
+          <option value="gradual">Gradual — optional type hints</option>
+        </select>
+      </div>
+      <div class="dyl-card">
+        <h4>3. Memory Management</h4>
+        <p style="font-size:13px;color:var(--muted);">Who handles memory?</p>
+        <select id="dyl-memory">
+          <option value="">Select memory model...</option>
+          <option value="manual">Manual — programmer allocates and frees (like C)</option>
+          <option value="gc">Garbage collected — runtime handles it (like C#, Python)</option>
+          <option value="ownership">Ownership model — compiler enforces rules (like Rust)</option>
+        </select>
+      </div>
+      <div class="dyl-card">
+        <h4>4. Primary Paradigm</h4>
+        <p style="font-size:13px;color:var(--muted);">How is code organized?</p>
+        <select id="dyl-paradigm">
+          <option value="">Select paradigm...</option>
+          <option value="procedural">Procedural — functions and procedures (like C)</option>
+          <option value="oop">Object-oriented — classes and objects (like C#)</option>
+          <option value="functional">Functional — immutable data, pure functions</option>
+          <option value="multi">Multi-paradigm — support all (like Python)</option>
+        </select>
+      </div>
+      <div class="dyl-card">
+        <h4>5. Error Handling</h4>
+        <p style="font-size:13px;color:var(--muted);">How does your language handle failure?</p>
+        <select id="dyl-errors">
+          <option value="">Select approach...</option>
+          <option value="codes">Return codes — caller checks result (like C)</option>
+          <option value="exceptions">Structured exceptions — try/catch (like C#, Python)</option>
+          <option value="result">Result types — compiler forces explicit handling</option>
+        </select>
+      </div>
+      <div class="dyl-card">
+        <h4>6. Language Name</h4>
+        <p style="font-size:13px;color:var(--muted);">Give your language a name!</p>
+        <input type="text" id="dyl-name" placeholder="e.g., Nova, Apex, Zeal...">
+      </div>
+    </div>
+    <button class="gen-btn" onclick="generateLanguage()">Generate My Language Profile</button>
+    <div class="dyl-output" id="dyl-output" style="display:none;"></div>
+  </div>
+
+  <!-- Misconceptions -->
+  <h3 style="margin-top:24px;">Common Misconceptions — Set the Record Straight</h3>
+
+  <div class="misconception-box">
+    <div class="mc-label">❌ Misconception 1</div>
+    <p>"Python is easier than C, so Python is a better language."</p>
+  </div>
+  <div class="correction-box">
+    <p><strong>✓ Correction:</strong> "Better" only makes sense relative to a specific goal. Python is better for rapid prototyping and data science. C is better for writing a device driver or an OS kernel. A surgeon's scalpel is not "better" than a chainsaw — they solve different problems. Language evaluation always requires specifying context first.</p>
+  </div>
+
+  <div class="misconception-box" style="margin-top:14px;">
+    <div class="mc-label">❌ Misconception 2</div>
+    <p>"High-level languages run directly on the CPU, just like machine code."</p>
+  </div>
+  <div class="correction-box">
+    <p><strong>✓ Correction:</strong> High-level code must be translated before the CPU can execute it. C is compiled to machine code ahead of time. C# compiles to bytecode, then JIT-compiled to machine code at runtime by the .NET CLR. Python is interpreted by the CPython interpreter — which is itself a C program. The hardware always runs machine code. High-level languages are translated, not natively executed.</p>
+  </div>
+
+  <div class="misconception-box" style="margin-top:14px;">
+    <div class="mc-label">❌ Misconception 3</div>
+    <p>"Dynamic typing in Python means Python has no types."</p>
+  </div>
+  <div class="correction-box">
+    <p><strong>✓ Correction:</strong> Python is strongly and dynamically typed — every value has a definite type, but that type is checked at runtime rather than at compile time. Try <span class="inline-code">"hello" + 5</span> in Python — you get a TypeError immediately. "Dynamic" refers to <em>when</em> types are checked, not <em>whether</em> they exist.</p>
+  </div>
+
+  <div class="misconception-box" style="margin-top:14px;">
+    <div class="mc-label">❌ Misconception 4</div>
+    <p>"C is outdated. Nobody writes C anymore."</p>
+  </div>
+  <div class="correction-box">
+    <p><strong>✓ Correction:</strong> The Linux kernel, Windows kernel, most embedded systems (your car, your pacemaker), database engines (MySQL, PostgreSQL), and the Python interpreter itself are all written in C. The TIOBE Index consistently ranks C in the top 2 most-used languages worldwide. C is not outdated — it is indispensable wherever hardware control and predictable performance are critical.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- SECTION 8 — PRACTICE QUESTIONS -->
+<!-- ══════════════════════════════════════════════════ -->
+<div class="section" id="s8">
+  <div class="section-label">Section 8</div>
+  <h2>Practice Questions</h2>
+  <p>These questions follow the conceptual progression of the chapter — from the problem, through evolution and abstraction, to our three languages and their design trade-offs.</p>
+
+  <!-- Q1 — Conceptual -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q1 of 8 — Conceptual</span> Why Languages Exist</div>
+    <div class="quiz-body">
+      <div class="quiz-q">Which statement best explains why programming languages were invented?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q1')"><span class="opt-letter">A</span>To make programs run faster than writing machine code directly</button>
+        <button class="quiz-opt" onclick="ans(this,'correct','Q1')"><span class="opt-letter">B</span>To bridge the gap between human intent and the binary instructions a CPU can execute</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q1')"><span class="opt-letter">C</span>To replace the need for an operating system</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q1')"><span class="opt-letter">D</span>To make all programs portable without modification</button>
+      </div>
+      <div class="quiz-feedback" id="Q1"></div>
+    </div>
+  </div>
+
+  <!-- Q2 — Evolution -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q2 of 8 — Evolution</span> What Problem Did Assembly Solve?</div>
+    <div class="quiz-body">
+      <div class="quiz-q">Assembly language improved on machine code primarily by:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q2')"><span class="opt-letter">A</span>Making programs run faster on the CPU</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q2')"><span class="opt-letter">B</span>Allowing programs to run on any type of CPU without changes</button>
+        <button class="quiz-opt" onclick="ans(this,'correct','Q2')"><span class="opt-letter">C</span>Replacing unreadable binary opcodes with human-readable mnemonics like MOV and ADD</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q2')"><span class="opt-letter">D</span>Adding automatic memory management so programmers didn't need to manage addresses</button>
+      </div>
+      <div class="quiz-feedback" id="Q2"></div>
+    </div>
+  </div>
+
+  <!-- Q3 — Evolution -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q3 of 8 — Evolution</span> What High-Level Languages Added</div>
+    <div class="quiz-body">
+      <div class="quiz-q">The most important new capability that high-level languages like FORTRAN introduced — compared to Assembly — was:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q3')"><span class="opt-letter">A</span>Faster execution speed through better optimization</button>
+        <button class="quiz-opt" onclick="ans(this,'correct','Q3')"><span class="opt-letter">B</span>One statement could produce many machine instructions, enabling portability and dramatically higher productivity</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q3')"><span class="opt-letter">C</span>Automatic memory management through garbage collection</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q3')"><span class="opt-letter">D</span>Object-oriented programming with classes and inheritance</button>
+      </div>
+      <div class="quiz-feedback" id="Q3"></div>
+    </div>
+  </div>
+
+  <!-- Q4 — Abstraction -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q4 of 8 — Abstraction</span> What Abstraction Means</div>
+    <div class="quiz-body">
+      <div class="quiz-q">In the context of programming languages, "abstraction" most accurately means:</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q4')"><span class="opt-letter">A</span>Making code shorter and more concise</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q4')"><span class="opt-letter">B</span>Removing comments and documentation to protect intellectual property</button>
+        <button class="quiz-opt" onclick="ans(this,'correct','Q4')"><span class="opt-letter">C</span>Hiding lower-level complexity behind a simpler interface so programmers can work at a higher level</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q4')"><span class="opt-letter">D</span>Converting source code into binary so the CPU can execute it</button>
+      </div>
+      <div class="quiz-feedback" id="Q4"></div>
+    </div>
+  </div>
+
+  <!-- Q5 — Trade-offs -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q5 of 8 — Trade-offs</span> The Cost of Abstraction</div>
+    <div class="quiz-body">
+      <div class="quiz-q">A language designer wants to maximize readability and writability. Which trade-off must they most likely accept?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q5')"><span class="opt-letter">A</span>The language will be harder to learn for beginners</button>
+        <button class="quiz-opt" onclick="ans(this,'correct','Q5')"><span class="opt-letter">B</span>The language will likely have lower runtime performance and less direct hardware control</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q5')"><span class="opt-letter">C</span>The language cannot support functions or procedures</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q5')"><span class="opt-letter">D</span>The language will have fewer available libraries and tools</button>
+      </div>
+      <div class="quiz-feedback" id="Q5"></div>
+    </div>
+  </div>
+
+  <!-- Q6 — Scenario -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q6 of 8 — Scenario</span> Embedded Systems</div>
+    <div class="quiz-body">
+      <div class="quiz-q">You are designing a language for embedded systems where programmers need precise control over memory and predictable, real-time execution. Which design goal would you prioritize above all others, and why?</div>
+      <div class="quiz-sub">Choose the option that best reflects sound language design reasoning for this domain.</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q6')"><span class="opt-letter">A</span>Writability — embedded developers should be able to prototype ideas quickly</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q6')"><span class="opt-letter">B</span>Expressiveness — embedded code should be concise and readable at a high level</button>
+        <button class="quiz-opt" onclick="ans(this,'correct','Q6')"><span class="opt-letter">C</span>Reliability and Performance — the software must behave correctly with predictable timing, even at the cost of developer convenience</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q6')"><span class="opt-letter">D</span>Portability — embedded code should run on any hardware without modification</button>
+      </div>
+      <div class="quiz-feedback" id="Q6"></div>
+    </div>
+  </div>
+
+  <!-- Q7 — Comparison -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q7 of 8 — Comparison</span> Control vs. Safety</div>
+    <div class="quiz-body">
+      <div class="quiz-q">If a language prioritizes programmer control and predictable low-level behavior over automatic safety, which of our three languages provides the most useful case study — and what design feature most illustrates this?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="ans(this,'correct','Q7')"><span class="opt-letter">A</span>C — its manual memory management (malloc/free) requires programmers to explicitly control allocation and deallocation, with no safety net</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q7')"><span class="opt-letter">B</span>C# — its garbage collector maximizes control by letting programmers decide when memory is freed</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q7')"><span class="opt-letter">C</span>Python — its dynamic typing gives programmers the most control over how values are used</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q7')"><span class="opt-letter">D</span>All three equally — they all give programmers the same level of hardware control</button>
+      </div>
+      <div class="quiz-feedback" id="Q7"></div>
+    </div>
+  </div>
+
+  <!-- Q8 — Comparison -->
+  <div class="quiz-card">
+    <div class="quiz-header"><span class="quiz-num">Q8 of 8 — Comparison</span> Dynamic Typing</div>
+    <div class="quiz-body">
+      <div class="quiz-q">A student claims: "Python has no types — I never write int or string anywhere." What is the accurate correction, and what design goal does Python's choice reflect?</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q8')"><span class="opt-letter">A</span>The student is correct — Python values genuinely have no type at runtime</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q8')"><span class="opt-letter">B</span>Python has types but converts everything to strings internally to avoid type errors</button>
+        <button class="quiz-opt" onclick="ans(this,'correct','Q8')"><span class="opt-letter">C</span>Python values always have types, but those types are checked at runtime rather than declared at compile time — a design choice that maximizes writability at the cost of early error detection</button>
+        <button class="quiz-opt" onclick="ans(this,'wrong','Q8')"><span class="opt-letter">D</span>Python avoids types because types make code harder to read</button>
+      </div>
+      <div class="quiz-feedback" id="Q8"></div>
+    </div>
+  </div>
+
+  <!-- SCORE -->
+  <div class="score-wrap">
+    <div class="score-title">Quiz Score</div>
+    <div class="score-bar-row">
+      <span class="score-lbl">Correct</span>
+      <div class="score-track"><div class="score-fill" id="scoreFill"></div></div>
+      <span class="score-pct" id="scorePct">0 / 8</span>
+    </div>
+    <p id="scoreMsg" style="font-size:13px;color:var(--muted);margin-top:10px;"></p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- SECTION 9 — SYNTHESIS -->
+<!-- ══════════════════════════════════════════════════ -->
+<div class="section" id="s9">
+  <div class="section-label">Section 9</div>
+  <h2>Synthesis — From "Using Languages" to "Designing Languages"</h2>
+
+  <p>Step back and look at what this chapter has built. The narrative arc from beginning to end is:</p>
+
+  <div class="flow">
+    <div class="flow-box"><strong>Computers are powerful but operate at the binary machine level</strong><p>CPUs execute machine instructions — not human ideas</p></div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-box"><strong>Humans think in terms of higher-level concepts</strong><p>Algorithms, intent, logic — not opcodes and registers</p></div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-box"><strong>Programming languages bridge that gap</strong><p>They provide structured notation that humans can write and machines can translate</p></div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-box"><strong>Languages provide abstractions</strong><p>Each layer hides some lower-level complexity — memory, types, hardware instructions</p></div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-box"><strong>Every abstraction involves trade-offs</strong><p>More automation = less control. More safety = less speed. No single language can optimize for everything.</p></div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-box"><strong>Language designers choose different priorities</strong><p>C: control. C#: safety and productivity. Python: readability. Each choice is deliberate and consequential.</p></div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-box"><strong>C, C#, and Python are three different answers to the same design problem</strong><p>Not better or worse — differently optimized for different purposes</p></div>
+    <div class="flow-arrow">↓</div>
+    <div class="flow-box"><strong>The rest of this course investigates those design decisions in detail</strong><p>Every chapter is a different place where language designers have to make a choice</p></div>
+  </div>
+
+  <h3 style="margin-top:24px;">Chapter 1 connects to everything that follows</h3>
+
+  <div class="synth-grid">
+    <div class="synth-card">
+      <div class="synth-icon">📝</div>
+      <div class="synth-title">Syntax &amp; Grammars</div>
+      <div class="synth-desc">Why does Python use indentation while C uses braces? How do designers formally define what "correct code" looks like?</div>
+      <div class="synth-chapter">→ Chapter 2</div>
+    </div>
+    <div class="synth-card">
+      <div class="synth-icon">🔗</div>
+      <div class="synth-title">Variable Binding</div>
+      <div class="synth-desc">When does a variable name get connected to a value? At compile time or runtime? This design choice affects both reliability and speed.</div>
+      <div class="synth-chapter">→ Chapter 3</div>
+    </div>
+    <div class="synth-card">
+      <div class="synth-icon">🔭</div>
+      <div class="synth-title">Scope Rules</div>
+      <div class="synth-desc">Where is a variable visible? C, C#, and Python each make different choices — with major consequences for program correctness.</div>
+      <div class="synth-chapter">→ Chapter 4</div>
+    </div>
+    <div class="synth-card">
+      <div class="synth-icon">🏷️</div>
+      <div class="synth-title">Type Systems</div>
+      <div class="synth-desc">Static vs. dynamic, strong vs. weak — the technical implementation of the readability vs. reliability trade-off you explored here.</div>
+      <div class="synth-chapter">→ Chapter 5</div>
+    </div>
+    <div class="synth-card">
+      <div class="synth-icon">🧠</div>
+      <div class="synth-title">Memory Management</div>
+      <div class="synth-desc">The full story of C's malloc/free vs. GC — what goes wrong in C, how C# and Python solve it, and what it costs them.</div>
+      <div class="synth-chapter">→ Chapters 9–10</div>
+    </div>
+    <div class="synth-card">
+      <div class="synth-icon">🧩</div>
+      <div class="synth-title">Paradigms</div>
+      <div class="synth-desc">Procedural, OOP, functional — different ways of organizing programmer thinking, each with design trade-offs.</div>
+      <div class="synth-chapter">→ Chapter 11</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:8px;">
+    <h3 style="margin-top:0;">The one question to carry through every chapter</h3>
+    <p>For every language feature you encounter in this course — a syntax rule, a type system, a memory model, a scope rule — ask these three questions:</p>
+    <ul class="checklist">
+      <li><strong>What problem does this feature solve?</strong> What was painful or impossible without it?</li>
+      <li><strong>Which design goal does it serve?</strong> Readability? Safety? Performance? Writability?</li>
+      <li><strong>What trade-off did the designer accept?</strong> What did they give up to get this benefit?</li>
+    </ul>
+    <p style="margin-top:14px;">You now have the conceptual foundation to ask and answer those questions for any language feature — in C, C#, Python, or any language you encounter in your career. That's what Chapter 1 was designed to build.</p>
+  </div>
+
+  <div class="analogy">
+    <div class="analogy-title">💡 Closing thought</div>
+    <p>Dennis Ritchie (C), Guido van Rossum (Python), and Anders Hejlsberg (C#) each sat down and asked: "What should this language optimize for?" They gave three different answers — and built three of the most widely used languages in history. Neither answer was wrong. They were deliberate choices about what matters most. Your job in this course is to understand exactly what those choices were, and why they matter.</p>
+  </div>
+</div>
+
+</div><!-- end .content -->
+
+<script>
+// ── NAV / SCROLL SPY ──
+const SEC = ['s0','s1','s2','s3','s4','s5','s6','s7','s8','s9'];
+function goTo(id, btn) {
+  document.getElementById(id).scrollIntoView({behavior:'smooth',block:'start'});
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+window.addEventListener('scroll', () => {
+  let cur = SEC[0];
+  SEC.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && window.scrollY >= el.offsetTop - 90) cur = id;
+  });
+  document.querySelectorAll('.nav-btn').forEach((b,i) => b.classList.toggle('active', SEC[i]===cur));
+  const pct = Math.min(100, Math.round((window.scrollY/(document.body.scrollHeight-window.innerHeight))*100));
+  document.getElementById('progFill').style.width = pct+'%';
+  document.getElementById('prog-pct').textContent = pct+'%';
+});
+
+// ── QUIZ ──
+const CORRECT = {Q1:'B',Q2:'C',Q3:'B',Q4:'C',Q5:'B',Q6:'C',Q7:'A',Q8:'C'};
+const EXP = {
+  Q1:{
+    ok:"Correct. Programming languages exist specifically to bridge the gap between how humans think about problems and the binary instructions a CPU can actually execute. Every other benefit — speed, portability, safety — is secondary to this core purpose.",
+    bad:"Not quite. Languages were not invented to increase speed — they typically add overhead compared to hand-written machine code. Their primary purpose is to let humans express computational ideas in a form that can be translated to machine instructions."
+  },
+  Q2:{
+    ok:"Correct. Assembly's key innovation was replacing binary opcodes with readable mnemonics — MOV instead of B8, ADD instead of 01 D8. This reduced transcription errors dramatically but did not add portability or memory management.",
+    bad:"Not quite. Assembly still maps 1-to-1 to machine instructions, so it did not improve speed or add portability. Its contribution was purely readability: replacing binary codes with human-readable mnemonics."
+  },
+  Q3:{
+    ok:"Correct. FORTRAN's breakthrough was that one high-level statement (like Y = A*X + B) could compile into many machine instructions automatically. This created portability — the same source code could run on different hardware — and dramatically increased productivity.",
+    bad:"Not quite. High-level languages like FORTRAN actually introduced some overhead compared to hand-tuned assembly. Their revolution was that one source statement could produce many machine instructions, enabling portability and massive productivity gains."
+  },
+  Q4:{
+    ok:"Correct. Abstraction means hiding lower-level complexity behind a simpler interface. print() hides system calls, memory management, and screen rendering. Every programming language feature is an abstraction over something the hardware does more primitively.",
+    bad:"Not quite. Abstraction specifically means hiding complexity. When you write print('Hello'), you don't think about the OS write() system call, the file descriptor, the terminal buffer, or the screen rendering. The language hides all of that behind a simple interface."
+  },
+  Q5:{
+    ok:"Correct. High readability and writability — like Python — typically require dynamic typing, interpretation, and rich abstractions. These features add runtime overhead and remove compile-time checks. The trade-off is speed and early error detection for developer productivity.",
+    bad:"Not quite. Maximizing readability and writability generally requires dynamic typing and interpretation — both of which reduce raw performance and compile-time type checking. That is the trade-off Python accepted deliberately."
+  },
+  Q6:{
+    ok:"Correct. In embedded and safety-critical systems, reliability and performance are non-negotiable. A garbage collector pause in a pacemaker or a braking system could be fatal. The language must produce correct, predictable behavior at the cost of developer convenience — which is exactly why these systems are often still written in C.",
+    bad:"Not quite. Embedded and safety-critical systems demand reliability and predictable performance above all else. A language optimized for writability or expressiveness would be wrong for a pacemaker — it prioritizes developer convenience over the correctness guarantees the domain requires."
+  },
+  Q7:{
+    ok:"Correct. C's manual memory management is the clearest illustration of its 'trust the programmer' philosophy. You call malloc() to allocate, you call free() to deallocate, and if you forget — or do it wrong — you get memory leaks, buffer overflows, or dangling pointers. No language gives programmers more direct control, or demands more responsibility in return.",
+    bad:"Not quite. C# and Python both use garbage collection, which automatically manages memory — that is the opposite of 'maximum programmer control.' C's manual malloc/free is the definitive example of a language that trusts programmers to manage memory directly with no safety net."
+  },
+  Q8:{
+    ok:"Correct. Python is strongly and dynamically typed — every value has a precise type (int, str, list), but those types are checked at runtime rather than declared at compile time. This is a deliberate design choice: dynamic typing maximizes writability and flexibility, at the cost of catching type errors later (at runtime instead of at compile time).",
+    bad:"Not quite. Python is strongly typed — try 'hello' + 5 and you get a TypeError immediately. What Python lacks is static type declarations at compile time. Every value always has a definite type. 'Dynamic' refers to when type checking happens, not whether types exist. This choice reflects Python's prioritization of writability over early error detection."
+  }
+};
+let scores = {};
+function ans(btn, result, qid) {
+  if (scores[qid] !== undefined) return;
+  btn.closest('.quiz-options').querySelectorAll('.quiz-opt').forEach(o => { o.onclick=null; o.disabled=true; });
+  btn.classList.add(result);
+  const fb = document.getElementById(qid);
+  fb.classList.add('show', result==='correct'?'ok':'bad');
+  fb.textContent = result==='correct' ? EXP[qid].ok : EXP[qid].bad;
+  scores[qid] = result==='correct' ? 1 : 0;
+  updateScore();
+}
+function updateScore() {
+  const total = Object.keys(CORRECT).length;
+  const correct = Object.values(scores).reduce((a,b)=>a+b,0);
+  const pct = Math.round((correct/total)*100);
+  document.getElementById('scoreFill').style.width = pct+'%';
+  document.getElementById('scorePct').textContent = correct+' / '+total;
+  const msgs = ['Keep going — answer all the questions!','Starting out — keep at it.','Making progress!','Halfway there!','Good understanding forming.','Strong work!','Excellent grasp of the material!','Perfect score — mastery achieved! 🎉'];
+  document.getElementById('scoreMsg').textContent = msgs[correct] || '';
+}
+
+// ── REVEAL ──
+function revealAnswer(btn) {
+  const ans = btn.nextElementSibling;
+  ans.classList.toggle('show');
+  btn.textContent = ans.classList.contains('show') ? 'Hide explanation' : 'See explanation';
+}
+
+// ── COPY ──
+function copyCode(btn) {
+  const pre = btn.closest('.code-wrap').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = 'copied!';
+    setTimeout(()=>btn.textContent='copy', 1600);
+  });
+}
+
+// ── DESIGN YOUR OWN LANGUAGE ──
+const DYL_DATA = {
+  domain:{medical:'medical device software',game:'video game engines',data:'data science and AI',web:'web applications',embedded:'embedded and IoT hardware',education:'teaching beginners'},
+  typing:{static:'static typing (compile-time type checking)',dynamic:'dynamic typing (runtime type checking)',gradual:'gradual typing (optional type annotations)'},
+  memory:{manual:'manual memory management (programmer allocates and frees)',gc:'garbage collection (runtime handles memory automatically)',ownership:'ownership model (compiler enforces memory rules)'},
+  paradigm:{procedural:'procedural programming (functions and data structures)',oop:'object-oriented programming (classes and objects)',functional:'functional programming (immutable data, pure functions)',multi:'multi-paradigm (supports all styles)'},
+  errors:{codes:'return codes (caller checks every result)',exceptions:'structured exceptions (try/catch/finally)',result:'result types (compiler forces explicit error handling)'}
+};
+const DYL_TRADEOFFS = {
+  typing:{static:'Trade-off: less flexible, more verbose declarations, but type bugs caught before the program ships.',dynamic:'Trade-off: type bugs only surface at runtime, potentially in production with real users.',gradual:'Trade-off: inconsistent codebases if teams do not enforce annotations consistently.'},
+  memory:{manual:'Trade-off: buffer overflows, memory leaks, and dangling pointers are programmer errors with no safety net.',gc:'Trade-off: GC pauses create unpredictable latency spikes — a serious problem for real-time systems.',ownership:'Trade-off: steep learning curve; the compiler rejects valid-looking code until ownership rules are satisfied.'},
+  paradigm:{procedural:'Trade-off: harder to model large, complex systems without OOP abstractions.',oop:'Trade-off: class hierarchies can become rigid and over-engineered for simple tasks.',functional:'Trade-off: unfamiliar paradigm for most programmers; steeper onboarding.',multi:'Trade-off: inconsistent codebases when different team members use different styles.'},
+  errors:{codes:'Trade-off: callers frequently ignore return codes, silently propagating failures through the system.',exceptions:'Trade-off: exceptions bypass normal control flow, making programs harder to reason about statically.',result:'Trade-off: verbose — every function call requires explicitly handling both success and error cases.'}
+};
+function generateLanguage() {
+  const name = document.getElementById('dyl-name').value.trim() || 'YourLang';
+  const domain = document.getElementById('dyl-domain').value;
+  const typing = document.getElementById('dyl-typing').value;
+  const memory = document.getElementById('dyl-memory').value;
+  const paradigm = document.getElementById('dyl-paradigm').value;
+  const errors = document.getElementById('dyl-errors').value;
+  const out = document.getElementById('dyl-output');
+  out.style.display = 'block';
+  if (!domain||!typing||!memory||!paradigm||!errors) {
+    out.innerHTML = '<span style="color:var(--red);">Please complete all six fields before generating your profile.</span>';
+    return;
+  }
+  out.innerHTML = `
+    <strong style="font-size:15px;color:var(--navy);">${name} — Language Design Profile</strong>
+    <hr style="border:none;border-top:1px solid var(--border);margin:10px 0;">
+    <p><strong>Domain:</strong> Designed for ${DYL_DATA.domain[domain]}.</p>
+    <p><strong>Typing:</strong> Uses ${DYL_DATA.typing[typing]}. ${DYL_TRADEOFFS.typing[typing]}</p>
+    <p><strong>Memory:</strong> Uses ${DYL_DATA.memory[memory]}. ${DYL_TRADEOFFS.memory[memory]}</p>
+    <p><strong>Paradigm:</strong> Supports ${DYL_DATA.paradigm[paradigm]}. ${DYL_TRADEOFFS.paradigm[paradigm]}</p>
+    <p><strong>Error handling:</strong> Uses ${DYL_DATA.errors[errors]}. ${DYL_TRADEOFFS.errors[errors]}</p>
+    <hr style="border:none;border-top:1px solid var(--border);margin:10px 0;">
+    <p><strong>Most similar to:</strong> ${getSimilar(typing,memory,paradigm)}</p>
+    <p style="font-size:12px;color:var(--muted);margin-top:10px;">Compare your profile with a classmate who chose differently — which design goals do your choices reflect? What did you each give up?</p>
+  `;
+}
+function getSimilar(t,m,p) {
+  if(t==='static'&&m==='manual'&&p==='procedural') return '<span class="pill pill-c">C</span> — you essentially designed C. Maximum programmer control, minimum safety net.';
+  if(t==='static'&&m==='gc'&&(p==='oop'||p==='multi')) return '<span class="pill pill-cs">C#</span> — your choices closely match C#\'s design: safe, productive, statically typed with GC.';
+  if(t==='dynamic'&&m==='gc'&&p==='multi') return '<span class="pill pill-py">Python</span> — your choices mirror Python: maximize flexibility and productivity, accept runtime type errors.';
+  if(t==='static'&&m==='ownership') return 'Rust — static typing plus an ownership memory model is precisely Rust\'s design.';
+  if(t==='dynamic'&&m==='manual') return 'An unusual and risky combination — dynamic typing with manual memory means both classes of bugs (type errors and memory errors) surface at runtime. Perl has some historical similarity.';
+  return 'A hybrid — your combination is unique. Ask yourself: which existing language is closest, and what specific problem does your design solve that it does not?';
+}
+</script>
+</body>
+</html>
