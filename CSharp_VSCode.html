@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C# in Visual Studio Code — Beginner Tutorial</title>
+<style>
+  :root { --ink:#172033; --muted:#5d6678; --accent:#3157c8; --soft:#eef3ff; --line:#d9deea; --code:#111827; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:Arial, Helvetica, sans-serif; color:var(--ink); background:#f7f8fb; line-height:1.6; }
+  main { max-width:920px; margin:36px auto; background:white; padding:46px; border-radius:16px; box-shadow:0 8px 30px rgba(20,30,60,.08); }
+  h1 { font-size:2.2rem; margin:0 0 8px; }
+  h2 { margin-top:38px; padding-top:8px; border-top:1px solid var(--line); }
+  h3 { margin-top:24px; }
+  p, li { font-size:1rem; }
+  .subtitle { color:var(--muted); margin-bottom:28px; }
+  .note { background:var(--soft); border-left:5px solid var(--accent); padding:14px 18px; margin:18px 0; border-radius:6px; }
+  .warning { background:#fff7e8; border-left:5px solid #d98b00; padding:14px 18px; margin:18px 0; border-radius:6px; }
+  code { font-family:Consolas, "Courier New", monospace; }
+  pre { background:var(--code); color:#f8fafc; padding:18px; overflow:auto; border-radius:9px; line-height:1.45; }
+  table { width:100%; border-collapse:collapse; margin:18px 0; }
+  th, td { border:1px solid var(--line); padding:11px 12px; text-align:left; vertical-align:top; }
+  th { background:#f0f3f8; }
+  .step { display:inline-block; background:var(--accent); color:white; font-weight:bold; border-radius:999px; padding:4px 10px; margin-right:8px; }
+  .flow { text-align:center; font-weight:bold; padding:16px; background:#f4f6fa; border-radius:8px; }
+  footer { margin-top:40px; color:var(--muted); font-size:.9rem; }
+  @media print { body{background:white;} main{box-shadow:none; margin:0; max-width:none;} }
+</style>
+</head>
+<body>
+<main>
+  <h1>C# in Visual Studio Code</h1>
+  <p class="subtitle">A Step-by-Step Beginner Tutorial</p>
+
+  <div class="note">
+    <strong>Goal:</strong> In this tutorial, you will create your first C# console project in Visual Studio Code, examine the <code>Program.cs</code> file, and run the program using the .NET command-line tools.
+  </div>
+
+  <h2><span class="step">1</span>Open Visual Studio Code</h2>
+  <p>Start <strong>Visual Studio Code (VS Code)</strong>. Then open the integrated terminal:</p>
+  <p><strong>Terminal → New Terminal</strong></p>
+  <p>The terminal appears near the bottom of the VS Code window. We will use it to create and run our C# project.</p>
+
+  <h2><span class="step">2</span>Check That the .NET SDK Is Installed</h2>
+  <p>In the VS Code terminal, type:</p>
+  <pre><code>dotnet --version</code></pre>
+  <p>Press <strong>Enter</strong>. If the .NET SDK is installed correctly, you will see a version number. Your version number may be different from another student's version.</p>
+  <pre><code>10.0.100</code></pre>
+  <div class="warning">
+    <strong>Important:</strong> A C# extension in VS Code does not replace the .NET SDK. If the terminal says that <code>dotnet</code> is not recognized or cannot be found, the .NET SDK needs to be installed or configured correctly.
+  </div>
+
+  <h2><span class="step">3</span>Open a Folder for Your Work</h2>
+  <p>Create or choose a folder where you want to keep your class projects. For example:</p>
+  <pre><code>CSharpPractice</code></pre>
+  <p>In VS Code, choose <strong>File → Open Folder</strong> and open that folder.</p>
+
+  <h2><span class="step">4</span>Create Your First C# Console Project</h2>
+  <p>In the VS Code terminal, type:</p>
+  <pre><code>dotnet new console -n HelloCSharp</code></pre>
+  <p>This tells .NET to create a new <strong>console application</strong> named <code>HelloCSharp</code>.</p>
+  <p>Next, move into the new project folder:</p>
+  <pre><code>cd HelloCSharp</code></pre>
+
+  <p>The project will contain files such as:</p>
+  <pre><code>HelloCSharp/
+├── Program.cs
+└── HelloCSharp.csproj</code></pre>
+
+  <table>
+    <tr><th>File</th><th>Purpose</th></tr>
+    <tr><td><code>Program.cs</code></td><td>Contains the C# source code that we will write.</td></tr>
+    <tr><td><code>HelloCSharp.csproj</code></td><td>The C# project file. It contains project information used by .NET to build and run the application.</td></tr>
+  </table>
+
+  <div class="note"><strong>C# file extension:</strong> C# source-code files use the <code>.cs</code> extension.</div>
+
+  <h2><span class="step">5</span>Open Program.cs</h2>
+  <p>In the VS Code Explorer on the left, click <code>Program.cs</code>.</p>
+  <p>Replace its contents with the following first program:</p>
+
+  <pre><code>Console.WriteLine("Hello, World!");
+
+string name = "Alex";
+int age = 20;
+
+Console.WriteLine("Name: " + name);
+Console.WriteLine("Age: " + age);
+
+int x = 10;
+int y = 5;
+int sum = x + y;
+
+Console.WriteLine("Sum: " + sum);</code></pre>
+
+  <p>Save the file using <strong>Ctrl + S</strong>.</p>
+
+  <h2><span class="step">6</span>Where Is Main()?</h2>
+  <p>You may notice that this program does <strong>not</strong> explicitly contain a <code>Main()</code> method or a <code>Program</code> class.</p>
+
+  <p>Older or more explicit C# code may look like this:</p>
+  <pre><code>using System;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Console.WriteLine("Hello, World!");
+    }
+}</code></pre>
+
+  <p>Modern C# supports <strong>top-level statements</strong>. Therefore, for a simple program we can write:</p>
+  <pre><code>Console.WriteLine("Hello, World!");</code></pre>
+
+  <div class="note">
+    <strong>Programming Language Design Concept:</strong> The program still has an entry point. With top-level statements, however, you do not have to explicitly write the <code>Main()</code> method. The compiler handles the entry-point structure for you.
+  </div>
+
+  <h2><span class="step">7</span>Run the Program</h2>
+  <p>Make sure the terminal is currently inside the <code>HelloCSharp</code> project folder. Then type:</p>
+  <pre><code>dotnet run</code></pre>
+  <p>Press <strong>Enter</strong>. You should see output similar to:</p>
+  <pre><code>Hello, World!
+Name: Alex
+Age: 20
+Sum: 15</code></pre>
+
+  <h2><span class="step">8</span>Modify and Run Again</h2>
+  <p>Change the value stored in <code>name</code>:</p>
+  <pre><code>string name = "Maria";</code></pre>
+  <p>Save the file and run the program again:</p>
+  <pre><code>dotnet run</code></pre>
+  <p>You should now see <code>Name: Maria</code> in the output.</p>
+
+  <div class="flow">Write Code → Save → Run → Observe Output → Modify → Run Again</div>
+
+  <h2><span class="step">9</span>Understand the Basic C# Syntax</h2>
+  <p>Consider this statement:</p>
+  <pre><code>string name = "Alex";</code></pre>
+  <table>
+    <tr><th>Part</th><th>Meaning</th></tr>
+    <tr><td><code>string</code></td><td>The data type.</td></tr>
+    <tr><td><code>name</code></td><td>The variable name.</td></tr>
+    <tr><td><code>=</code></td><td>The assignment operator.</td></tr>
+    <tr><td><code>"Alex"</code></td><td>The value being stored.</td></tr>
+    <tr><td><code>;</code></td><td>Ends the statement.</td></tr>
+  </table>
+
+  <p>To display output in a console program, we can use:</p>
+  <pre><code>Console.WriteLine("Hello!");</code></pre>
+
+  <h2><span class="step">10</span>Compare C, C#, and Python</h2>
+  <p>All three languages can perform the same basic task, but their syntax and design choices differ.</p>
+
+  <h3>C</h3>
+  <pre><code>#include &lt;stdio.h&gt;
+
+int main()
+{
+    printf("Hello, World!\n");
+    return 0;
+}</code></pre>
+
+  <h3>C# — Modern Top-Level Statements</h3>
+  <pre><code>Console.WriteLine("Hello, World!");</code></pre>
+
+  <h3>Python</h3>
+  <pre><code>print("Hello, World!")</code></pre>
+
+  <table>
+    <tr><th>Language</th><th>Source Extension</th><th>Entry-Point Observation</th></tr>
+    <tr><td>C</td><td><code>.c</code></td><td>An explicit <code>main()</code> function is used as the program entry point.</td></tr>
+    <tr><td>C#</td><td><code>.cs</code></td><td>Modern C# can use top-level statements, so an explicit <code>Main()</code> does not have to be written.</td></tr>
+    <tr><td>Python</td><td><code>.py</code></td><td>Top-level statements in the module are executed; a <code>main()</code> function is not required.</td></tr>
+  </table>
+
+  <h2>Quick Reference</h2>
+  <table>
+    <tr><th>Task</th><th>Command / Information</th></tr>
+    <tr><td>C# source-file extension</td><td><code>.cs</code></td></tr>
+    <tr><td>Check .NET installation</td><td><code>dotnet --version</code></td></tr>
+    <tr><td>Create console project</td><td><code>dotnet new console -n HelloCSharp</code></td></tr>
+    <tr><td>Enter project folder</td><td><code>cd HelloCSharp</code></td></tr>
+    <tr><td>Main source file</td><td><code>Program.cs</code></td></tr>
+    <tr><td>Run project</td><td><code>dotnet run</code></td></tr>
+    <tr><td>Display output</td><td><code>Console.WriteLine()</code></td></tr>
+    <tr><td>Explicit Main required with top-level statements?</td><td>No</td></tr>
+  </table>
+
+  <div class="note">
+    <strong>Remember:</strong> For this class, create a C# console <em>project</em> using <code>dotnet new console</code>. Then work in <code>Program.cs</code> and use <code>dotnet run</code> from the project folder.
+  </div>
+
+  <footer>Beginner C# / Visual Studio Code Tutorial — Programming Language Design</footer>
+</main>
+</body>
+</html>
