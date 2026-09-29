@@ -1,0 +1,1778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C# Primer — CSBS 315</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#F4F6FC;--surface:#FFFFFF;--border:#D0DAF0;--code-bg:#EEF1FA;
+  --navy:#1A2B5E;--blue:#2E5BFF;--accent:#4F8EF7;--text:#1E2A3A;--muted:#5A6A82;
+  --green:#1A7A3C;--green-bg:#EAF7EE;--green-border:#86EFAC;
+  --red:#9B1C1C;--red-bg:#FEF2F2;--red-border:#FCA5A5;
+  --yellow-bg:#FFFBEB;--yellow-border:#FCD34D;
+  --purple-bg:#F5F3FF;--purple-border:#C4B5FD;
+  --teal-bg:#F0FDFA;--teal-border:#5EEAD4;
+  --cs-bg:#F3E8FE;--cs-border:#D8B8F8;--cs-text:#7B2FBE;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.75;}
+/* HERO */
+.hero-wrap{padding:44px 24px 0;max-width:960px;margin:0 auto;}
+.hero{background:linear-gradient(135deg,#3B0764 0%,#7B2FBE 60%,#A855F7 100%);border-radius:18px;padding:44px 48px;color:#fff;position:relative;overflow:hidden;}
+.hero::after{content:'';position:absolute;bottom:-80px;right:-60px;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,0.06);}
+.hero-chip{display:inline-block;background:rgba(255,255,255,0.18);border-radius:20px;padding:3px 14px;font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,0.9);margin-bottom:14px;letter-spacing:.04em;}
+.hero h1{font-size:30px;font-weight:700;line-height:1.2;margin-bottom:10px;}
+.hero p{font-size:15px;color:rgba(255,255,255,0.78);max-width:560px;line-height:1.7;}
+.hero-meta{display:flex;gap:28px;margin-top:24px;flex-wrap:wrap;}
+.hero-stat{display:flex;flex-direction:column;gap:2px;}
+.hero-stat-num{font-size:22px;font-weight:700;}
+.hero-stat-lbl{font-size:11px;color:rgba(255,255,255,0.5);font-family:'DM Mono',monospace;}
+/* NAV */
+.sticky-nav{position:sticky;top:0;z-index:100;background:rgba(244,246,252,0.97);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:0 24px;}
+.nav-inner{max-width:960px;margin:0 auto;display:flex;gap:3px;overflow-x:auto;padding:9px 0;scrollbar-width:none;}
+.nav-inner::-webkit-scrollbar{display:none;}
+.nav-btn{background:none;border:1px solid transparent;border-radius:6px;padding:4px 10px;font-family:'DM Mono',monospace;font-size:10.5px;color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .15s;}
+.nav-btn:hover{background:var(--cs-bg);color:var(--cs-text);border-color:var(--cs-border);}
+.nav-btn.active{background:var(--cs-text);color:#fff;border-color:var(--cs-text);}
+/* PROGRESS */
+.progress-wrap{max-width:960px;margin:22px auto 0;padding:0 24px;}
+.prog-top{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:5px;}
+.prog-bar{height:4px;background:var(--border);border-radius:4px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,#7B2FBE,#A855F7);border-radius:4px;width:0;transition:width .5s ease;}
+/* CONTENT */
+.content{max-width:960px;margin:32px auto 80px;padding:0 24px;display:flex;flex-direction:column;gap:40px;}
+.section{scroll-margin-top:60px;}
+.section-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+.section h2{font-size:22px;font-weight:700;color:var(--navy);margin-bottom:14px;line-height:1.3;}
+.section h3{font-size:16px;font-weight:600;color:var(--text);margin:24px 0 10px;}
+.section p{margin-bottom:12px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:14px;}
+/* CODE */
+.code-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+.cs-badge{display:inline-block;background:var(--cs-bg);color:var(--cs-text);border:1px solid var(--cs-border);border-radius:20px;padding:2px 12px;font-family:'DM Mono',monospace;font-size:11px;font-weight:600;}
+.code-block{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px 18px;overflow-x:auto;margin:8px 0 14px;position:relative;}
+.code-block pre{font-family:'DM Mono',monospace;font-size:13px;color:var(--navy);line-height:1.7;white-space:pre;}
+/* syntax colors */
+.kw{color:#6D28D9;}   /* keyword */
+.ty{color:#1A4A8A;}   /* type */
+.st{color:#1A7A3C;}   /* string */
+.cm{color:#8A9AB8;}   /* comment */
+.nm{color:#B05800;}   /* number */
+.mt{color:#0E7490;}   /* method */
+.at{color:#9B1C1C;}   /* attribute/annotation */
+.inline-code{font-family:'DM Mono',monospace;background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:13px;color:#6D28D9;}
+/* copy button */
+.copy-btn{position:absolute;top:10px;right:10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:3px 10px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);cursor:pointer;transition:all .15s;}
+.copy-btn:hover{border-color:var(--cs-text);color:var(--cs-text);}
+/* CALLOUTS */
+.callout{border-radius:10px;padding:15px 20px;margin:14px 0;font-size:14px;line-height:1.7;}
+.callout-note{background:var(--cs-bg);border-left:4px solid var(--cs-border);}
+.callout-tip{background:var(--teal-bg);border-left:4px solid var(--teal-border);}
+.callout-warn{background:var(--yellow-bg);border-left:4px solid var(--yellow-border);}
+.callout-good{background:var(--green-bg);border-left:4px solid var(--green-border);}
+.callout-title{font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;font-family:'DM Mono',monospace;}
+.callout-note .callout-title{color:var(--cs-text);}
+.callout-tip .callout-title{color:#0F766E;}
+.callout-warn .callout-title{color:#92400E;}
+.callout-good .callout-title{color:var(--green);}
+/* TABLES */
+.tbl{width:100%;border-collapse:collapse;font-size:14px;margin:12px 0;}
+.tbl th{background:var(--code-bg);font-family:'DM Mono',monospace;font-size:11.5px;font-weight:600;padding:9px 14px;text-align:left;border:1px solid var(--border);color:var(--navy);}
+.tbl td{padding:9px 14px;border:1px solid var(--border);vertical-align:top;line-height:1.6;}
+.tbl tr:nth-child(even) td{background:#F8FAFF;}
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:14px 0;}
+/* QUIZ */
+.quiz-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;}
+.quiz-q{margin-bottom:22px;padding-bottom:22px;border-bottom:1px solid var(--border);}
+.quiz-q:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.quiz-q p{font-weight:600;margin-bottom:10px;}
+.qopt{display:block;width:100%;text-align:left;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 16px;margin-bottom:7px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;transition:all .15s;}
+.qopt:hover{border-color:var(--cs-text);background:var(--cs-bg);}
+.qopt.correct{background:var(--green-bg);border-color:var(--green-border);color:var(--green);}
+.qopt.wrong{background:var(--red-bg);border-color:var(--red-border);color:var(--red);}
+.qexp{display:none;background:var(--code-bg);border-radius:8px;padding:11px 16px;font-size:13px;color:var(--muted);margin-top:6px;line-height:1.6;}
+.qexp.show{display:block;}
+.quiz-score{text-align:center;padding:18px;font-size:16px;font-weight:600;}
+.quiz-score span{color:var(--cs-text);}
+.retry-btn{padding:9px 24px;background:var(--cs-text);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-top:10px;}
+/* BIG IDEA */
+.big-idea{background:linear-gradient(135deg,#3B0764 0%,#7B2FBE 60%,#A855F7 100%);border-radius:16px;padding:36px 40px;color:#fff;text-align:center;}
+.big-idea h3{font-size:20px;font-weight:700;margin-bottom:10px;}
+.big-idea p{color:rgba(255,255,255,0.78);font-size:15px;max-width:580px;margin:0 auto;}
+/* SECTION DIVIDER */
+.sec-divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:4px 0;}
+/* OUTPUT BOX */
+.output-box{background:#F0FDF4;border:1px solid var(--green-border);border-radius:8px;padding:12px 18px;margin:6px 0 14px;}
+.output-box pre{font-family:'DM Mono',monospace;font-size:13px;color:var(--green);line-height:1.6;}
+.output-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--green);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;}
+/* TAG PILL */
+.tag{display:inline-block;font-family:'DM Mono',monospace;font-size:11px;padding:2px 8px;border-radius:4px;margin:2px 2px;}
+.tag-kw{background:#EDE9FE;color:#6D28D9;}
+.tag-new{background:#DCFCE7;color:var(--green);}
+/* TOC */
+.toc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0;}
+.toc-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 16px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:10px;}
+.toc-item:hover{border-color:var(--cs-text);background:var(--cs-bg);}
+.toc-num{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);min-width:24px;}
+.toc-name{font-size:14px;font-weight:500;}
+@media(max-width:600px){
+  .g2,.g3,.toc-grid{grid-template-columns:1fr;}
+  .hero{padding:28px 22px;}
+  .hero h1{font-size:22px;}
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero-wrap">
+<div class="hero">
+  <div class="hero-chip">CSBS 315 · Language Primer</div>
+  <h1>C# — A Complete Beginner's Guide</h1>
+  <p>C# (pronounced "C-sharp") is a modern, object-oriented language built by Microsoft. It runs on the .NET platform, is statically typed, and compiles to an intermediate language before execution. This guide takes you from zero to confident — covering every concept you need for this course.</p>
+  <div class="hero-meta">
+    <div class="hero-stat"><span class="hero-stat-num">17</span><span class="hero-stat-lbl">sections</span></div>
+    <div class="hero-stat"><span class="hero-stat-num">60+</span><span class="hero-stat-lbl">code examples</span></div>
+    <div class="hero-stat"><span class="hero-stat-num">15</span><span class="hero-stat-lbl">quiz questions</span></div>
+    <div class="hero-stat"><span class="hero-stat-num">0</span><span class="hero-stat-lbl">prior C# needed</span></div>
+  </div>
+</div>
+</div>
+
+<!-- NAV -->
+<nav class="sticky-nav">
+<div class="nav-inner">
+  <button class="nav-btn active" onclick="go('s0')">S0 · What is C#</button>
+  <button class="nav-btn" onclick="go('s1')">S1 · Program Structure</button>
+  <button class="nav-btn" onclick="go('s2')">S2 · Types &amp; Variables</button>
+  <button class="nav-btn" onclick="go('s3')">S3 · Operators</button>
+  <button class="nav-btn" onclick="go('s4')">S4 · Strings</button>
+  <button class="nav-btn" onclick="go('s5')">S5 · Control Flow</button>
+  <button class="nav-btn" onclick="go('s6')">S6 · Loops</button>
+  <button class="nav-btn" onclick="go('s7')">S7 · Arrays &amp; Lists</button>
+  <button class="nav-btn" onclick="go('s8')">S8 · Methods</button>
+  <button class="nav-btn" onclick="go('s9')">S9 · Classes &amp; Objects</button>
+  <button class="nav-btn" onclick="go('s10')">S10 · Access &amp; Properties</button>
+  <button class="nav-btn" onclick="go('s11')">S11 · Inheritance</button>
+  <button class="nav-btn" onclick="go('s12')">S12 · Interfaces</button>
+  <button class="nav-btn" onclick="go('s13')">S13 · Exceptions</button>
+  <button class="nav-btn" onclick="go('s14')">S14 · Generics &amp; Collections</button>
+  <button class="nav-btn" onclick="go('s15')">S15 · Lambdas &amp; LINQ</button>
+  <button class="nav-btn" onclick="go('s16')">S16 · Quiz</button>
+</div>
+</nav>
+
+<!-- PROGRESS -->
+<div class="progress-wrap">
+  <div class="prog-top"><span>Your Progress</span><span id="pct">0%</span></div>
+  <div class="prog-bar"><div class="prog-fill" id="pbar"></div></div>
+</div>
+
+<div class="content">
+
+<!-- ═══════════════════════════════════════════════════ S0 -->
+<section class="section" id="s0">
+  <div class="section-label">Section 0</div>
+  <h2>What Is C# and How Does It Run?</h2>
+
+  <p>C# was created at Microsoft by Anders Hejlsberg and released in 2002. It is part of the <strong>.NET platform</strong> — an ecosystem of tools, libraries, and a runtime that lets C# programs run on Windows, macOS, and Linux.</p>
+
+  <h3>The Execution Model</h3>
+  <p>Unlike C (which compiles directly to machine code), C# compiles to an <strong>Intermediate Language (IL)</strong> — also called bytecode. The IL is then executed by the <strong>Common Language Runtime (CLR)</strong>, which translates it to native machine code at run time using a <strong>Just-In-Time (JIT) compiler</strong>.</p>
+
+  <div class="card">
+    <table class="tbl">
+      <tr><th>Step</th><th>What Happens</th><th>Tool</th></tr>
+      <tr><td>1</td><td>You write <span class="inline-code">.cs</span> source files</td><td>Any text editor or Visual Studio</td></tr>
+      <tr><td>2</td><td>The C# compiler translates source → IL</td><td><span class="inline-code">csc</span> or <span class="inline-code">dotnet build</span></td></tr>
+      <tr><td>3</td><td>IL is stored in an <span class="inline-code">.exe</span> or <span class="inline-code">.dll</span> assembly</td><td>Output file</td></tr>
+      <tr><td>4</td><td>CLR loads the assembly and JIT-compiles IL → native code</td><td>.NET Runtime (CLR)</td></tr>
+      <tr><td>5</td><td>Native code executes on your CPU</td><td>Your processor</td></tr>
+    </table>
+  </div>
+
+  <div class="callout callout-note">
+    <div class="callout-title">Key Idea</div>
+    C# is <strong>statically typed</strong> and <strong>compiled</strong>. Type errors are caught before the program runs, not during execution. This makes C# programs faster to debug at scale compared to dynamically typed languages.
+  </div>
+
+  <h3>What C# Is Used For</h3>
+  <div class="g3">
+    <div class="card" style="text-align:center;">
+      <div style="font-size:28px;margin-bottom:8px;">🎮</div>
+      <strong>Game Development</strong>
+      <p style="font-size:13px;color:var(--muted);margin-top:4px;">Unity game engine uses C# as its primary scripting language</p>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="font-size:28px;margin-bottom:8px;">🌐</div>
+      <strong>Web Backends</strong>
+      <p style="font-size:13px;color:var(--muted);margin-top:4px;">ASP.NET Core powers high-traffic APIs and web applications</p>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="font-size:28px;margin-bottom:8px;">🖥️</div>
+      <strong>Desktop Apps</strong>
+      <p style="font-size:13px;color:var(--muted);margin-top:4px;">Windows desktop applications built with WPF or WinForms</p>
+    </div>
+  </div>
+
+  <h3>Quick-Start: Running C# Today</h3>
+  <p>The easiest way to run C# without installing anything is <strong>dotnetfiddle.net</strong> — an online compiler. For local development, install the <strong>.NET SDK</strong> from <span class="inline-code">dotnet.microsoft.com</span> and use <span class="inline-code">dotnet run</span> from the terminal.</p>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ S1 -->
+<section class="section" id="s1">
+  <div class="section-label">Section 1</div>
+  <h2>Program Structure — The Skeleton of Every C# Program</h2>
+
+  <p>Every C# program is organized into <strong>namespaces</strong>, <strong>classes</strong>, and <strong>methods</strong>. Let's look at the simplest possible complete program.</p>
+
+  <div class="code-label"><span class="cs-badge">C#</span> Hello World</div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="kw">using</span> System;
+
+<span class="kw">namespace</span> MyFirstProgram
+{
+    <span class="kw">class</span> <span class="ty">Program</span>
+    {
+        <span class="kw">static void</span> <span class="mt">Main</span>(<span class="ty">string</span>[] args)
+        {
+            Console.<span class="mt">WriteLine</span>(<span class="st">"Hello, World!"</span>);
+        }
+    }
+}</pre>
+  </div>
+
+  <div class="output-label">Output</div>
+  <div class="output-box"><pre>Hello, World!</pre></div>
+
+  <p>Let's break down every line:</p>
+  <table class="tbl">
+    <tr><th>Line</th><th>What it means</th></tr>
+    <tr><td><span class="inline-code">using System;</span></td><td>Import the System namespace so you can use <span class="inline-code">Console</span> without typing the full path <span class="inline-code">System.Console</span></td></tr>
+    <tr><td><span class="inline-code">namespace MyFirstProgram</span></td><td>A container that groups related classes together. Prevents name collisions between classes in large projects.</td></tr>
+    <tr><td><span class="inline-code">class Program</span></td><td>Everything in C# lives inside a class. <span class="inline-code">Program</span> is just a conventional name for the entry-point class.</td></tr>
+    <tr><td><span class="inline-code">static void Main(string[] args)</span></td><td>The entry point. Every C# program starts here. <span class="inline-code">static</span> = no object needed to call it. <span class="inline-code">void</span> = returns nothing. <span class="inline-code">args</span> = command-line arguments.</td></tr>
+    <tr><td><span class="inline-code">Console.WriteLine(...)</span></td><td>Print a line to the terminal, followed by a newline character.</td></tr>
+  </table>
+
+  <div class="callout callout-tip">
+    <div class="callout-title">Top-Level Statements (C# 9+)</div>
+    Modern C# (version 9 and later) allows you to skip the class and method boilerplate for simple programs. You can write just:
+    <div class="code-block" style="margin-top:10px;"><pre>Console.<span class="mt">WriteLine</span>(<span class="st">"Hello, World!"</span>);</pre></div>
+    The compiler wraps this in a hidden <span class="inline-code">Main</span> method automatically. You will see both styles in the wild.
+  </div>
+
+  <h3>Console Input and Output</h3>
+  <div class="code-label"><span class="cs-badge">C#</span> Reading input from the user</div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre>Console.<span class="mt">Write</span>(<span class="st">"Enter your name: "</span>);   <span class="cm">// Write = no newline at end</span>
+<span class="ty">string</span> name = Console.<span class="mt">ReadLine</span>();     <span class="cm">// ReadLine reads one line of input</span>
+Console.<span class="mt">WriteLine</span>(<span class="st">"Hello, "</span> + name + <span class="st">"!"</span>);</pre>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ S2 -->
+<section class="section" id="s2">
+  <div class="section-label">Section 2</div>
+  <h2>Data Types and Variables</h2>
+
+  <p>C# is <strong>statically typed</strong> — every variable must have a declared type, and the compiler enforces it. You declare a variable by writing the type, then the name, then optionally assigning a value.</p>
+
+  <div class="code-label"><span class="cs-badge">C#</span> Variable declaration syntax</div>
+  <div class="code-block"><pre><span class="ty">type</span> variableName = value;   <span class="cm">// general form</span>
+<span class="ty">int</span> age = <span class="nm">25</span>;
+<span class="ty">double</span> price = <span class="nm">9.99</span>;
+<span class="ty">string</span> city = <span class="st">"Vancouver"</span>;
+<span class="ty">bool</span> isActive = <span class="kw">true</span>;</pre></div>
+
+  <h3>Built-in Value Types</h3>
+  <table class="tbl">
+    <tr><th>Type</th><th>Size</th><th>Range / Use</th><th>Example</th></tr>
+    <tr><td><span class="inline-code">int</span></td><td>32-bit</td><td>Whole numbers: −2.1B to 2.1B</td><td><span class="inline-code">int score = 98;</span></td></tr>
+    <tr><td><span class="inline-code">long</span></td><td>64-bit</td><td>Very large whole numbers</td><td><span class="inline-code">long pop = 8000000000L;</span></td></tr>
+    <tr><td><span class="inline-code">double</span></td><td>64-bit</td><td>Decimal numbers (most common)</td><td><span class="inline-code">double pi = 3.14159;</span></td></tr>
+    <tr><td><span class="inline-code">float</span></td><td>32-bit</td><td>Decimal, less precision, suffix F</td><td><span class="inline-code">float temp = 36.6F;</span></td></tr>
+    <tr><td><span class="inline-code">decimal</span></td><td>128-bit</td><td>Financial calculations (exact)</td><td><span class="inline-code">decimal price = 9.99M;</span></td></tr>
+    <tr><td><span class="inline-code">char</span></td><td>16-bit</td><td>Single Unicode character</td><td><span class="inline-code">char grade = 'A';</span></td></tr>
+    <tr><td><span class="inline-code">bool</span></td><td>1-bit</td><td>true or false only</td><td><span class="inline-code">bool done = false;</span></td></tr>
+    <tr><td><span class="inline-code">byte</span></td><td>8-bit</td><td>0 to 255</td><td><span class="inline-code">byte r = 255;</span></td></tr>
+  </table>
+
+  <h3>Reference Types</h3>
+  <table class="tbl">
+    <tr><th>Type</th><th>What it holds</th><th>Default value</th></tr>
+    <tr><td><span class="inline-code">string</span></td><td>A sequence of characters (text)</td><td><span class="inline-code">null</span></td></tr>
+    <tr><td><span class="inline-code">object</span></td><td>The base type of everything in C#</td><td><span class="inline-code">null</span></td></tr>
+    <tr><td>Any class you define</td><td>A reference to an object on the heap</td><td><span class="inline-code">null</span></td></tr>
+  </table>
+
+  <div class="callout callout-note">
+    <div class="callout-title">Value Types vs Reference Types</div>
+    <strong>Value types</strong> (int, double, bool, char, struct) store the actual data directly in memory. When you copy a value type, you get a fully independent copy.<br><br>
+    <strong>Reference types</strong> (string, arrays, classes) store a <em>reference</em> (memory address) to the data. When you copy a reference type, both variables point to the same object.
+  </div>
+
+  <h3>Type Inference with var</h3>
+  <p>C# can infer the type of a variable from its initial value using the <span class="inline-code">var</span> keyword. The type is still fixed at compile time — <span class="inline-code">var</span> is just a convenience shorthand.</p>
+
+  <div class="code-label"><span class="cs-badge">C#</span> Using var</div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="kw">var</span> score = <span class="nm">95</span>;              <span class="cm">// compiler infers: int</span>
+<span class="kw">var</span> name = <span class="st">"Alice"</span>;          <span class="cm">// compiler infers: string</span>
+<span class="kw">var</span> price = <span class="nm">19.99</span>;           <span class="cm">// compiler infers: double</span>
+<span class="kw">var</span> flag = <span class="kw">true</span>;             <span class="cm">// compiler infers: bool</span>
+
+<span class="cm">// var score = 95; is identical to int score = 95;</span>
+<span class="cm">// Once assigned, the type cannot change.</span></pre>
+  </div>
+
+  <h3>Constants</h3>
+  <div class="code-label"><span class="cs-badge">C#</span> Constants with const</div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="kw">const double</span> PI = <span class="nm">3.14159265</span>;
+<span class="kw">const int</span> MAX_STUDENTS = <span class="nm">30</span>;
+<span class="cm">// PI = 3.0;  ← compile error: cannot assign to a constant</span></pre>
+  </div>
+
+  <h3>Nullable Types</h3>
+  <p>By default, value types cannot be <span class="inline-code">null</span>. Adding <span class="inline-code">?</span> after the type makes it nullable — useful when a value might be absent.</p>
+
+  <div class="callout callout-note">
+    <div class="callout-title">int? is NOT the same as int</div>
+    <span class="inline-code">int?</span> is shorthand for <span class="inline-code">Nullable&lt;int&gt;</span> — a struct that <em>wraps</em> an <span class="inline-code">int</span> and adds a second piece of information: whether a value is present at all. It holds two things internally:
+    <div class="code-block" style="margin-top:10px;"><pre style="font-size:12px;"><span class="ty">bool</span> HasValue   <span class="cm">// is there a value?</span>
+<span class="ty">int</span>  Value      <span class="cm">// what is that value? (only meaningful if HasValue is true)</span></pre></div>
+    A plain <span class="inline-code">int</span> always has a value — there is no way to represent "no value" with it. <span class="inline-code">int?</span> takes slightly more memory and has extra behavior.
+  </div>
+
+  <div class="code-label"><span class="cs-badge">C#</span> int vs int? — the difference</div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="ty">int</span>  a = <span class="kw">null</span>;     <span class="cm">// ❌ compile error — int cannot be null</span>
+<span class="ty">int</span>? b = <span class="kw">null</span>;     <span class="cm">// ✅ valid — no value present</span>
+
+<span class="ty">int</span>? x = <span class="nm">25</span>;
+Console.<span class="mt">WriteLine</span>(x.<span class="mt">HasValue</span>);   <span class="cm">// True</span>
+Console.<span class="mt">WriteLine</span>(x.<span class="mt">Value</span>);      <span class="cm">// 25</span>
+
+<span class="ty">int</span>? y = <span class="kw">null</span>;
+Console.<span class="mt">WriteLine</span>(y.<span class="mt">HasValue</span>);   <span class="cm">// False</span>
+Console.<span class="mt">WriteLine</span>(y.<span class="mt">Value</span>);      <span class="cm">// ❌ runtime exception — no value to read!</span></pre>
+  </div>
+
+  <h3>When Would You Actually Use It?</h3>
+  <p>The classic example is a database. Imagine a student record where age is optional — the student may not have filled it in:</p>
+
+  <div class="code-label"><span class="cs-badge">C#</span> Real-world motivation</div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="ty">int</span>  age = <span class="nm">0</span>;    <span class="cm">// ❓ is 0 "not provided" or actually zero? Ambiguous.</span>
+<span class="ty">int</span>? age = <span class="kw">null</span>; <span class="cm">// ✅ null clearly means "not provided"</span>
+
+<span class="cm">// Safe way to use a nullable — check before reading</span>
+<span class="ty">int</span>? optionalAge = <span class="kw">null</span>;
+optionalAge = <span class="nm">25</span>;
+
+<span class="kw">if</span> (optionalAge.<span class="mt">HasValue</span>)
+    Console.<span class="mt">WriteLine</span>(<span class="st">$"Age: {optionalAge.Value}"</span>);  <span class="cm">// Age: 25</span>
+
+<span class="cm">// Shorthand using null-coalescing operator</span>
+<span class="ty">int</span> displayAge = optionalAge ?? <span class="nm">0</span>;  <span class="cm">// use 0 if no value present</span></pre>
+  </div>
+
+  <div class="callout callout-tip">
+    <div class="callout-title">In Short</div>
+    <span class="inline-code">int?</span> is a wrapper around <span class="inline-code">int</span> that adds the concept of absence. Same data when a value exists — but a fundamentally different type that can also represent "nothing." Never read <span class="inline-code">.Value</span> without first checking <span class="inline-code">.HasValue</span>, or use the <span class="inline-code">??</span> operator to provide a safe default.
+  </div>
+
+  <h3>Type Casting</h3>
+  <div class="code-label"><span class="cs-badge">C#</span> Implicit and explicit casting</div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="cm">// Implicit (safe — no data loss possible)</span>
+<span class="ty">int</span> x = <span class="nm">10</span>;
+<span class="ty">double</span> d = x;              <span class="cm">// int → double is always safe</span>
+
+<span class="cm">// Explicit cast (may lose data)</span>
+<span class="ty">double</span> pi = <span class="nm">3.99</span>;
+<span class="ty">int</span> truncated = (<span class="ty">int</span>) pi;  <span class="cm">// truncated = 3 (decimal dropped)</span>
+
+<span class="cm">// Convert using Convert class</span>
+<span class="ty">string</span> s = <span class="st">"42"</span>;
+<span class="ty">int</span> n = Convert.<span class="mt">ToInt32</span>(s);  <span class="cm">// parse string to int</span>
+<span class="ty">int</span> n2 = <span class="ty">int</span>.<span class="mt">Parse</span>(s);       <span class="cm">// another way</span></pre>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ S3 -->
+<section class="section" id="s3">
+  <div class="section-label">Section 3</div>
+  <h2>Operators and Expressions</h2>
+
+  <h3>Arithmetic Operators</h3>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="ty">int</span> a = <span class="nm">17</span>, b = <span class="nm">5</span>;
+Console.<span class="mt">WriteLine</span>(a + b);    <span class="cm">// 22  — addition</span>
+Console.<span class="mt">WriteLine</span>(a - b);    <span class="cm">// 12  — subtraction</span>
+Console.<span class="mt">WriteLine</span>(a * b);    <span class="cm">// 85  — multiplication</span>
+Console.<span class="mt">WriteLine</span>(a / b);    <span class="cm">// 3   — integer division (truncates!)</span>
+Console.<span class="mt">WriteLine</span>(a % b);    <span class="cm">// 2   — modulo (remainder)</span>
+Console.<span class="mt">WriteLine</span>(<span class="nm">17.0</span> / b); <span class="cm">// 3.4 — use double for real division</span></pre>
+  </div>
+
+  <h3>Comparison Operators</h3>
+  <table class="tbl">
+    <tr><th>Operator</th><th>Meaning</th><th>Example</th><th>Result</th></tr>
+    <tr><td><span class="inline-code">==</span></td><td>Equal to</td><td><span class="inline-code">5 == 5</span></td><td><span class="inline-code">true</span></td></tr>
+    <tr><td><span class="inline-code">!=</span></td><td>Not equal to</td><td><span class="inline-code">5 != 3</span></td><td><span class="inline-code">true</span></td></tr>
+    <tr><td><span class="inline-code">&gt;</span></td><td>Greater than</td><td><span class="inline-code">7 &gt; 3</span></td><td><span class="inline-code">true</span></td></tr>
+    <tr><td><span class="inline-code">&lt;</span></td><td>Less than</td><td><span class="inline-code">2 &lt; 1</span></td><td><span class="inline-code">false</span></td></tr>
+    <tr><td><span class="inline-code">&gt;=</span></td><td>Greater than or equal</td><td><span class="inline-code">5 &gt;= 5</span></td><td><span class="inline-code">true</span></td></tr>
+    <tr><td><span class="inline-code">&lt;=</span></td><td>Less than or equal</td><td><span class="inline-code">4 &lt;= 3</span></td><td><span class="inline-code">false</span></td></tr>
+  </table>
+
+  <h3>Logical Operators</h3>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="ty">bool</span> p = <span class="kw">true</span>, q = <span class="kw">false</span>;
+Console.<span class="mt">WriteLine</span>(p &amp;&amp; q);   <span class="cm">// false  — AND: both must be true</span>
+Console.<span class="mt">WriteLine</span>(p || q);   <span class="cm">// true   — OR:  at least one true</span>
+Console.<span class="mt">WriteLine</span>(!p);       <span class="cm">// false  — NOT: flips the value</span></pre>
+  </div>
+
+  <h3>Assignment Shorthand</h3>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="ty">int</span> n = <span class="nm">10</span>;
+n += <span class="nm">5</span>;   <span class="cm">// n = 15  (same as n = n + 5)</span>
+n -= <span class="nm">3</span>;   <span class="cm">// n = 12</span>
+n *= <span class="nm">2</span>;   <span class="cm">// n = 24</span>
+n /= <span class="nm">4</span>;   <span class="cm">// n = 6</span>
+n++;       <span class="cm">// n = 7   (increment by 1)</span>
+n--;       <span class="cm">// n = 6   (decrement by 1)</span></pre>
+  </div>
+
+  <h3>Ternary Operator</h3>
+  <p>A one-line shorthand for simple if/else decisions that produce a value.</p>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="ty">int</span> age = <span class="nm">20</span>;
+<span class="ty">string</span> status = (age >= <span class="nm">18</span>) ? <span class="st">"adult"</span> : <span class="st">"minor"</span>;
+Console.<span class="mt">WriteLine</span>(status);   <span class="cm">// adult</span>
+
+<span class="cm">// condition ? value_if_true : value_if_false</span></pre>
+  </div>
+
+  <h3>Null-Coalescing Operator ??</h3>
+  <p>The <span class="inline-code">??</span> operator answers one simple question: <strong>"Is this null? If yes, use a backup instead."</strong> Think of it as a safety net — you have a value that <em>might</em> be null, and you want to guarantee you always end up with something usable.</p>
+
+  <div class="g2">
+    <div class="card">
+      <p style="font-weight:700;margin-bottom:8px;">Without ??</p>
+      <div class="code-block" style="margin:0;"><pre style="font-size:12px;"><span class="ty">string</span> result;
+<span class="kw">if</span> (input != <span class="kw">null</span>)
+    result = input;
+<span class="kw">else</span>
+    result = <span class="st">"default"</span>;</pre></div>
+    </div>
+    <div class="card">
+      <p style="font-weight:700;margin-bottom:8px;">With ?? — same logic, one line</p>
+      <div class="code-block" style="margin:0;"><pre style="font-size:12px;"><span class="ty">string</span> result = input ?? <span class="st">"default"</span>;
+
+<span class="cm">// Left side first. Not null → use it.</span>
+<span class="cm">// Is null → use right side.</span></pre></div>
+    </div>
+  </div>
+
+  <div class="code-label"><span class="cs-badge">C#</span> With a nullable int</div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="ty">int</span>? score = <span class="kw">null</span>;
+<span class="ty">int</span> displayScore = score ?? <span class="nm">0</span>;
+Console.<span class="mt">WriteLine</span>(displayScore);   <span class="cm">// 0  — score was null, fallback used</span>
+
+score = <span class="nm">85</span>;
+displayScore = score ?? <span class="nm">0</span>;
+Console.<span class="mt">WriteLine</span>(displayScore);   <span class="cm">// 85 — score has a value, used directly</span></pre>
+  </div>
+
+  <div class="code-label"><span class="cs-badge">C#</span> Chaining ?? — checks left to right, stops at first non-null</div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="ty">string</span> a = <span class="kw">null</span>;
+<span class="ty">string</span> b = <span class="kw">null</span>;
+<span class="ty">string</span> c = <span class="st">"hello"</span>;
+
+<span class="ty">string</span> result = a ?? b ?? c;
+<span class="cm">// a is null → try b → b is null → try c → "hello"</span>
+Console.<span class="mt">WriteLine</span>(result);   <span class="cm">// hello</span></pre>
+  </div>
+
+  <div class="code-label"><span class="cs-badge">C#</span> Where it really shines — method return values</div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="ty">string</span> name = <span class="mt">GetNameFromDatabase</span>() ?? <span class="st">"Guest"</span>;
+<span class="cm">// Don't know if the database returned something or null.</span>
+<span class="cm">// ?? handles both cases in one clean line.</span></pre>
+  </div>
+
+  <div class="callout callout-tip">
+    <div class="callout-title">Mental Model</div>
+    <span class="inline-code">??</span> is a <strong>fallback</strong> operator. The left side is your preferred value. The right side is your backup when the preferred is absent. Left is always checked first — right is only used when left is null.
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ S4 -->
+<section class="section" id="s4">
+  <div class="section-label">Section 4</div>
+  <h2>Strings — Working with Text</h2>
+
+  <p>In C#, <span class="inline-code">string</span> is a reference type but behaves like a value type in practice. Strings are <strong>immutable</strong> — once created, the characters inside cannot be changed. Operations that appear to modify a string actually create a new one.</p>
+
+  <h3>String Concatenation</h3>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="ty">string</span> first = <span class="st">"Alice"</span>;
+<span class="ty">string</span> last  = <span class="st">"Smith"</span>;
+<span class="ty">string</span> full  = first + <span class="st">" "</span> + last;   <span class="cm">// "Alice Smith"</span>
+Console.<span class="mt">WriteLine</span>(full);</pre>
+  </div>
+
+  <h3>String Interpolation (the modern way)</h3>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="ty">string</span> name = <span class="st">"Alice"</span>;
+<span class="ty">int</span> score = <span class="nm">95</span>;
+
+<span class="cm">// Prefix the string with $ to embed expressions in { }</span>
+Console.<span class="mt">WriteLine</span>(<span class="st">$"</span>{name}<span class="st"> scored </span>{score}<span class="st"> out of 100."</span>);
+<span class="cm">// Alice scored 95 out of 100.</span>
+
+Console.<span class="mt">WriteLine</span>(<span class="st">$"</span>{score * <span class="nm">1.0</span> / <span class="nm">100</span>:P0}<span class="st">"</span>);  <span class="cm">// 95% — with format</span></pre>
+  </div>
+
+  <h3>Verbatim Strings</h3>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="cm">// Use @ to disable escape sequences — useful for file paths</span>
+<span class="ty">string</span> path = <span class="st">@"C:\Users\Alice\Documents\file.txt"</span>;
+<span class="ty">string</span> multiLine = <span class="st">@"Line one
+Line two
+Line three"</span>;</pre>
+  </div>
+
+  <h3>Common String Methods</h3>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="ty">string</span> s = <span class="st">"  Hello, World!  "</span>;
+
+Console.<span class="mt">WriteLine</span>(s.<span class="mt">Trim</span>());             <span class="cm">// "Hello, World!"</span>
+Console.<span class="mt">WriteLine</span>(s.<span class="mt">ToUpper</span>());          <span class="cm">// "  HELLO, WORLD!  "</span>
+Console.<span class="mt">WriteLine</span>(s.<span class="mt">ToLower</span>());          <span class="cm">// "  hello, world!  "</span>
+Console.<span class="mt">WriteLine</span>(s.<span class="mt">Contains</span>(<span class="st">"World"</span>));  <span class="cm">// True</span>
+Console.<span class="mt">WriteLine</span>(s.<span class="mt">Replace</span>(<span class="st">"World"</span>, <span class="st">"C#"</span>));  <span class="cm">// "  Hello, C#!  "</span>
+Console.<span class="mt">WriteLine</span>(s.<span class="mt">Length</span>);            <span class="cm">// 18 (property, not method)</span>
+Console.<span class="mt">WriteLine</span>(s.<span class="mt">Trim</span>().<span class="mt">Split</span>(<span class="st">','</span>)[<span class="nm">0</span>]); <span class="cm">// "Hello"</span>
+Console.<span class="mt">WriteLine</span>(s.<span class="mt">Substring</span>(<span class="nm">2</span>, <span class="nm">5</span>));   <span class="cm">// "Hello"</span>
+Console.<span class="mt">WriteLine</span>(s.<span class="mt">StartsWith</span>(<span class="st">"  H"</span>)); <span class="cm">// True</span>
+Console.<span class="mt">WriteLine</span>(s[<span class="nm">2</span>]);               <span class="cm">// 'H' — index access</span></pre>
+  </div>
+
+  <h3>String Comparison</h3>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="ty">string</span> a = <span class="st">"hello"</span>;
+<span class="ty">string</span> b = <span class="st">"HELLO"</span>;
+
+Console.<span class="mt">WriteLine</span>(a == b);                       <span class="cm">// False (case-sensitive)</span>
+Console.<span class="mt">WriteLine</span>(a.<span class="mt">Equals</span>(b, StringComparison.<span class="mt">OrdinalIgnoreCase</span>)); <span class="cm">// True</span></pre>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ S5 -->
+<section class="section" id="s5">
+  <div class="section-label">Section 5</div>
+  <h2>Control Flow — Making Decisions</h2>
+
+  <h3>if / else if / else</h3>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="ty">int</span> score = <span class="nm">78</span>;
+
+<span class="kw">if</span> (score >= <span class="nm">90</span>)
+{
+    Console.<span class="mt">WriteLine</span>(<span class="st">"Grade: A"</span>);
+}
+<span class="kw">else if</span> (score >= <span class="nm">80</span>)
+{
+    Console.<span class="mt">WriteLine</span>(<span class="st">"Grade: B"</span>);
+}
+<span class="kw">else if</span> (score >= <span class="nm">70</span>)
+{
+    Console.<span class="mt">WriteLine</span>(<span class="st">"Grade: C"</span>);
+}
+<span class="kw">else</span>
+{
+    Console.<span class="mt">WriteLine</span>(<span class="st">"Grade: F"</span>);
+}</pre>
+  </div>
+  <div class="output-label">Output</div>
+  <div class="output-box"><pre>Grade: C</pre></div>
+
+  <div class="callout callout-tip">
+    <div class="callout-title">Braces Rule</div>
+    In C#, braces <span class="inline-code">{ }</span> define a block. You can omit them for a single-statement body — but best practice is to always include them to avoid bugs when adding lines later.
+  </div>
+
+  <h3>switch Statement</h3>
+  <div class="code-label"><span class="cs-badge">C#</span> Classic switch</div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="ty">string</span> day = <span class="st">"Monday"</span>;
+
+<span class="kw">switch</span> (day)
+{
+    <span class="kw">case</span> <span class="st">"Saturday"</span>:
+    <span class="kw">case</span> <span class="st">"Sunday"</span>:
+        Console.<span class="mt">WriteLine</span>(<span class="st">"Weekend"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="st">"Monday"</span>:
+        Console.<span class="mt">WriteLine</span>(<span class="st">"Start of week"</span>);
+        <span class="kw">break</span>;
+    <span class="kw">default</span>:
+        Console.<span class="mt">WriteLine</span>(<span class="st">"Weekday"</span>);
+        <span class="kw">break</span>;
+}</pre>
+  </div>
+
+  <h3>switch Expression (C# 8+ — modern and concise)</h3>
+  <p>The switch expression is a cleaner alternative to if/else chains and the classic switch statement. Instead of running code inside each branch, it <strong>produces a value directly</strong> — the whole block is one expression that gets assigned to a variable.</p>
+
+  <div class="code-label"><span class="cs-badge">C#</span> switch expression — line by line</div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="ty">int</span> score = <span class="nm">85</span>;
+
+<span class="ty">string</span> grade = score <span class="kw">switch</span>   <span class="cm">// take the value of score and match it</span>
+{
+    >= <span class="nm">90</span> =&gt; <span class="st">"A"</span>,   <span class="cm">// if score >= 90  → result is "A"</span>
+    >= <span class="nm">80</span> =&gt; <span class="st">"B"</span>,   <span class="cm">// if score >= 80  → result is "B"</span>
+    >= <span class="nm">70</span> =&gt; <span class="st">"C"</span>,   <span class="cm">// if score >= 70  → result is "C"</span>
+    _      =&gt; <span class="st">"F"</span>    <span class="cm">// anything else  → result is "F"  (_ = default)</span>
+};
+Console.<span class="mt">WriteLine</span>(<span class="st">$"Grade: {grade}"</span>);  <span class="cm">// Grade: B</span></pre>
+  </div>
+
+  <div class="callout callout-note">
+    <div class="callout-title">How Matching Works — Top to Bottom, Stops at First Match</div>
+    For score = 85:
+    <ul style="padding-left:18px;line-height:2.2;margin-top:6px;font-size:14px;">
+      <li><span class="inline-code">&gt;= 90</span> — is 85 &gt;= 90? <strong>No.</strong> Move down.</li>
+      <li><span class="inline-code">&gt;= 80</span> — is 85 &gt;= 80? <strong>Yes. ✅ Stop here. Result is "B".</strong></li>
+      <li><span class="inline-code">&gt;= 70</span> — never even checked.</li>
+      <li><span class="inline-code">_</span> — never reached either.</li>
+    </ul>
+    The <span class="inline-code">=&gt;</span> means <strong>"then the result is"</strong> — not an assignment, not a comparison. If this pattern matches, produce this value.
+  </div>
+
+  <div class="callout callout-tip">
+    <div class="callout-title">What is _ ?</div>
+    The underscore is the <strong>discard pattern</strong> — it matches anything that did not match above. It is the default case. Every switch expression should have one, otherwise the compiler warns you that some values are unhandled.
+  </div>
+
+  <h3>All Three Ways — Same Result</h3>
+  <div class="code-label"><span class="cs-badge">C#</span> if/else vs switch statement vs switch expression</div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="cm">// Option 1 — if/else chain (most familiar)</span>
+<span class="ty">string</span> grade;
+<span class="kw">if</span>      (score >= <span class="nm">90</span>) grade = <span class="st">"A"</span>;
+<span class="kw">else if</span> (score >= <span class="nm">80</span>) grade = <span class="st">"B"</span>;
+<span class="kw">else if</span> (score >= <span class="nm">70</span>) grade = <span class="st">"C"</span>;
+<span class="kw">else</span>                   grade = <span class="st">"F"</span>;
+
+<span class="cm">// Option 2 — classic switch statement</span>
+<span class="kw">switch</span> (score)
+{
+    <span class="kw">case</span> >= <span class="nm">90</span>: grade = <span class="st">"A"</span>; <span class="kw">break</span>;
+    <span class="kw">case</span> >= <span class="nm">80</span>: grade = <span class="st">"B"</span>; <span class="kw">break</span>;
+    <span class="kw">case</span> >= <span class="nm">70</span>: grade = <span class="st">"C"</span>; <span class="kw">break</span>;
+    <span class="kw">default</span>:    grade = <span class="st">"F"</span>; <span class="kw">break</span>;
+}
+
+<span class="cm">// Option 3 — switch expression (modern, cleanest)</span>
+<span class="ty">string</span> grade = score <span class="kw">switch</span>
+{
+    >= <span class="nm">90</span> =&gt; <span class="st">"A"</span>,
+    >= <span class="nm">80</span> =&gt; <span class="st">"B"</span>,
+    >= <span class="nm">70</span> =&gt; <span class="st">"C"</span>,
+    _     =&gt; <span class="st">"F"</span>
+};
+<span class="cm">// All three produce: grade = "B" for score = 85</span></pre>
+  </div>
+
+  <div class="callout callout-good">
+    <div class="callout-title">Why switch expression is preferred in modern C#</div>
+    <ul style="padding-left:18px;font-size:14px;line-height:2;">
+      <li>No <span class="inline-code">break</span> statements to forget</li>
+      <li>The entire block produces one value — assigned in one go</li>
+      <li>Compiler forces you to handle all cases (via <span class="inline-code">_</span>)</li>
+      <li>Less code, same logic, easier to read</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ S6 -->
+<section class="section" id="s6">
+  <div class="section-label">Section 6</div>
+  <h2>Loops — Repeating Actions</h2>
+
+  <h3>for Loop</h3>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="cm">// for (initializer; condition; iterator)</span>
+<span class="kw">for</span> (<span class="ty">int</span> i = <span class="nm">0</span>; i &lt; <span class="nm">5</span>; i++)
+{
+    Console.<span class="mt">WriteLine</span>(<span class="st">$"i = {i}"</span>);
+}</pre>
+  </div>
+  <div class="output-label">Output</div>
+  <div class="output-box"><pre>i = 0
+i = 1
+i = 2
+i = 3
+i = 4</pre></div>
+
+  <h3>while Loop</h3>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="ty">int</span> count = <span class="nm">1</span>;
+<span class="kw">while</span> (count &lt;= <span class="nm">5</span>)
+{
+    Console.<span class="mt">Write</span>(count + <span class="st">" "</span>);
+    count++;
+}
+<span class="cm">// Output: 1 2 3 4 5</span></pre>
+  </div>
+
+  <h3>do-while Loop</h3>
+  <p>Executes the body <strong>at least once</strong> — the condition is checked after, not before.</p>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="ty">int</span> n;
+<span class="kw">do</span>
+{
+    Console.<span class="mt">Write</span>(<span class="st">"Enter a positive number: "</span>);
+    n = <span class="ty">int</span>.<span class="mt">Parse</span>(Console.<span class="mt">ReadLine</span>());
+} <span class="kw">while</span> (n &lt;= <span class="nm">0</span>);
+
+Console.<span class="mt">WriteLine</span>(<span class="st">$"You entered: {n}"</span>);</pre>
+  </div>
+
+  <h3>foreach Loop — iterating collections</h3>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="ty">string</span>[] fruits = { <span class="st">"apple"</span>, <span class="st">"banana"</span>, <span class="st">"cherry"</span> };
+
+<span class="kw">foreach</span> (<span class="ty">string</span> fruit <span class="kw">in</span> fruits)
+{
+    Console.<span class="mt">WriteLine</span>(fruit);
+}</pre>
+  </div>
+  <div class="output-label">Output</div>
+  <div class="output-box"><pre>apple
+banana
+cherry</pre></div>
+
+  <h3>break and continue</h3>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="kw">for</span> (<span class="ty">int</span> i = <span class="nm">0</span>; i &lt; <span class="nm">10</span>; i++)
+{
+    <span class="kw">if</span> (i == <span class="nm">3</span>) <span class="kw">continue</span>;  <span class="cm">// skip 3</span>
+    <span class="kw">if</span> (i == <span class="nm">7</span>) <span class="kw">break</span>;     <span class="cm">// stop at 7</span>
+    Console.<span class="mt">Write</span>(i + <span class="st">" "</span>);
+}
+<span class="cm">// Output: 0 1 2 4 5 6</span></pre>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ S7 -->
+<section class="section" id="s7">
+  <div class="section-label">Section 7</div>
+  <h2>Arrays and Lists</h2>
+
+  <h3>Arrays — Fixed-Size Collections</h3>
+  <p>An array holds a fixed number of elements of the same type. The size is set at creation and cannot change.</p>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="cm">// Declaration and initialization</span>
+<span class="ty">int</span>[] scores = <span class="kw">new</span> <span class="ty">int</span>[<span class="nm">5</span>];          <span class="cm">// 5 ints, all 0 by default</span>
+<span class="ty">int</span>[] grades = { <span class="nm">90</span>, <span class="nm">85</span>, <span class="nm">78</span>, <span class="nm">92</span>, <span class="nm">88</span> };  <span class="cm">// inline initialization</span>
+
+<span class="cm">// Accessing elements</span>
+Console.<span class="mt">WriteLine</span>(grades[<span class="nm">0</span>]);   <span class="cm">// 90  — zero-indexed</span>
+Console.<span class="mt">WriteLine</span>(grades[<span class="nm">4</span>]);   <span class="cm">// 88  — last element</span>
+Console.<span class="mt">WriteLine</span>(grades.<span class="mt">Length</span>); <span class="cm">// 5</span>
+
+<span class="cm">// Modify</span>
+grades[<span class="nm">2</span>] = <span class="nm">80</span>;
+
+<span class="cm">// Iterate</span>
+<span class="kw">foreach</span> (<span class="ty">int</span> g <span class="kw">in</span> grades)
+    Console.<span class="mt">Write</span>(g + <span class="st">" "</span>);   <span class="cm">// 90 85 80 92 88</span></pre>
+  </div>
+
+  <h3>Multi-Dimensional Arrays</h3>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="ty">int</span>[,] matrix = {
+    { <span class="nm">1</span>, <span class="nm">2</span>, <span class="nm">3</span> },
+    { <span class="nm">4</span>, <span class="nm">5</span>, <span class="nm">6</span> }
+};
+
+Console.<span class="mt">WriteLine</span>(matrix[<span class="nm">0</span>, <span class="nm">2</span>]);  <span class="cm">// 3  (row 0, col 2)</span>
+Console.<span class="mt">WriteLine</span>(matrix[<span class="nm">1</span>, <span class="nm">0</span>]);  <span class="cm">// 4  (row 1, col 0)</span></pre>
+  </div>
+
+  <h3>List&lt;T&gt; — Dynamic-Size Collections</h3>
+  <p><span class="inline-code">List&lt;T&gt;</span> is the go-to dynamic collection. It grows and shrinks automatically. You must include <span class="inline-code">using System.Collections.Generic;</span> (or <span class="inline-code">using System;</span> covers it in modern .NET).</p>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="ty">List</span>&lt;<span class="ty">string</span>&gt; names = <span class="kw">new</span> <span class="ty">List</span>&lt;<span class="ty">string</span>&gt;();
+
+names.<span class="mt">Add</span>(<span class="st">"Alice"</span>);
+names.<span class="mt">Add</span>(<span class="st">"Bob"</span>);
+names.<span class="mt">Add</span>(<span class="st">"Carol"</span>);
+
+Console.<span class="mt">WriteLine</span>(names[<span class="nm">1</span>]);       <span class="cm">// Bob</span>
+Console.<span class="mt">WriteLine</span>(names.<span class="mt">Count</span>);    <span class="cm">// 3</span>
+Console.<span class="mt">WriteLine</span>(names.<span class="mt">Contains</span>(<span class="st">"Bob"</span>));  <span class="cm">// True</span>
+
+names.<span class="mt">Remove</span>(<span class="st">"Bob"</span>);
+names.<span class="mt">Insert</span>(<span class="nm">0</span>, <span class="st">"Dave"</span>);          <span class="cm">// insert at index 0</span>
+
+<span class="kw">foreach</span> (<span class="ty">string</span> n <span class="kw">in</span> names)
+    Console.<span class="mt">WriteLine</span>(n);</pre>
+  </div>
+
+  <h3>Dictionary&lt;TKey, TValue&gt; — Key-Value Pairs</h3>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="ty">Dictionary</span>&lt;<span class="ty">string</span>, <span class="ty">int</span>&gt; ages = <span class="kw">new</span>()
+{
+    { <span class="st">"Alice"</span>, <span class="nm">30</span> },
+    { <span class="st">"Bob"</span>,   <span class="nm">25</span> }
+};
+
+Console.<span class="mt">WriteLine</span>(ages[<span class="st">"Alice"</span>]);    <span class="cm">// 30</span>
+ages[<span class="st">"Carol"</span>] = <span class="nm">28</span>;                 <span class="cm">// add new entry</span>
+
+<span class="kw">if</span> (ages.<span class="mt">ContainsKey</span>(<span class="st">"Bob"</span>))
+    Console.<span class="mt">WriteLine</span>(<span class="st">"Bob found"</span>);
+
+<span class="kw">foreach</span> (<span class="kw">var</span> kvp <span class="kw">in</span> ages)
+    Console.<span class="mt">WriteLine</span>(<span class="st">$"{kvp.Key}: {kvp.Value}"</span>);</pre>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ S8 -->
+<section class="section" id="s8">
+  <div class="section-label">Section 8</div>
+  <h2>Methods — Defining and Calling Functions</h2>
+
+  <p>In C#, functions are called <strong>methods</strong> and must live inside a class. A method has a return type, a name, and optional parameters.</p>
+
+  <div class="code-label"><span class="cs-badge">C#</span> Basic method structure</div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="kw">static</span> <span class="ty">int</span> <span class="mt">Add</span>(<span class="ty">int</span> a, <span class="ty">int</span> b)
+{
+    <span class="kw">return</span> a + b;
+}
+
+<span class="kw">static void</span> <span class="mt">Greet</span>(<span class="ty">string</span> name)     <span class="cm">// void = returns nothing</span>
+{
+    Console.<span class="mt">WriteLine</span>(<span class="st">$"Hello, {name}!"</span>);
+}
+
+<span class="cm">// Calling methods</span>
+<span class="ty">int</span> sum = <span class="mt">Add</span>(<span class="nm">3</span>, <span class="nm">7</span>);              <span class="cm">// sum = 10</span>
+<span class="mt">Greet</span>(<span class="st">"Alice"</span>);                   <span class="cm">// Hello, Alice!</span></pre>
+  </div>
+
+  <h3>Default Parameters</h3>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="kw">static void</span> <span class="mt">PrintMessage</span>(<span class="ty">string</span> message, <span class="ty">int</span> times = <span class="nm">1</span>)
+{
+    <span class="kw">for</span> (<span class="ty">int</span> i = <span class="nm">0</span>; i &lt; times; i++)
+        Console.<span class="mt">WriteLine</span>(message);
+}
+
+<span class="mt">PrintMessage</span>(<span class="st">"Hi"</span>);        <span class="cm">// prints once (default)</span>
+<span class="mt">PrintMessage</span>(<span class="st">"Hi"</span>, <span class="nm">3</span>);     <span class="cm">// prints three times</span></pre>
+  </div>
+
+  <h3>Method Overloading</h3>
+  <p>Multiple methods can share the same name if their parameter lists differ — the compiler picks the right one based on the arguments you pass.</p>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="kw">static</span> <span class="ty">double</span> <span class="mt">Area</span>(<span class="ty">double</span> radius)               <span class="cm">// circle</span>
+    =&gt; Math.PI * radius * radius;
+
+<span class="kw">static</span> <span class="ty">double</span> <span class="mt">Area</span>(<span class="ty">double</span> width, <span class="ty">double</span> height)  <span class="cm">// rectangle</span>
+    =&gt; width * height;
+
+<span class="kw">static</span> <span class="ty">double</span> <span class="mt">Area</span>(<span class="ty">double</span> a, <span class="ty">double</span> b, <span class="ty">double</span> c)  <span class="cm">// triangle (Heron's)</span>
+{
+    <span class="ty">double</span> s = (a + b + c) / <span class="nm">2</span>;
+    <span class="kw">return</span> Math.<span class="mt">Sqrt</span>(s * (s-a) * (s-b) * (s-c));
+}
+
+Console.<span class="mt">WriteLine</span>(<span class="mt">Area</span>(<span class="nm">5.0</span>));            <span class="cm">// circle</span>
+Console.<span class="mt">WriteLine</span>(<span class="mt">Area</span>(<span class="nm">4.0</span>, <span class="nm">6.0</span>));      <span class="cm">// rectangle</span></pre>
+  </div>
+
+  <h3>ref and out Parameters</h3>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="cm">// out: method must assign a value before returning</span>
+<span class="kw">static bool</span> <span class="mt">TryParse</span>(<span class="ty">string</span> s, <span class="kw">out</span> <span class="ty">int</span> result)
+{
+    <span class="kw">return</span> <span class="ty">int</span>.<span class="mt">TryParse</span>(s, <span class="kw">out</span> result);
+}
+
+<span class="kw">if</span> (<span class="mt">TryParse</span>(<span class="st">"42"</span>, <span class="kw">out int</span> val))
+    Console.<span class="mt">WriteLine</span>(<span class="st">$"Parsed: {val}"</span>);   <span class="cm">// Parsed: 42</span></pre>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ S9 -->
+<section class="section" id="s9">
+  <div class="section-label">Section 9</div>
+  <h2>Classes and Objects</h2>
+
+  <p>A <strong>class</strong> is a blueprint for an object. It defines what data an object holds (fields) and what actions it can perform (methods). An <strong>object</strong> is a specific instance of a class.</p>
+
+  <div class="code-label"><span class="cs-badge">C#</span> Defining a class</div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="kw">class</span> <span class="ty">Student</span>
+{
+    <span class="cm">// Fields — data the object holds</span>
+    <span class="kw">public</span> <span class="ty">string</span> Name;
+    <span class="kw">public</span> <span class="ty">int</span>    Age;
+    <span class="kw">public</span> <span class="ty">double</span> GPA;
+
+    <span class="cm">// Constructor — runs when you create an object</span>
+    <span class="kw">public</span> <span class="ty">Student</span>(<span class="ty">string</span> name, <span class="ty">int</span> age, <span class="ty">double</span> gpa)
+    {
+        Name = name;
+        Age  = age;
+        GPA  = gpa;
+    }
+
+    <span class="cm">// Method — action the object can perform</span>
+    <span class="kw">public void</span> <span class="mt">Introduce</span>()
+    {
+        Console.<span class="mt">WriteLine</span>(<span class="st">$"Hi, I'm {Name}, age {Age}, GPA {GPA}."</span>);
+    }
+
+    <span class="cm">// Override ToString so Console.WriteLine shows something useful</span>
+    <span class="kw">public override</span> <span class="ty">string</span> <span class="mt">ToString</span>()
+        =&gt; <span class="st">$"Student({Name}, {Age}, {GPA})"</span>;
+}</pre>
+  </div>
+
+  <div class="code-label"><span class="cs-badge">C#</span> Creating and using objects</div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="cm">// new keyword creates an object and calls the constructor</span>
+<span class="ty">Student</span> s1 = <span class="kw">new</span> <span class="ty">Student</span>(<span class="st">"Alice"</span>, <span class="nm">20</span>, <span class="nm">3.8</span>);
+<span class="ty">Student</span> s2 = <span class="kw">new</span> <span class="ty">Student</span>(<span class="st">"Bob"</span>,   <span class="nm">22</span>, <span class="nm">3.5</span>);
+
+s1.<span class="mt">Introduce</span>();   <span class="cm">// Hi, I'm Alice, age 20, GPA 3.8.</span>
+s2.<span class="mt">Introduce</span>();   <span class="cm">// Hi, I'm Bob, age 22, GPA 3.5.</span>
+
+Console.<span class="mt">WriteLine</span>(s1.Name);  <span class="cm">// Alice</span>
+Console.<span class="mt">WriteLine</span>(s1);       <span class="cm">// Student(Alice, 20, 3.8)</span></pre>
+  </div>
+
+  <h3>Multiple Constructors (Constructor Overloading)</h3>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="kw">class</span> <span class="ty">Point</span>
+{
+    <span class="kw">public</span> <span class="ty">double</span> X, Y;
+
+    <span class="kw">public</span> <span class="ty">Point</span>()                         <span class="cm">// default constructor</span>
+    { X = <span class="nm">0</span>; Y = <span class="nm">0</span>; }
+
+    <span class="kw">public</span> <span class="ty">Point</span>(<span class="ty">double</span> x, <span class="ty">double</span> y)       <span class="cm">// parameterized</span>
+    { X = x; Y = y; }
+
+    <span class="kw">public</span> <span class="ty">double</span> <span class="mt">DistanceTo</span>(<span class="ty">Point</span> other)
+    {
+        <span class="ty">double</span> dx = X - other.X;
+        <span class="ty">double</span> dy = Y - other.Y;
+        <span class="kw">return</span> Math.<span class="mt">Sqrt</span>(dx*dx + dy*dy);
+    }
+}
+
+<span class="ty">Point</span> origin = <span class="kw">new</span> <span class="ty">Point</span>();
+<span class="ty">Point</span> p      = <span class="kw">new</span> <span class="ty">Point</span>(<span class="nm">3</span>, <span class="nm">4</span>);
+Console.<span class="mt">WriteLine</span>(origin.<span class="mt">DistanceTo</span>(p));  <span class="cm">// 5</span></pre>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ S10 -->
+<section class="section" id="s10">
+  <div class="section-label">Section 10</div>
+  <h2>Access Modifiers and Properties</h2>
+
+  <p>Access modifiers control which parts of your program can see a class member. Properties let you expose data safely — they look like fields to the outside world but run code when read or written.</p>
+
+  <h3>Access Modifiers</h3>
+  <table class="tbl">
+    <tr><th>Modifier</th><th>Visible to</th><th>Use it for</th></tr>
+    <tr><td><span class="inline-code">public</span></td><td>Everyone</td><td>API surface — things other code needs to use</td></tr>
+    <tr><td><span class="inline-code">private</span></td><td>This class only</td><td>Internal state that should not be directly touched</td></tr>
+    <tr><td><span class="inline-code">protected</span></td><td>This class + subclasses</td><td>Data shared with subclasses but not the outside world</td></tr>
+    <tr><td><span class="inline-code">internal</span></td><td>This project/assembly</td><td>Visible across the project but not to external consumers</td></tr>
+    <tr><td><span class="inline-code">protected internal</span></td><td>Project + subclasses</td><td>Combination of both</td></tr>
+  </table>
+
+  <h3>Properties — Controlled Access to Data</h3>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="kw">class</span> <span class="ty">BankAccount</span>
+{
+    <span class="kw">private</span> <span class="ty">double</span> _balance;   <span class="cm">// private field — hidden from outside</span>
+
+    <span class="cm">// Property with getter and setter</span>
+    <span class="kw">public</span> <span class="ty">double</span> Balance
+    {
+        <span class="kw">get</span> { <span class="kw">return</span> _balance; }
+        <span class="kw">set</span>
+        {
+            <span class="kw">if</span> (value &lt; <span class="nm">0</span>)
+                <span class="kw">throw new</span> ArgumentException(<span class="st">"Balance cannot be negative"</span>);
+            _balance = value;
+        }
+    }
+
+    <span class="cm">// Auto-property: compiler creates the hidden field automatically</span>
+    <span class="kw">public</span> <span class="ty">string</span> Owner { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="cm">// Read-only auto-property (can only be set in constructor)</span>
+    <span class="kw">public</span> <span class="ty">string</span> AccountId { <span class="kw">get</span>; }
+
+    <span class="kw">public</span> <span class="ty">BankAccount</span>(<span class="ty">string</span> owner, <span class="ty">string</span> id)
+    {
+        Owner = owner;
+        AccountId = id;
+        _balance = <span class="nm">0</span>;
+    }
+}
+
+<span class="ty">BankAccount</span> acct = <span class="kw">new</span> <span class="ty">BankAccount</span>(<span class="st">"Alice"</span>, <span class="st">"ACC001"</span>);
+acct.Balance = <span class="nm">500.0</span>;              <span class="cm">// calls the setter</span>
+Console.<span class="mt">WriteLine</span>(acct.Balance);   <span class="cm">// calls the getter: 500</span></pre>
+  </div>
+
+  <div class="callout callout-note">
+    <div class="callout-title">Encapsulation</div>
+    The pattern of hiding fields with <span class="inline-code">private</span> and exposing them through <span class="inline-code">public</span> properties is called <strong>encapsulation</strong>. It lets you add validation, logging, or computation inside the getter/setter without changing how the rest of the code uses the class.
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ S11 -->
+<section class="section" id="s11">
+  <div class="section-label">Section 11</div>
+  <h2>Inheritance and Polymorphism</h2>
+
+  <p><strong>Inheritance</strong> lets one class (the <em>child</em> or <em>derived</em> class) reuse the fields and methods of another (the <em>parent</em> or <em>base</em> class) using the <span class="inline-code">:</span> operator.</p>
+
+  <div class="code-label"><span class="cs-badge">C#</span> Base class</div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="kw">class</span> <span class="ty">Animal</span>
+{
+    <span class="kw">public</span> <span class="ty">string</span> Name { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="kw">public</span> <span class="ty">Animal</span>(<span class="ty">string</span> name) { Name = name; }
+
+    <span class="cm">// virtual = can be overridden by a subclass</span>
+    <span class="kw">public virtual void</span> <span class="mt">Speak</span>()
+    {
+        Console.<span class="mt">WriteLine</span>(<span class="st">$"{Name} makes a sound."</span>);
+    }
+
+    <span class="kw">public void</span> <span class="mt">Breathe</span>()
+    {
+        Console.<span class="mt">WriteLine</span>(<span class="st">$"{Name} breathes."</span>);
+    }
+}</pre>
+  </div>
+
+  <div class="code-label"><span class="cs-badge">C#</span> Derived classes</div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="kw">class</span> <span class="ty">Dog</span> : <span class="ty">Animal</span>   <span class="cm">// Dog inherits from Animal</span>
+{
+    <span class="kw">public</span> <span class="ty">Dog</span>(<span class="ty">string</span> name) : <span class="kw">base</span>(name) { }  <span class="cm">// call parent constructor</span>
+
+    <span class="kw">public override void</span> <span class="mt">Speak</span>()   <span class="cm">// override the virtual method</span>
+    {
+        Console.<span class="mt">WriteLine</span>(<span class="st">$"{Name} barks: Woof!"</span>);
+    }
+}
+
+<span class="kw">class</span> <span class="ty">Cat</span> : <span class="ty">Animal</span>
+{
+    <span class="kw">public</span> <span class="ty">Cat</span>(<span class="ty">string</span> name) : <span class="kw">base</span>(name) { }
+
+    <span class="kw">public override void</span> <span class="mt">Speak</span>()
+    {
+        Console.<span class="mt">WriteLine</span>(<span class="st">$"{Name} meows: Meow!"</span>);
+    }
+}</pre>
+  </div>
+
+  <div class="code-label"><span class="cs-badge">C#</span> Polymorphism in action</div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="ty">Animal</span>[] animals = {
+    <span class="kw">new</span> <span class="ty">Dog</span>(<span class="st">"Rex"</span>),
+    <span class="kw">new</span> <span class="ty">Cat</span>(<span class="st">"Whiskers"</span>),
+    <span class="kw">new</span> <span class="ty">Dog</span>(<span class="st">"Buddy"</span>)
+};
+
+<span class="kw">foreach</span> (<span class="ty">Animal</span> a <span class="kw">in</span> animals)
+{
+    a.<span class="mt">Speak</span>();      <span class="cm">// each calls its OWN Speak() — polymorphism</span>
+    a.<span class="mt">Breathe</span>();    <span class="cm">// inherited — same for all</span>
+}</pre>
+  </div>
+  <div class="output-label">Output</div>
+  <div class="output-box"><pre>Rex barks: Woof!
+Rex breathes.
+Whiskers meows: Meow!
+Whiskers breathes.
+Buddy barks: Woof!
+Buddy breathes.</pre></div>
+
+  <h3>Abstract Classes</h3>
+  <p>An <span class="inline-code">abstract</span> class cannot be instantiated directly. It defines a contract that derived classes must fulfill.</p>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="kw">abstract class</span> <span class="ty">Shape</span>
+{
+    <span class="kw">public abstract</span> <span class="ty">double</span> <span class="mt">Area</span>();     <span class="cm">// no body — subclass MUST implement</span>
+    <span class="kw">public abstract</span> <span class="ty">double</span> <span class="mt">Perimeter</span>();
+
+    <span class="kw">public void</span> <span class="mt">Describe</span>()             <span class="cm">// concrete method — shared by all</span>
+        =&gt; Console.<span class="mt">WriteLine</span>(<span class="st">$"Area={<span class="mt">Area</span>():F2}, Perimeter={<span class="mt">Perimeter</span>():F2}"</span>);
+}
+
+<span class="kw">class</span> <span class="ty">Circle</span> : <span class="ty">Shape</span>
+{
+    <span class="ty">double</span> _r;
+    <span class="kw">public</span> <span class="ty">Circle</span>(<span class="ty">double</span> r) { _r = r; }
+    <span class="kw">public override</span> <span class="ty">double</span> <span class="mt">Area</span>()      =&gt; Math.PI * _r * _r;
+    <span class="kw">public override</span> <span class="ty">double</span> <span class="mt">Perimeter</span>() =&gt; <span class="nm">2</span> * Math.PI * _r;
+}
+
+<span class="ty">Circle</span> c = <span class="kw">new</span> <span class="ty">Circle</span>(<span class="nm">5</span>);
+c.<span class="mt">Describe</span>();   <span class="cm">// Area=78.54, Perimeter=31.42</span></pre>
+  </div>
+
+  <h3>sealed Classes</h3>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <pre><span class="kw">sealed class</span> <span class="ty">FinalClass</span> { }   <span class="cm">// no class can inherit from this</span></pre>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ S12 -->
+<section class="section" id="s12">
+  <div class="section-label">Section 12</div>
+  <h2>Interfaces — Contracts Without Implementation</h2>
+
+  <p>An <strong>interface</strong> defines a set of method signatures (and properties) that a class must implement — without providing any implementation itself. A class can implement multiple interfaces, solving C#'s single-inheritance limitation.</p>
+
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="cm">// Define interfaces — names conventionally start with I</span>
+<span class="kw">interface</span> <span class="ty">IDrawable</span>
+{
+    <span class="kw">void</span> <span class="mt">Draw</span>();
+    <span class="ty">string</span> Color { <span class="kw">get</span>; }
+}
+
+<span class="kw">interface</span> <span class="ty">IResizable</span>
+{
+    <span class="kw">void</span> <span class="mt">Resize</span>(<span class="ty">double</span> factor);
+}
+
+<span class="cm">// Implement both interfaces in one class</span>
+<span class="kw">class</span> <span class="ty">Rectangle</span> : <span class="ty">IDrawable</span>, <span class="ty">IResizable</span>
+{
+    <span class="kw">public</span> <span class="ty">double</span> Width, Height;
+    <span class="kw">public</span> <span class="ty">string</span> Color { <span class="kw">get</span>; } = <span class="st">"Blue"</span>;
+
+    <span class="kw">public</span> <span class="ty">Rectangle</span>(<span class="ty">double</span> w, <span class="ty">double</span> h) { Width = w; Height = h; }
+
+    <span class="kw">public void</span> <span class="mt">Draw</span>()
+        =&gt; Console.<span class="mt">WriteLine</span>(<span class="st">$"Drawing {Color} rectangle {Width}x{Height}"</span>);
+
+    <span class="kw">public void</span> <span class="mt">Resize</span>(<span class="ty">double</span> factor)
+    {
+        Width  *= factor;
+        Height *= factor;
+    }
+}
+
+<span class="ty">Rectangle</span> rect = <span class="kw">new</span> <span class="ty">Rectangle</span>(<span class="nm">4</span>, <span class="nm">6</span>);
+rect.<span class="mt">Draw</span>();           <span class="cm">// Drawing Blue rectangle 4x6</span>
+rect.<span class="mt">Resize</span>(<span class="nm">2.0</span>);
+rect.<span class="mt">Draw</span>();           <span class="cm">// Drawing Blue rectangle 8x12</span>
+
+<span class="cm">// Can assign to interface type</span>
+<span class="ty">IDrawable</span> drawable = rect;
+drawable.<span class="mt">Draw</span>();        <span class="cm">// works — only IDrawable methods visible</span></pre>
+  </div>
+
+  <div class="callout callout-note">
+    <div class="callout-title">Abstract Class vs Interface</div>
+    <table class="tbl" style="margin:8px 0 0;">
+      <tr><th></th><th>Abstract Class</th><th>Interface</th></tr>
+      <tr><td>Can have implementation?</td><td>Yes</td><td>Only default methods (C# 8+)</td></tr>
+      <tr><td>Multiple inheritance?</td><td>No — one base class only</td><td>Yes — implement many interfaces</td></tr>
+      <tr><td>Can have fields?</td><td>Yes</td><td>No (only properties)</td></tr>
+      <tr><td>Use when?</td><td>Sharing implementation across related classes</td><td>Defining a capability any unrelated class can have</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ S13 -->
+<section class="section" id="s13">
+  <div class="section-label">Section 13</div>
+  <h2>Exception Handling</h2>
+
+  <p>When something goes wrong at runtime, C# throws an <strong>exception</strong> — an object describing the error. You handle exceptions with <span class="inline-code">try / catch / finally</span> blocks.</p>
+
+  <div class="code-label"><span class="cs-badge">C#</span> Basic exception handling</div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="kw">try</span>
+{
+    <span class="ty">int</span>[] nums = { <span class="nm">1</span>, <span class="nm">2</span>, <span class="nm">3</span> };
+    Console.<span class="mt">WriteLine</span>(nums[<span class="nm">10</span>]);    <span class="cm">// index out of range!</span>
+}
+<span class="kw">catch</span> (<span class="ty">IndexOutOfRangeException</span> ex)
+{
+    Console.<span class="mt">WriteLine</span>(<span class="st">$"Array error: {ex.Message}"</span>);
+}
+<span class="kw">catch</span> (<span class="ty">Exception</span> ex)               <span class="cm">// catch-all for anything else</span>
+{
+    Console.<span class="mt">WriteLine</span>(<span class="st">$"Unexpected error: {ex.Message}"</span>);
+}
+<span class="kw">finally</span>
+{
+    Console.<span class="mt">WriteLine</span>(<span class="st">"This always runs — cleanup goes here."</span>);
+}</pre>
+  </div>
+
+  <h3>Common Built-In Exceptions</h3>
+  <table class="tbl">
+    <tr><th>Exception</th><th>When it occurs</th></tr>
+    <tr><td><span class="inline-code">NullReferenceException</span></td><td>Calling a method on a null object reference</td></tr>
+    <tr><td><span class="inline-code">IndexOutOfRangeException</span></td><td>Accessing an array element beyond its bounds</td></tr>
+    <tr><td><span class="inline-code">DivideByZeroException</span></td><td>Integer division by zero</td></tr>
+    <tr><td><span class="inline-code">FormatException</span></td><td><span class="inline-code">int.Parse("abc")</span> — invalid format</td></tr>
+    <tr><td><span class="inline-code">ArgumentException</span></td><td>A method received an invalid argument</td></tr>
+    <tr><td><span class="inline-code">InvalidOperationException</span></td><td>Method call invalid for current object state</td></tr>
+    <tr><td><span class="inline-code">IOException</span></td><td>File or network I/O failure</td></tr>
+  </table>
+
+  <h3>Throwing Exceptions</h3>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="kw">static</span> <span class="ty">double</span> <span class="mt">Divide</span>(<span class="ty">double</span> a, <span class="ty">double</span> b)
+{
+    <span class="kw">if</span> (b == <span class="nm">0</span>)
+        <span class="kw">throw new</span> DivideByZeroException(<span class="st">"Denominator cannot be zero."</span>);
+    <span class="kw">return</span> a / b;
+}
+
+<span class="kw">try</span>   { Console.<span class="mt">WriteLine</span>(<span class="mt">Divide</span>(<span class="nm">10</span>, <span class="nm">0</span>)); }
+<span class="kw">catch</span> (<span class="ty">DivideByZeroException</span> ex) { Console.<span class="mt">WriteLine</span>(ex.Message); }</pre>
+  </div>
+
+  <h3>Custom Exceptions</h3>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="kw">class</span> <span class="ty">InsufficientFundsException</span> : <span class="ty">Exception</span>
+{
+    <span class="kw">public</span> <span class="ty">double</span> Amount { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="ty">InsufficientFundsException</span>(<span class="ty">double</span> amount)
+        : <span class="kw">base</span>(<span class="st">$"Insufficient funds: need {amount:C} more"</span>)
+    {
+        Amount = amount;
+    }
+}
+
+<span class="cm">// Usage:</span>
+<span class="kw">throw new</span> <span class="ty">InsufficientFundsException</span>(<span class="nm">150.0</span>);</pre>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ S14 -->
+<section class="section" id="s14">
+  <div class="section-label">Section 14</div>
+  <h2>Generics and Collections</h2>
+
+  <p><strong>Generics</strong> let you write classes and methods that work with any type, specified at use time. The type parameter is written in angle brackets: <span class="inline-code">&lt;T&gt;</span>.</p>
+
+  <h3>Generic Method</h3>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="cm">// Works for ANY type T</span>
+<span class="kw">static void</span> <span class="mt">Swap</span>&lt;<span class="ty">T</span>&gt;(<span class="kw">ref</span> <span class="ty">T</span> a, <span class="kw">ref</span> <span class="ty">T</span> b)
+{
+    <span class="ty">T</span> temp = a;
+    a = b;
+    b = temp;
+}
+
+<span class="ty">int</span> x = <span class="nm">1</span>, y = <span class="nm">2</span>;
+<span class="mt">Swap</span>(<span class="kw">ref</span> x, <span class="kw">ref</span> y);
+Console.<span class="mt">WriteLine</span>(<span class="st">$"{x}, {y}"</span>);   <span class="cm">// 2, 1</span>
+
+<span class="ty">string</span> a = <span class="st">"hello"</span>, b = <span class="st">"world"</span>;
+<span class="mt">Swap</span>(<span class="kw">ref</span> a, <span class="kw">ref</span> b);
+Console.<span class="mt">WriteLine</span>(<span class="st">$"{a}, {b}"</span>);   <span class="cm">// world, hello</span></pre>
+  </div>
+
+  <h3>Generic Class</h3>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="kw">class</span> <span class="ty">Stack</span>&lt;<span class="ty">T</span>&gt;
+{
+    <span class="kw">private</span> <span class="ty">List</span>&lt;<span class="ty">T</span>&gt; _items = <span class="kw">new</span>();
+
+    <span class="kw">public void</span> <span class="mt">Push</span>(<span class="ty">T</span> item) =&gt; _items.<span class="mt">Add</span>(item);
+
+    <span class="kw">public</span> <span class="ty">T</span> <span class="mt">Pop</span>()
+    {
+        <span class="kw">if</span> (_items.<span class="mt">Count</span> == <span class="nm">0</span>) <span class="kw">throw new</span> InvalidOperationException(<span class="st">"Stack empty"</span>);
+        <span class="ty">T</span> top = _items[_items.<span class="mt">Count</span> - <span class="nm">1</span>];
+        _items.<span class="mt">RemoveAt</span>(_items.<span class="mt">Count</span> - <span class="nm">1</span>);
+        <span class="kw">return</span> top;
+    }
+
+    <span class="kw">public</span> <span class="ty">int</span> Count =&gt; _items.<span class="mt">Count</span>;
+}
+
+<span class="ty">Stack</span>&lt;<span class="ty">int</span>&gt; stack = <span class="kw">new</span>();
+stack.<span class="mt">Push</span>(<span class="nm">10</span>); stack.<span class="mt">Push</span>(<span class="nm">20</span>); stack.<span class="mt">Push</span>(<span class="nm">30</span>);
+Console.<span class="mt">WriteLine</span>(stack.<span class="mt">Pop</span>());   <span class="cm">// 30</span>
+Console.<span class="mt">WriteLine</span>(stack.<span class="mt">Pop</span>());   <span class="cm">// 20</span></pre>
+  </div>
+
+  <h3>Common Generic Collections</h3>
+  <table class="tbl">
+    <tr><th>Collection</th><th>Description</th><th>Key Operations</th></tr>
+    <tr><td><span class="inline-code">List&lt;T&gt;</span></td><td>Ordered, resizable list</td><td>Add, Remove, Contains, Sort, Count</td></tr>
+    <tr><td><span class="inline-code">Dictionary&lt;K,V&gt;</span></td><td>Key-value pairs (hash map)</td><td>Add, Remove, ContainsKey, TryGetValue</td></tr>
+    <tr><td><span class="inline-code">HashSet&lt;T&gt;</span></td><td>Unique elements, fast lookup</td><td>Add, Remove, Contains, Union, Intersect</td></tr>
+    <tr><td><span class="inline-code">Queue&lt;T&gt;</span></td><td>First-in first-out</td><td>Enqueue, Dequeue, Peek</td></tr>
+    <tr><td><span class="inline-code">Stack&lt;T&gt;</span></td><td>Last-in first-out (built-in)</td><td>Push, Pop, Peek</td></tr>
+    <tr><td><span class="inline-code">SortedDictionary&lt;K,V&gt;</span></td><td>Key-value pairs, keys sorted</td><td>Same as Dictionary</td></tr>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ S15 -->
+<section class="section" id="s15">
+  <div class="section-label">Section 15</div>
+  <h2>Delegates, Lambdas, and LINQ</h2>
+
+  <h3>Delegates — Variables That Hold Methods</h3>
+  <p>A <strong>delegate</strong> is a type-safe reference to a method. It lets you store a method in a variable and pass it around as a value.</p>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="cm">// Declare a delegate type</span>
+<span class="kw">delegate</span> <span class="ty">int</span> <span class="ty">MathOp</span>(<span class="ty">int</span> a, <span class="ty">int</span> b);
+
+<span class="kw">static</span> <span class="ty">int</span> <span class="mt">Add</span>(<span class="ty">int</span> a, <span class="ty">int</span> b) =&gt; a + b;
+<span class="kw">static</span> <span class="ty">int</span> <span class="mt">Multiply</span>(<span class="ty">int</span> a, <span class="ty">int</span> b) =&gt; a * b;
+
+<span class="ty">MathOp</span> op = <span class="mt">Add</span>;
+Console.<span class="mt">WriteLine</span>(op(<span class="nm">3</span>, <span class="nm">4</span>));    <span class="cm">// 7</span>
+op = <span class="mt">Multiply</span>;
+Console.<span class="mt">WriteLine</span>(op(<span class="nm">3</span>, <span class="nm">4</span>));    <span class="cm">// 12</span></pre>
+  </div>
+
+  <h3>Func and Action — Built-In Delegate Types</h3>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="cm">// Func&lt;TInput, TOutput&gt; — for methods that return a value</span>
+<span class="ty">Func</span>&lt;<span class="ty">int</span>, <span class="ty">int</span>, <span class="ty">int</span>&gt; add = (<span class="ty">int</span> a, <span class="ty">int</span> b) =&gt; a + b;
+Console.<span class="mt">WriteLine</span>(add(<span class="nm">5</span>, <span class="nm">3</span>));   <span class="cm">// 8</span>
+
+<span class="cm">// Action&lt;T&gt; — for methods that return void</span>
+<span class="ty">Action</span>&lt;<span class="ty">string</span>&gt; greet = name =&gt; Console.<span class="mt">WriteLine</span>(<span class="st">$"Hello, {name}!"</span>);
+greet(<span class="st">"Alice"</span>);   <span class="cm">// Hello, Alice!</span>
+
+<span class="cm">// Predicate&lt;T&gt; — a Func that returns bool</span>
+<span class="ty">Predicate</span>&lt;<span class="ty">int</span>&gt; isEven = n =&gt; n % <span class="nm">2</span> == <span class="nm">0</span>;
+Console.<span class="mt">WriteLine</span>(isEven(<span class="nm">4</span>));   <span class="cm">// True</span></pre>
+  </div>
+
+  <h3>Lambda Expressions</h3>
+  <p>A <strong>lambda</strong> is an anonymous (nameless) method written inline. The syntax is <span class="inline-code">parameters =&gt; expression</span>.</p>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="cm">// Single expression lambda</span>
+<span class="ty">Func</span>&lt;<span class="ty">double</span>, <span class="ty">double</span>&gt; square = x =&gt; x * x;
+Console.<span class="mt">WriteLine</span>(square(<span class="nm">5</span>));   <span class="cm">// 25</span>
+
+<span class="cm">// Multi-statement lambda (needs { } and return)</span>
+<span class="ty">Func</span>&lt;<span class="ty">int</span>, <span class="ty">string</span>&gt; classify = n =&gt;
+{
+    <span class="kw">if</span> (n &lt; <span class="nm">0</span>) <span class="kw">return</span> <span class="st">"negative"</span>;
+    <span class="kw">if</span> (n == <span class="nm">0</span>) <span class="kw">return</span> <span class="st">"zero"</span>;
+    <span class="kw">return</span> <span class="st">"positive"</span>;
+};
+
+<span class="cm">// Lambdas with collections</span>
+<span class="ty">List</span>&lt;<span class="ty">int</span>&gt; nums = <span class="kw">new</span> <span class="ty">List</span>&lt;<span class="ty">int</span>&gt; { <span class="nm">1</span>, <span class="nm">2</span>, <span class="nm">3</span>, <span class="nm">4</span>, <span class="nm">5</span>, <span class="nm">6</span> };
+nums.<span class="mt">ForEach</span>(n =&gt; Console.<span class="mt">Write</span>(n + <span class="st">" "</span>));   <span class="cm">// 1 2 3 4 5 6</span></pre>
+  </div>
+
+  <h3>LINQ — Language Integrated Query</h3>
+  <p>LINQ lets you query collections using SQL-like syntax or method chaining. It works on any <span class="inline-code">IEnumerable&lt;T&gt;</span>.</p>
+
+  <div class="code-label"><span class="cs-badge">C#</span> LINQ method syntax</div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="kw">using</span> System.Linq;
+
+<span class="ty">List</span>&lt;<span class="ty">int</span>&gt; numbers = <span class="kw">new</span> <span class="ty">List</span>&lt;<span class="ty">int</span>&gt; { <span class="nm">3</span>, <span class="nm">1</span>, <span class="nm">8</span>, <span class="nm">5</span>, <span class="nm">2</span>, <span class="nm">9</span>, <span class="nm">4</span>, <span class="nm">7</span>, <span class="nm">6</span> };
+
+<span class="cm">// Where = filter</span>
+<span class="kw">var</span> evens = numbers.<span class="mt">Where</span>(n =&gt; n % <span class="nm">2</span> == <span class="nm">0</span>);
+<span class="cm">// [8, 2, 4, 6]</span>
+
+<span class="cm">// Select = transform (map)</span>
+<span class="kw">var</span> squares = numbers.<span class="mt">Select</span>(n =&gt; n * n);
+<span class="cm">// [9, 1, 64, 25, 4, 81, 16, 49, 36]</span>
+
+<span class="cm">// OrderBy = sort</span>
+<span class="kw">var</span> sorted = numbers.<span class="mt">OrderBy</span>(n =&gt; n);
+<span class="cm">// [1, 2, 3, 4, 5, 6, 7, 8, 9]</span>
+
+<span class="cm">// Aggregate operations</span>
+Console.<span class="mt">WriteLine</span>(numbers.<span class="mt">Sum</span>());     <span class="cm">// 45</span>
+Console.<span class="mt">WriteLine</span>(numbers.<span class="mt">Average</span>()); <span class="cm">// 5</span>
+Console.<span class="mt">WriteLine</span>(numbers.<span class="mt">Max</span>());     <span class="cm">// 9</span>
+Console.<span class="mt">WriteLine</span>(numbers.<span class="mt">Min</span>());     <span class="cm">// 1</span>
+Console.<span class="mt">WriteLine</span>(numbers.<span class="mt">Count</span>());   <span class="cm">// 9</span>
+
+<span class="cm">// Chaining operations</span>
+<span class="kw">var</span> result = numbers
+    .<span class="mt">Where</span>(n =&gt; n &gt; <span class="nm">3</span>)
+    .<span class="mt">Select</span>(n =&gt; n * <span class="nm">2</span>)
+    .<span class="mt">OrderByDescending</span>(n =&gt; n)
+    .<span class="mt">ToList</span>();
+<span class="cm">// [18, 16, 14, 12, 10, 8] — filtered &gt;3, doubled, sorted descending</span></pre>
+  </div>
+
+  <div class="code-label"><span class="cs-badge">C#</span> LINQ query syntax (SQL-style)</div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="kw">var</span> query = <span class="kw">from</span> n <span class="kw">in</span> numbers
+            <span class="kw">where</span> n % <span class="nm">2</span> == <span class="nm">0</span>
+            <span class="kw">orderby</span> n
+            <span class="kw">select</span> n * <span class="nm">2</span>;
+
+<span class="cm">// Same as: numbers.Where(n => n%2==0).OrderBy(n=>n).Select(n=>n*2)</span></pre>
+  </div>
+
+  <h3>LINQ with Objects</h3>
+  <div class="code-label"><span class="cs-badge">C#</span></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <pre><span class="kw">record</span> <span class="ty">Student</span>(<span class="ty">string</span> Name, <span class="ty">int</span> Score);
+
+<span class="ty">List</span>&lt;<span class="ty">Student</span>&gt; students = <span class="kw">new</span>()
+{
+    <span class="kw">new</span>(<span class="st">"Alice"</span>, <span class="nm">92</span>), <span class="kw">new</span>(<span class="st">"Bob"</span>, <span class="nm">78</span>),
+    <span class="kw">new</span>(<span class="st">"Carol"</span>, <span class="nm">88</span>), <span class="kw">new</span>(<span class="st">"Dave"</span>, <span class="nm">65</span>)
+};
+
+<span class="cm">// Top scorers over 80, sorted by score descending</span>
+<span class="kw">var</span> top = students
+    .<span class="mt">Where</span>(s =&gt; s.Score &gt; <span class="nm">80</span>)
+    .<span class="mt">OrderByDescending</span>(s =&gt; s.Score)
+    .<span class="mt">Select</span>(s =&gt; <span class="st">$"{s.Name}: {s.Score}"</span>);
+
+<span class="kw">foreach</span> (<span class="kw">var</span> s <span class="kw">in</span> top)
+    Console.<span class="mt">WriteLine</span>(s);</pre>
+  </div>
+  <div class="output-label">Output</div>
+  <div class="output-box"><pre>Alice: 92
+Carol: 88</pre></div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ S16 QUIZ -->
+<section class="section" id="s16">
+  <div class="section-label">Section 16 · Quiz</div>
+  <h2>Test Your Understanding</h2>
+
+  <div class="quiz-wrap" id="quiz">
+
+    <div class="quiz-q" id="q1">
+      <p>1. What does the CLR do in the C# execution model?</p>
+      <button class="qopt" onclick="ans(this,'q1',false)">It compiles .cs files to IL</button>
+      <button class="qopt" onclick="ans(this,'q1',true)">It JIT-compiles IL to native machine code and executes it</button>
+      <button class="qopt" onclick="ans(this,'q1',false)">It is a text editor for writing C# code</button>
+      <button class="qopt" onclick="ans(this,'q1',false)">It converts .NET assemblies to Python bytecode</button>
+      <div class="qexp" id="q1-exp">The C# compiler (csc / dotnet build) compiles source to IL. The CLR then takes that IL and JIT-compiles it to native code at run time. This two-step process allows C# code to run on any platform that has a .NET runtime installed.</div>
+    </div>
+
+    <div class="quiz-q" id="q2">
+      <p>2. Which declaration correctly creates a nullable integer in C#?</p>
+      <button class="qopt" onclick="ans(this,'q2',false)"><span class="inline-code">nullable int x = null;</span></button>
+      <button class="qopt" onclick="ans(this,'q2',false)"><span class="inline-code">int x = null;</span></button>
+      <button class="qopt" onclick="ans(this,'q2',true)"><span class="inline-code">int? x = null;</span></button>
+      <button class="qopt" onclick="ans(this,'q2',false)"><span class="inline-code">Optional&lt;int&gt; x = null;</span></button>
+      <div class="qexp" id="q2-exp">Adding ? after a value type creates a nullable version. <span class="inline-code">int? x = null;</span> is correct. Regular value types like <span class="inline-code">int</span> cannot hold null — the compiler will reject it.</div>
+    </div>
+
+    <div class="quiz-q" id="q3">
+      <p>3. What does <span class="inline-code">var</span> do in C#?</p>
+      <button class="qopt" onclick="ans(this,'q3',false)">Creates a dynamically typed variable whose type can change at runtime</button>
+      <button class="qopt" onclick="ans(this,'q3',true)">Lets the compiler infer the type from the initial value; the type is still fixed at compile time</button>
+      <button class="qopt" onclick="ans(this,'q3',false)">Declares a variable with no type at all</button>
+      <button class="qopt" onclick="ans(this,'q3',false)">Creates a variant type compatible with all C# types</button>
+      <div class="qexp" id="q3-exp"><span class="inline-code">var</span> is compile-time type inference. The compiler determines the type from the right-hand side and fixes it permanently. It is NOT dynamic — you cannot change the type later. <span class="inline-code">var x = 5;</span> is identical to <span class="inline-code">int x = 5;</span>.</div>
+    </div>
+
+    <div class="quiz-q" id="q4">
+      <p>4. What is the output of: <span class="inline-code">Console.WriteLine(17 / 5);</span></p>
+      <button class="qopt" onclick="ans(this,'q4',false)">3.4</button>
+      <button class="qopt" onclick="ans(this,'q4',true)">3</button>
+      <button class="qopt" onclick="ans(this,'q4',false)">4</button>
+      <button class="qopt" onclick="ans(this,'q4',false)">2</button>
+      <div class="qexp" id="q4-exp">Both 17 and 5 are integer literals, so C# performs integer division and truncates the decimal. 17 / 5 = 3 with remainder 2. To get 3.4, at least one operand must be a double: <span class="inline-code">17.0 / 5</span> or <span class="inline-code">(double)17 / 5</span>.</div>
+    </div>
+
+    <div class="quiz-q" id="q5">
+      <p>5. What does the <span class="inline-code">override</span> keyword do?</p>
+      <button class="qopt" onclick="ans(this,'q5',false)">Hides a base class method without replacing it</button>
+      <button class="qopt" onclick="ans(this,'q5',true)">Replaces a base class virtual method with a new implementation in a derived class</button>
+      <button class="qopt" onclick="ans(this,'q5',false)">Prevents a method from being inherited</button>
+      <button class="qopt" onclick="ans(this,'q5',false)">Calls the parent class constructor</button>
+      <div class="qexp" id="q5-exp"><span class="inline-code">override</span> is used in a derived class to replace a <span class="inline-code">virtual</span> method from the base class. When the method is called on a base-class reference that holds a derived-class object, the overridden version runs — this is the essence of polymorphism.</div>
+    </div>
+
+    <div class="quiz-q" id="q6">
+      <p>6. A class can implement multiple <em>__</em> but can only inherit from one <em>__</em>.</p>
+      <button class="qopt" onclick="ans(this,'q6',false)">abstract classes; interface</button>
+      <button class="qopt" onclick="ans(this,'q6',true)">interfaces; base class</button>
+      <button class="qopt" onclick="ans(this,'q6',false)">base classes; interface</button>
+      <button class="qopt" onclick="ans(this,'q6',false)">delegates; struct</button>
+      <div class="qexp" id="q6-exp">C# supports single inheritance — a class can only extend one base class. However, it can implement as many interfaces as needed. This is why interfaces are the preferred mechanism for sharing capability contracts across unrelated class hierarchies.</div>
+    </div>
+
+    <div class="quiz-q" id="q7">
+      <p>7. What is string interpolation in C#?</p>
+      <button class="qopt" onclick="ans(this,'q7',false)">Combining strings using the + operator</button>
+      <button class="qopt" onclick="ans(this,'q7',true)">Embedding expressions inside a string using $ prefix and { } placeholders</button>
+      <button class="qopt" onclick="ans(this,'q7',false)">Converting a non-string value to a string</button>
+      <button class="qopt" onclick="ans(this,'q7',false)">Storing a string in a verbatim format</button>
+      <div class="qexp" id="q7-exp">String interpolation uses the <span class="inline-code">$</span> prefix. You place any expression inside <span class="inline-code">{ }</span> within the string and the compiler evaluates it and inserts the result. Example: <span class="inline-code">$"Hello, {name}! Score: {score * 2}"</span>.</div>
+    </div>
+
+    <div class="quiz-q" id="q8">
+      <p>8. What does the <span class="inline-code">finally</span> block do in exception handling?</p>
+      <button class="qopt" onclick="ans(this,'q8',false)">Catches any exception not caught by earlier catch blocks</button>
+      <button class="qopt" onclick="ans(this,'q8',false)">Runs only when no exception is thrown</button>
+      <button class="qopt" onclick="ans(this,'q8',true)">Runs always — whether an exception was thrown or not — for cleanup</button>
+      <button class="qopt" onclick="ans(this,'q8',false)">Re-throws the last exception</button>
+      <div class="qexp" id="q8-exp"><span class="inline-code">finally</span> always executes regardless of whether an exception was thrown or caught. It is the right place to release resources: close file handles, database connections, or network sockets — ensuring cleanup even when errors occur.</div>
+    </div>
+
+    <div class="quiz-q" id="q9">
+      <p>9. What is the difference between <span class="inline-code">List&lt;T&gt;</span> and an array in C#?</p>
+      <button class="qopt" onclick="ans(this,'q9',false)">Arrays can hold any type; List&lt;T&gt; can only hold ints</button>
+      <button class="qopt" onclick="ans(this,'q9',true)">Arrays have a fixed size set at creation; List&lt;T&gt; grows and shrinks dynamically</button>
+      <button class="qopt" onclick="ans(this,'q9',false)">List&lt;T&gt; is faster for random access than arrays</button>
+      <button class="qopt" onclick="ans(this,'q9',false)">Arrays support LINQ but List&lt;T&gt; does not</button>
+      <div class="qexp" id="q9-exp">Arrays are fixed-size — you set the capacity when you create them and it cannot change. <span class="inline-code">List&lt;T&gt;</span> is a dynamic wrapper around an array that automatically resizes when you add or remove elements. Both support LINQ and index access.</div>
+    </div>
+
+    <div class="quiz-q" id="q10">
+      <p>10. What does this LINQ expression do? <span class="inline-code">nums.Where(n =&gt; n &gt; 5).Select(n =&gt; n * 2)</span></p>
+      <button class="qopt" onclick="ans(this,'q10',false)">Doubles all numbers, then keeps those greater than 5</button>
+      <button class="qopt" onclick="ans(this,'q10',true)">Keeps only numbers greater than 5, then doubles each of those</button>
+      <button class="qopt" onclick="ans(this,'q10',false)">Squares all numbers greater than 5</button>
+      <button class="qopt" onclick="ans(this,'q10',false)">Sums all numbers greater than 5 and multiplies by 2</button>
+      <div class="qexp" id="q10-exp">LINQ operations chain left-to-right. <span class="inline-code">Where</span> filters first — keeping only elements where <span class="inline-code">n &gt; 5</span>. Then <span class="inline-code">Select</span> transforms each surviving element by doubling it. Order matters: filtering first reduces the number of elements that Select has to process.</div>
+    </div>
+
+    <div class="quiz-q" id="q11">
+      <p>11. What does <span class="inline-code">sealed</span> mean when applied to a class?</p>
+      <button class="qopt" onclick="ans(this,'q11',false)">The class cannot be instantiated</button>
+      <button class="qopt" onclick="ans(this,'q11',false)">All its members are private</button>
+      <button class="qopt" onclick="ans(this,'q11',true)">No other class can inherit from it</button>
+      <button class="qopt" onclick="ans(this,'q11',false)">Its fields cannot be modified after construction</button>
+      <div class="qexp" id="q11-exp"><span class="inline-code">sealed</span> prevents inheritance. A sealed class can still be instantiated and its methods called normally — but you cannot write <span class="inline-code">class MyClass : SealedClass</span>. The .NET <span class="inline-code">string</span> type is sealed, which is part of why string immutability is guaranteed.</div>
+    </div>
+
+    <div class="quiz-q" id="q12">
+      <p>12. What is a property in C#?</p>
+      <button class="qopt" onclick="ans(this,'q12',false)">A public field with no restrictions</button>
+      <button class="qopt" onclick="ans(this,'q12',true)">A member that looks like a field from outside but runs get/set code internally</button>
+      <button class="qopt" onclick="ans(this,'q12',false)">A static method that belongs to the class, not an object</button>
+      <button class="qopt" onclick="ans(this,'q12',false)">An attribute attached to a class definition</button>
+      <div class="qexp" id="q12-exp">A property has a <span class="inline-code">get</span> accessor (run when you read it) and optionally a <span class="inline-code">set</span> accessor (run when you assign to it). From the caller's perspective, <span class="inline-code">account.Balance = 500</span> looks like a field assignment — but internally it runs validation code. This is the encapsulation pattern.</div>
+    </div>
+
+    <div class="quiz-q" id="q13">
+      <p>13. What is the purpose of the <span class="inline-code">??</span> operator?</p>
+      <button class="qopt" onclick="ans(this,'q13',false)">Logical AND shorthand</button>
+      <button class="qopt" onclick="ans(this,'q13',false)">Strict equality check</button>
+      <button class="qopt" onclick="ans(this,'q13',true)">Returns the left value if it is not null; otherwise returns the right value</button>
+      <button class="qopt" onclick="ans(this,'q13',false)">Throws an exception if either operand is null</button>
+      <div class="qexp" id="q13-exp"><span class="inline-code">??</span> is the null-coalescing operator. <span class="inline-code">x ?? defaultValue</span> returns <span class="inline-code">x</span> when it is not null, and <span class="inline-code">defaultValue</span> when it is. It is a concise alternative to <span class="inline-code">x != null ? x : defaultValue</span>.</div>
+    </div>
+
+    <div class="quiz-q" id="q14">
+      <p>14. What is a lambda expression?</p>
+      <button class="qopt" onclick="ans(this,'q14',false)">A named method stored in a class</button>
+      <button class="qopt" onclick="ans(this,'q14',true)">An anonymous method written inline using the =&gt; syntax</button>
+      <button class="qopt" onclick="ans(this,'q14',false)">A special loop that iterates over lambda collections</button>
+      <button class="qopt" onclick="ans(this,'q14',false)">A C# keyword that creates a new thread</button>
+      <div class="qexp" id="q14-exp">A lambda is an anonymous (nameless) function defined inline. The arrow <span class="inline-code">=&gt;</span> separates parameters from the body: <span class="inline-code">x =&gt; x * x</span> is a function that squares its input. Lambdas are most commonly passed to LINQ methods like Where, Select, and OrderBy.</div>
+    </div>
+
+    <div class="quiz-q" id="q15">
+      <p>15. Which loop is guaranteed to run its body at least once?</p>
+      <button class="qopt" onclick="ans(this,'q15',false)">for</button>
+      <button class="qopt" onclick="ans(this,'q15',false)">while</button>
+      <button class="qopt" onclick="ans(this,'q15',false)">foreach</button>
+      <button class="qopt" onclick="ans(this,'q15',true)">do-while</button>
+      <div class="qexp" id="q15-exp">A <span class="inline-code">do-while</span> loop checks its condition <em>after</em> the body executes, so the body always runs at least once even if the condition starts out false. This makes it useful for input-validation loops where you must prompt the user at least one time.</div>
+    </div>
+
+    <div class="quiz-score" id="quiz-score" style="display:none;">
+      You scored <span id="score-val"></span> / 15
+      <br><button class="retry-btn" onclick="resetQuiz()">Try Again</button>
+    </div>
+  </div>
+</section>
+
+<!-- BIG IDEA -->
+<div class="big-idea">
+  <h3>What You Now Know About C#</h3>
+  <p>You have covered C# from the ground up — how it runs on .NET, how its static type system works, how objects and classes are structured, how inheritance and interfaces enable code reuse, and how modern features like LINQ and lambdas make data manipulation concise. These are the foundations you will draw on throughout the course when reading and comparing C# alongside C and Python.</p>
+</div>
+
+</div><!-- /content -->
+
+<script>
+// NAV
+function go(id){document.getElementById(id).scrollIntoView({behavior:'smooth'});}
+const secs=['s0','s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13','s14','s15','s16'];
+const btns=document.querySelectorAll('.nav-btn');
+function updateNav(){
+  let a=0;
+  secs.forEach((id,i)=>{const el=document.getElementById(id);if(el&&el.getBoundingClientRect().top<120)a=i;});
+  btns.forEach((b,i)=>b.classList.toggle('active',i===a));
+  const p=Math.round((a/(secs.length-1))*100);
+  document.getElementById('pbar').style.width=p+'%';
+  document.getElementById('pct').textContent=p+'%';
+}
+window.addEventListener('scroll',updateNav,{passive:true});
+
+// COPY
+function copyCode(btn){
+  const pre=btn.parentElement.querySelector('pre');
+  const text=pre.innerText;
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='copied!';
+    setTimeout(()=>btn.textContent='copy',2000);
+  });
+}
+
+// QUIZ
+let answered={},score=0;
+const TOTAL=15;
+function ans(btn,qid,correct){
+  if(answered[qid])return;
+  answered[qid]=true;
+  btn.classList.add(correct?'correct':'wrong');
+  if(!correct)btn.closest('.quiz-q').querySelectorAll('.qopt').forEach(b=>{if(b.getAttribute('onclick').includes(',true)'))b.classList.add('correct');});
+  document.getElementById(qid+'-exp').classList.add('show');
+  if(correct)score++;
+  if(Object.keys(answered).length===TOTAL){
+    document.getElementById('quiz-score').style.display='block';
+    document.getElementById('score-val').textContent=score;
+  }
+}
+function resetQuiz(){
+  answered={};score=0;
+  document.querySelectorAll('.qopt').forEach(b=>b.classList.remove('correct','wrong'));
+  document.querySelectorAll('.qexp').forEach(e=>e.classList.remove('show'));
+  document.getElementById('quiz-score').style.display='none';
+  document.getElementById('quiz-score').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
