@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>CSBS 315 — Non-Terminals Activity Solution</title><style>
+:root{--navy:#17325c;--blue:#2f66d0;--ink:#1f2937;--muted:#64748b;--line:#cbd5e1;--bg:#f4f7fb;--soft:#eef4ff;--green:#eaf7ef;--gold:#fff8df}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,Helvetica,sans-serif;line-height:1.55}
+.page{max-width:1000px;margin:30px auto;background:#fff;padding:42px 48px;border:1px solid #dbe3ee;border-radius:14px}
+h1{color:var(--navy);margin:0 0 4px;font-size:30px} h2{color:var(--navy);border-bottom:2px solid #dbe6f7;padding-bottom:7px;margin-top:34px}
+h3{color:#234b84;margin-top:24px}.subtitle{color:var(--muted);margin-bottom:24px}.tag{display:inline-block;background:#eaf0f8;color:var(--navy);padding:3px 9px;border-radius:14px;font-size:12px;font-weight:bold}
+.callout,.note,.answer{padding:14px 18px;margin:18px 0;border-radius:6px}.callout{background:var(--soft);border-left:5px solid var(--blue)}.note{background:var(--gold);border-left:5px solid #d69e2e}.answer{background:var(--green);border-left:5px solid #2f855a}
+table{width:100%;border-collapse:collapse;margin:16px 0 24px}th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}th{background:#eaf0f8;color:var(--navy)}
+code,pre{font-family:Consolas,"Courier New",monospace}pre{background:#f7f9fc;border:1px solid #dbe3ee;border-radius:8px;padding:16px;overflow:auto;line-height:1.55}
+.blankbox{height:80px;border:1px solid var(--line);border-radius:8px;margin:10px 0 20px}.small{height:48px}.meta{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0}
+.line{display:inline-block;min-width:240px;border-bottom:1px solid #777}.footer{margin-top:38px;padding-top:15px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+@media print{body{background:#fff}.page{max-width:none;margin:0;border:0;padding:22px}table,pre,.callout,.note,.answer{break-inside:avoid}}
+</style></head><body><main class="page">
+<span class="tag">SOLUTION</span><h1>Solution: Identify Non-Terminals</h1><div class="subtitle">CSBS 315 · Formal Grammars · C, C#, and Python</div>
+<div class="callout"><strong>Purpose:</strong> Practice identifying <strong>non-terminals</strong>—grammar categories that describe program structure. Unlike terminals, non-terminals are not literal source-code tokens. They are names such as <code>&lt;statement&gt;</code>, <code>&lt;declaration&gt;</code>, and <code>&lt;expression&gt;</code>.</div>
+<h2>Before You Begin</h2>
+<table>
+<tr><th>Concept</th><th>Meaning</th><th>Example</th></tr>
+<tr><td><strong>Terminal</strong></td><td>An actual token/token kind at the leaves of the grammar.</td><td><code>int</code>, <code>=</code>, <code>20</code>, <code>;</code>, <code>NEWLINE</code></td></tr>
+<tr><td><strong>Non-terminal</strong></td><td>An abstract grammar category used to describe a language construct.</td><td><code>&lt;declaration&gt;</code>, <code>&lt;statement&gt;</code>, <code>&lt;expression&gt;</code></td></tr>
+</table>
+<h3>Quick Example</h3>
+<pre>int age = 20;</pre>
+<p>A simplified grammar can describe this source statement as:</p>
+<pre>&lt;declaration&gt; ::= int &lt;identifier&gt; = &lt;number&gt; ;</pre>
+<p>Here, <code>&lt;declaration&gt;</code>, <code>&lt;identifier&gt;</code>, and <code>&lt;number&gt;</code> are <strong>non-terminals</strong>. The concrete source is ultimately built from terminals/tokens such as <code>int</code>, an identifier token with lexeme <code>age</code>, <code>=</code>, a numeric literal <code>20</code>, and <code>;</code>.</p>
+<div class="note"><strong>Important:</strong> The grammars in this activity are intentionally simplified teaching grammars. They are designed to help you recognize grammatical structure; they are not the complete official grammars of C, C#, or Python.</div>
+<h2>Solution A — C</h2>
+<pre>int main()
+{
+    int age = 20;
+    printf("%d", age);
+    return 0;
+}</pre>
+<table><tr><th>Source-code part</th><th>Most specific non-terminal</th></tr>
+<tr><td><code>age</code></td><td><code>&lt;identifier&gt;</code></td></tr><tr><td><code>20</code></td><td><code>&lt;number&gt;</code></td></tr>
+<tr><td><code>int age = 20;</code></td><td><code>&lt;declaration&gt;</code></td></tr>
+<tr><td><code>printf("%d", age);</code></td><td><code>&lt;function-call&gt;</code></td></tr>
+<tr><td><code>return 0;</code></td><td><code>&lt;return-statement&gt;</code></td></tr>
+<tr><td>Entire <code>main()</code> construct</td><td><code>&lt;main-function&gt;</code></td></tr>
+<tr><td>Entire program</td><td><code>&lt;program&gt;</code></td></tr></table>
+<pre>&lt;program&gt;
+    ↓
+&lt;main-function&gt;
+    ↓
+&lt;statement-list&gt;
+    ├── &lt;declaration&gt;       → int age = 20;
+    ├── &lt;function-call&gt;     → printf("%d", age);
+    └── &lt;return-statement&gt;  → return 0;</pre>
+<table><tr><th>Item</th><th>Answer</th></tr>
+<tr><td><code>int</code></td><td>Terminal/token</td></tr><tr><td><code>&lt;declaration&gt;</code></td><td>Non-terminal</td></tr>
+<tr><td><code>;</code></td><td>Terminal/token</td></tr><tr><td><code>&lt;identifier&gt;</code></td><td>Non-terminal</td></tr>
+<tr><td><code>return</code></td><td>Terminal/token</td></tr></table>
+<h2>Solution B — C#</h2>
+<table><tr><th>Source-code part</th><th>Most specific non-terminal</th></tr>
+<tr><td><code>age</code></td><td><code>&lt;identifier&gt;</code></td></tr><tr><td><code>20</code></td><td><code>&lt;number&gt;</code></td></tr>
+<tr><td><code>int age = 20;</code></td><td><code>&lt;declaration&gt;</code></td></tr>
+<tr><td><code>Console.WriteLine(age);</code></td><td><code>&lt;method-call&gt;</code></td></tr>
+<tr><td>Both statements together</td><td><code>&lt;statement-list&gt;</code></td></tr>
+<tr><td>Entire program</td><td><code>&lt;program&gt;</code></td></tr></table>
+<pre>&lt;program&gt;
+    ↓
+&lt;statement-list&gt;
+    ├── &lt;statement&gt;
+    │      ↓
+    │   &lt;declaration&gt;  → int age = 20;
+    │
+    └── &lt;statement&gt;
+           ↓
+        &lt;method-call&gt;  → Console.WriteLine(age);</pre>
+<h2>Solution C — Python</h2>
+<table><tr><th>Source-code part</th><th>Most specific non-terminal</th></tr>
+<tr><td><code>age</code></td><td><code>&lt;identifier&gt;</code></td></tr><tr><td><code>20</code></td><td><code>&lt;number&gt;</code></td></tr>
+<tr><td><code>age = 20</code></td><td><code>&lt;assignment&gt;</code></td></tr>
+<tr><td><code>print(age)</code></td><td><code>&lt;function-call&gt;</code></td></tr>
+<tr><td>Both statements together</td><td><code>&lt;statement-list&gt;</code></td></tr>
+<tr><td>Entire program</td><td><code>&lt;program&gt;</code></td></tr></table>
+<table><tr><th>Item</th><th>Answer</th></tr>
+<tr><td><code>NEWLINE</code></td><td>Terminal/token</td></tr><tr><td><code>&lt;statement&gt;</code></td><td>Non-terminal</td></tr>
+<tr><td><code>=</code></td><td>Terminal/token</td></tr><tr><td><code>&lt;assignment&gt;</code></td><td>Non-terminal</td></tr>
+<tr><td><code>(</code></td><td>Terminal/token</td></tr><tr><td><code>&lt;identifier&gt;</code></td><td>Non-terminal</td></tr></table>
+<div class="answer"><strong>Python detail:</strong> <code>NEWLINE</code> is deliberately retained here as a terminal/token. If the program contained an indented suite, <code>INDENT</code> and <code>DEDENT</code> would likewise be structural tokens—not non-terminals.</div>
+<h2>Solution D — Challenge</h2>
+<pre>&lt;program&gt;
+    ↓
+&lt;statement-list&gt;
+    ├── &lt;statement&gt;
+    │      ↓
+    │   &lt;assignment&gt;
+    │      ├── &lt;identifier&gt; → age
+    │      ├── =             ← terminal/operator
+    │      └── &lt;number&gt;     → 20
+    │
+    └── &lt;statement&gt;
+           ↓
+        &lt;function-call&gt;
+           ├── &lt;identifier&gt; → print
+           ├── (             ← terminal/punctuation
+           ├── &lt;identifier&gt; → age
+           └── )             ← terminal/punctuation</pre><div class="note"><strong>Why &lt;statement-list&gt;?</strong> The program contains two statements:
+            <code>age = 20</code> and <code>print(age)</code>. Together they form the
+            <code>&lt;statement-list&gt;</code>. If a block had only one statement, the statement list
+            could still contain that one statement in this simplified teaching grammar.
+            <br/><br/><strong>Terminal reminder:</strong> <code>=</code>, <code>(</code>, and <code>)</code>
+            are terminals. Python's logical <code>NEWLINE</code> tokens are also terminals; they are not
+            expanded in this diagram because the challenge is focused on identifying non-terminal hierarchy.</div>
+<div class="answer"><strong>Final answer:</strong> A <strong>terminal</strong> is an actual token/token kind that occurs at the leaves of the grammar, such as <code>=</code>, <code>;</code>, or Python's <code>NEWLINE</code>. A <strong>non-terminal</strong> is an abstract grammatical category used to describe structure, such as <code>&lt;assignment&gt;</code> or <code>&lt;statement&gt;</code>. Non-terminals are expanded by production rules until the structure ultimately reaches terminals.</div>
+<div class="footer">CSBS 315 · Solution · Formal Grammars: Non-Terminals</div></main></body></html>
