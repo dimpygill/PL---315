@@ -1,0 +1,92 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CSBS 315 — Token Activity Solution</title><style>
+:root{
+  --navy:#17325c; --blue:#2f66d0; --ink:#1f2937; --muted:#64748b;
+  --line:#cbd5e1; --paper:#ffffff; --bg:#f4f7fb; --soft:#eef4ff;
+  --green:#eaf7ef; --gold:#fff8df;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,Helvetica,sans-serif;line-height:1.55}
+.page{max-width:1000px;margin:30px auto;background:var(--paper);padding:42px 48px;border:1px solid #dbe3ee;border-radius:14px}
+h1{color:var(--navy);margin:0 0 4px;font-size:30px}
+h2{color:var(--navy);border-bottom:2px solid #dbe6f7;padding-bottom:7px;margin-top:34px}
+h3{color:#234b84;margin-top:25px}
+.subtitle{color:var(--muted);margin-bottom:24px}
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0}
+.blank{border-bottom:1px solid #777;display:inline-block;min-width:230px;height:1.2em}
+.callout{background:var(--soft);border-left:5px solid var(--blue);padding:14px 18px;margin:18px 0;border-radius:6px}
+.note{background:var(--gold);border-left:5px solid #d69e2e;padding:14px 18px;margin:18px 0;border-radius:6px}
+.solution{background:var(--green);border-left:5px solid #2f855a;padding:14px 18px;margin:18px 0;border-radius:6px}
+table{width:100%;border-collapse:collapse;margin:16px 0 24px}
+th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+th{background:#eaf0f8;color:var(--navy)}
+code,pre{font-family:Consolas,"Courier New",monospace}
+pre{background:#f7f9fc;border:1px solid #dbe3ee;border-radius:8px;padding:16px;overflow:auto;line-height:1.55}
+.answerbox{height:90px;border:1px solid var(--line);border-radius:8px;margin:10px 0 20px;background:#fff}
+.answerbox.small{height:55px}
+.tag{display:inline-block;background:#eaf0f8;color:var(--navy);padding:3px 9px;border-radius:14px;font-size:12px;font-weight:bold}
+.footer{margin-top:38px;padding-top:15px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+@media print{
+ body{background:#fff}
+ .page{max-width:none;margin:0;border:0;border-radius:0;padding:22px}
+ h2{break-after:avoid}
+ table,pre,.callout,.note,.solution{break-inside:avoid}
+}
+</style></head><body><main class="page">
+<h1>Solution: Identify and Classify Tokens</h1>
+<div class="subtitle">CSBS 315 · Syntax, Tokens &amp; Grammars · C, C#, and Python</div>
+<div class="solution"> The token streams below are pedagogical representations appropriate for this activity. In Python, logical <code>NEWLINE</code>, <code>INDENT</code>, and <code>DEDENT</code> are shown because they carry syntactic structure.</div>
+
+<h2>Reference — Token Categories</h2>
+<table>
+<tr><th>Category</th><th>Meaning</th><th>Examples</th></tr>
+<tr><td><strong>KEYWORD</strong></td><td>Reserved word with a special meaning in the language.</td><td><code>int</code>, <code>if</code>, <code>return</code></td></tr>
+<tr><td><strong>IDENTIFIER</strong></td><td>Name used for a variable, function, method, class, etc.</td><td><code>age</code>, <code>main</code>, <code>printf</code></td></tr>
+<tr><td><strong>LITERAL</strong></td><td>A value written directly in source code.</td><td><code>20</code>, <code>18</code>, <code>"Adult"</code></td></tr>
+<tr><td><strong>OPERATOR</strong></td><td>Performs assignment, arithmetic, comparison, or another operation.</td><td><code>=</code>, <code>+</code>, <code>&gt;=</code></td></tr>
+<tr><td><strong>PUNCTUATION / DELIMITER</strong></td><td>Separates or structures parts of the program.</td><td><code>( ) { } ; , . :</code></td></tr>
+<tr><td><strong>NEWLINE</strong></td><td>In Python, a logical newline can terminate a simple statement.</td><td><code>NEWLINE</code></td></tr>
+<tr><td><strong>INDENT</strong></td><td>Python token marking the beginning of an indented block.</td><td><code>INDENT</code></td></tr>
+<tr><td><strong>DEDENT</strong></td><td>Python token marking the end of an indented block.</td><td><code>DEDENT</code></td></tr>
+</table>
+
+
+<h2>Solution A — C</h2>
+<pre>int | main | ( | ) | { |
+int | age | = | 20 | ; |
+if | ( | age | &gt;= | 18 | ) | { |
+printf | ( | "Adult" | ) | ; |
+} |
+return | 0 | ; |
+}</pre>
+<table><tr><th>Token</th><th>Category</th></tr><tr><td><code>int</code></td><td>KEYWORD</td></tr><tr><td><code>main</code></td><td>IDENTIFIER</td></tr><tr><td><code>(</code></td><td>PUNCTUATION</td></tr><tr><td><code>)</code></td><td>PUNCTUATION</td></tr><tr><td><code>{</code></td><td>PUNCTUATION</td></tr><tr><td><code>int</code></td><td>KEYWORD</td></tr><tr><td><code>age</code></td><td>IDENTIFIER</td></tr><tr><td><code>=</code></td><td>OPERATOR</td></tr><tr><td><code>20</code></td><td>LITERAL</td></tr><tr><td><code>;</code></td><td>PUNCTUATION</td></tr><tr><td><code>if</code></td><td>KEYWORD</td></tr><tr><td><code>(</code></td><td>PUNCTUATION</td></tr><tr><td><code>age</code></td><td>IDENTIFIER</td></tr><tr><td><code>&gt;=</code></td><td>OPERATOR</td></tr><tr><td><code>18</code></td><td>LITERAL</td></tr><tr><td><code>)</code></td><td>PUNCTUATION</td></tr><tr><td><code>{</code></td><td>PUNCTUATION</td></tr><tr><td><code>printf</code></td><td>IDENTIFIER</td></tr><tr><td><code>(</code></td><td>PUNCTUATION</td></tr><tr><td><code>&quot;Adult&quot;</code></td><td>LITERAL</td></tr><tr><td><code>)</code></td><td>PUNCTUATION</td></tr><tr><td><code>;</code></td><td>PUNCTUATION</td></tr><tr><td><code>}</code></td><td>PUNCTUATION</td></tr><tr><td><code>return</code></td><td>KEYWORD</td></tr><tr><td><code>0</code></td><td>LITERAL</td></tr><tr><td><code>;</code></td><td>PUNCTUATION</td></tr><tr><td><code>}</code></td><td>PUNCTUATION</td></tr></table>
+<div class="solution"><strong>Think About It:</strong> The physical line breaks are generally whitespace in this example. They are not the statement terminators. The <code>;</code> explicitly terminates the declaration, <code>printf</code> call, and <code>return</code> statement.</div>
+
+<h2>Solution B — C#</h2>
+<pre>int | age | = | 20 | ; |
+if | ( | age | &gt;= | 18 | ) | { |
+Console | . | WriteLine | ( | "Adult" | ) | ; |
+}</pre>
+<table><tr><th>Token</th><th>Category</th></tr><tr><td><code>int</code></td><td>KEYWORD</td></tr><tr><td><code>age</code></td><td>IDENTIFIER</td></tr><tr><td><code>=</code></td><td>OPERATOR</td></tr><tr><td><code>20</code></td><td>LITERAL</td></tr><tr><td><code>;</code></td><td>PUNCTUATION</td></tr><tr><td><code>if</code></td><td>KEYWORD</td></tr><tr><td><code>(</code></td><td>PUNCTUATION</td></tr><tr><td><code>age</code></td><td>IDENTIFIER</td></tr><tr><td><code>&gt;=</code></td><td>OPERATOR</td></tr><tr><td><code>18</code></td><td>LITERAL</td></tr><tr><td><code>)</code></td><td>PUNCTUATION</td></tr><tr><td><code>{</code></td><td>PUNCTUATION</td></tr><tr><td><code>Console</code></td><td>IDENTIFIER</td></tr><tr><td><code>.</code></td><td>PUNCTUATION</td></tr><tr><td><code>WriteLine</code></td><td>IDENTIFIER</td></tr><tr><td><code>(</code></td><td>PUNCTUATION</td></tr><tr><td><code>&quot;Adult&quot;</code></td><td>LITERAL</td></tr><tr><td><code>)</code></td><td>PUNCTUATION</td></tr><tr><td><code>;</code></td><td>PUNCTUATION</td></tr><tr><td><code>}</code></td><td>PUNCTUATION</td></tr></table>
+<div class="solution"><strong>Think About It:</strong> <code>;</code> terminates the declaration and method-call statements. The physical line break itself is not serving as the statement terminator in this example.</div>
+
+<h2>Solution C — Python</h2>
+<pre>age | = | 20 | NEWLINE |
+if | age | &gt;= | 18 | : | NEWLINE |
+INDENT |
+print | ( | "Adult" | ) | NEWLINE |
+DEDENT |
+print | ( | "Done" | ) | NEWLINE</pre>
+<table><tr><th>Token</th><th>Category</th></tr><tr><td><code>age</code></td><td>IDENTIFIER</td></tr><tr><td><code>=</code></td><td>OPERATOR</td></tr><tr><td><code>20</code></td><td>LITERAL</td></tr><tr><td><code>NEWLINE</code></td><td>NEWLINE</td></tr><tr><td><code>if</code></td><td>KEYWORD</td></tr><tr><td><code>age</code></td><td>IDENTIFIER</td></tr><tr><td><code>&gt;=</code></td><td>OPERATOR</td></tr><tr><td><code>18</code></td><td>LITERAL</td></tr><tr><td><code>:</code></td><td>PUNCTUATION</td></tr><tr><td><code>NEWLINE</code></td><td>NEWLINE</td></tr><tr><td><code>INDENT</code></td><td>INDENT</td></tr><tr><td><code>print</code></td><td>IDENTIFIER</td></tr><tr><td><code>(</code></td><td>PUNCTUATION</td></tr><tr><td><code>&quot;Adult&quot;</code></td><td>LITERAL</td></tr><tr><td><code>)</code></td><td>PUNCTUATION</td></tr><tr><td><code>NEWLINE</code></td><td>NEWLINE</td></tr><tr><td><code>DEDENT</code></td><td>DEDENT</td></tr><tr><td><code>print</code></td><td>IDENTIFIER</td></tr><tr><td><code>(</code></td><td>PUNCTUATION</td></tr><tr><td><code>&quot;Done&quot;</code></td><td>LITERAL</td></tr><tr><td><code>)</code></td><td>PUNCTUATION</td></tr><tr><td><code>NEWLINE</code></td><td>NEWLINE</td></tr></table>
+<div class="solution"><strong>Why INDENT and DEDENT?</strong> Python uses indentation as part of its block syntax. The tokenizer therefore emits <code>INDENT</code> when an indented block begins and <code>DEDENT</code> when that block ends. In the equivalent C and C# examples, braces <code>{</code> and <code>}</code> explicitly delimit the blocks.</div>
+
+<h2>Solution D — Comparison</h2>
+<table><tr><th>Question</th><th>C</th><th>C#</th><th>Python</th></tr>
+<tr><td>Uses <code>;</code> in these examples to terminate simple statements?</td><td>Yes</td><td>Yes</td><td>No</td></tr>
+<tr><td>Uses <code>{ }</code> for blocks?</td><td>Yes</td><td>Yes</td><td>No</td></tr>
+<tr><td>Uses indentation to define blocks?</td><td>No</td><td>No</td><td>Yes</td></tr>
+<tr><td>Has meaningful logical <code>NEWLINE</code> tokens in these examples?</td><td>No</td><td>No</td><td>Yes</td></tr>
+<tr><td>Has <code>INDENT</code> / <code>DEDENT</code> tokens?</td><td>No</td><td>No</td><td>Yes</td></tr></table>
+<div class="solution"><strong>Final discussion:</strong> The programs express approximately the same computation, but their token streams differ because the languages make different lexical and syntactic design choices. C and C# use explicit punctuation such as <code>;</code>, <code>{</code>, and <code>}</code>. Python uses logical <code>NEWLINE</code> plus <code>INDENT</code>/<code>DEDENT</code> to represent some of that structure.</div>
+
+</main></body></html>
