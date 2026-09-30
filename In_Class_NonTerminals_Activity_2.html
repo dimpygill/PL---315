@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+
+<html><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>CSBS 315 — Non-Terminals Activity</title><style>
+:root{--navy:#17325c;--blue:#2f66d0;--ink:#1f2937;--muted:#64748b;--line:#cbd5e1;--bg:#f4f7fb;--soft:#eef4ff;--green:#eaf7ef;--gold:#fff8df}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,Helvetica,sans-serif;line-height:1.55}
+.page{max-width:1000px;margin:30px auto;background:#fff;padding:42px 48px;border:1px solid #dbe3ee;border-radius:14px}
+h1{color:var(--navy);margin:0 0 4px;font-size:30px} h2{color:var(--navy);border-bottom:2px solid #dbe6f7;padding-bottom:7px;margin-top:34px}
+h3{color:#234b84;margin-top:24px}.subtitle{color:var(--muted);margin-bottom:24px}.tag{display:inline-block;background:#eaf0f8;color:var(--navy);padding:3px 9px;border-radius:14px;font-size:12px;font-weight:bold}
+.callout,.note,.answer{padding:14px 18px;margin:18px 0;border-radius:6px}.callout{background:var(--soft);border-left:5px solid var(--blue)}.note{background:var(--gold);border-left:5px solid #d69e2e}.answer{background:var(--green);border-left:5px solid #2f855a}
+table{width:100%;border-collapse:collapse;margin:16px 0 24px}th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}th{background:#eaf0f8;color:var(--navy)}
+code,pre{font-family:Consolas,"Courier New",monospace}pre{background:#f7f9fc;border:1px solid #dbe3ee;border-radius:8px;padding:16px;overflow:auto;line-height:1.55}
+.blankbox{height:80px;border:1px solid var(--line);border-radius:8px;margin:10px 0 20px}.small{height:48px}.meta{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0}
+.line{display:inline-block;min-width:240px;border-bottom:1px solid #777}.footer{margin-top:38px;padding-top:15px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+@media print{body{background:#fff}.page{max-width:none;margin:0;border:0;padding:22px}table,pre,.callout,.note,.answer{break-inside:avoid}}
+</style></head><body><main class="page">
+<span class="tag">STUDENT ACTIVITY</span><h1>In-Class Activity: Identify Non-Terminals</h1><div class="subtitle">CSBS 315 · Formal Grammars · C, C#, and Python</div>
+
+<div class="callout"><strong>Purpose:</strong> Practice identifying <strong>non-terminals</strong>—grammar categories that describe program structure. Unlike terminals, non-terminals are not literal source-code tokens. They are names such as <code>&lt;statement&gt;</code>, <code>&lt;declaration&gt;</code>, and <code>&lt;expression&gt;</code>.</div>
+<div class="callout" style="border-left-color:#2f855a;background:#eefaf2;">
+<h3 style="margin-top:0;color:#245c3b;">How to Complete and Submit Your Work in Canvas</h3>
+<p>This activity is provided as an HTML page for you to read. <strong>You will not type your answers directly into this HTML page.</strong></p><p>Because you are submitting through your own Canvas account, you do not need to add your name to the HTML activity or to work with a partner. This is an individual activity.</p>
+<p>Open the <strong>Text Entry</strong> area for this assignment in Canvas and type all of your answers there. Clearly label each response by <strong>Part</strong> and <strong>Task</strong> so it is easy to identify which question you are answering.</p>
+<p><strong>You do not need to copy the questions or programs into Canvas.</strong> Write only your clearly labeled answers.</p>
+<p><strong>Example Canvas response format:</strong></p>
+<pre>Part A — C
+Task 1 — Match Source Code to a Non-Terminal
+age → &lt;identifier&gt;
+20 → &lt;number&gt;
+int age = 20; → &lt;declaration&gt;
+
+Task 2 — Build the Structure
+&lt;program&gt;
+    ↓
+&lt;main-function&gt;
+    ↓
+&lt;statement-list&gt;
+    ...
+
+Task 3 — Terminal or Non-Terminal?
+int → Terminal
+&lt;declaration&gt; → Non-terminal</pre>
+<p>Continue with <strong>Part B — C#</strong>, <strong>Part C — Python</strong>, and <strong>Part D — Challenge</strong> in the same format.</p>
+</div>
+<h2>Before You Begin</h2>
+<table>
+<tr><th>Concept</th><th>Meaning</th><th>Example</th></tr>
+<tr><td><strong>Terminal</strong></td><td>An actual token/token kind at the leaves of the grammar.</td><td><code>int</code>, <code>=</code>, <code>20</code>, <code>;</code>, <code>NEWLINE</code></td></tr>
+<tr><td><strong>Non-terminal</strong></td><td>An abstract grammar category used to describe a language construct.</td><td><code>&lt;declaration&gt;</code>, <code>&lt;statement&gt;</code>, <code>&lt;expression&gt;</code></td></tr>
+</table>
+<div class="note">
+<h3 style="margin-top:0;">Concept Guide — Everything You Need for This Activity</h3>
+<p><strong>Non-terminal:</strong> A non-terminal is a grammar category that describes the role or structure of source code. It is not something the programmer literally types as part of the program. In this activity, non-terminals are written inside angle brackets, such as <code>&lt;program&gt;</code>, <code>&lt;statement&gt;</code>, <code>&lt;declaration&gt;</code>, <code>&lt;identifier&gt;</code>, and <code>&lt;number&gt;</code>.</p>
+<p><strong>Terminal:</strong> A terminal is an actual token/token kind that appears at the leaves of the grammar. Examples include keywords and symbols such as <code>int</code>, <code>return</code>, <code>=</code>, <code>;</code>, <code>(</code>, and Python's logical <code>NEWLINE</code>.</p>
+<p><strong>Think of the relationship this way:</strong></p>
+<pre>&lt;declaration&gt;                    ← non-terminal: name of a structure
+      ↓
+int &lt;identifier&gt; = &lt;number&gt; ;    ← grammar description
+      ↓
+int age = 20;                    ← actual source code</pre>
+<p>Here, <code>&lt;declaration&gt;</code>, <code>&lt;identifier&gt;</code>, and <code>&lt;number&gt;</code> are non-terminals. The source code <code>int age = 20;</code> is the concrete code that matches that structure.</p>
+<p><strong>Most specific non-terminal:</strong> When asked for the most specific non-terminal, choose the category that describes that exact piece of code—not a broader category that also contains it. For example, <code>int age = 20;</code> may ultimately be part of a <code>&lt;statement&gt;</code> and a <code>&lt;program&gt;</code>, but <code>&lt;declaration&gt;</code> is the most specific choice for that line.</p>
+<p><strong>Grammar hierarchy:</strong> Non-terminals can contain other non-terminals. A simplified hierarchy may look like:</p>
+<pre>&lt;program&gt;
+    ↓
+&lt;statement-list&gt;
+    ↓
+&lt;statement&gt;
+    ↓
+&lt;declaration&gt;
+    ↓
+int age = 20;</pre>
+<p><strong>Python reminder:</strong> <code>NEWLINE</code>, <code>INDENT</code>, and <code>DEDENT</code> are structural tokens/terminals when they are relevant to the grammar. They are <strong>not</strong> non-terminals.</p>
+</div>
+
+<h3>Common Non-Terminal Categories Used in This Activity</h3>
+<p>The names below describe different kinds of program structure. These are the simplified
+non-terminal categories you will use in this activity.</p>
+<table>
+<tr><th>Non-terminal category</th><th>What it represents</th><th>Example from source code</th></tr>
+<tr><td><code>&lt;program&gt;</code></td><td>The entire program being described.</td><td><code>age = 20</code><br/><code>print(age)</code> together</td></tr>
+<tr><td><code>&lt;statement-list&gt;</code></td><td>A sequence of statements. In our simplified grammar, it can contain one statement or several statements.</td><td><code>age = 20</code><br/><code>print(age)</code></td></tr>
+<tr><td><code>&lt;statement&gt;</code></td><td>One complete instruction or statement.</td><td><code>age = 20</code></td></tr>
+<tr><td><code>&lt;declaration&gt;</code></td><td>A declaration that introduces a variable/type in the simplified C or C# examples.</td><td><code>int age = 20;</code></td></tr>
+<tr><td><code>&lt;assignment&gt;</code></td><td>An assignment that gives a value to a name.</td><td><code>age = 20</code></td></tr>
+<tr><td><code>&lt;function-call&gt;</code></td><td>A call to a function.</td><td><code>printf("%d", age);</code> or <code>print(age)</code></td></tr>
+<tr><td><code>&lt;method-call&gt;</code></td><td>A call to a method in the simplified C# example.</td><td><code>Console.WriteLine(age);</code></td></tr>
+<tr><td><code>&lt;return-statement&gt;</code></td><td>A statement that returns control/value from a function.</td><td><code>return 0;</code></td></tr>
+<tr><td><code>&lt;main-function&gt;</code></td><td>The complete <code>main</code> function, including its body, in our simplified C example.</td><td><code>int main() { ... }</code></td></tr>
+<tr><td><code>&lt;identifier&gt;</code></td><td>A grammar category for a name.</td><td><code>age</code>, <code>print</code></td></tr>
+<tr><td><code>&lt;number&gt;</code></td><td>A grammar category representing a numeric value in this simplified grammar.</td><td><code>20</code>, <code>0</code></td></tr>
+<tr><td><code>&lt;if-statement&gt;</code></td><td>An <code>if</code> construct containing a condition and a body.</td><td><code>if age &gt;= 18: ...</code></td></tr>
+</table>
+<div class="note">
+<strong>Important about &lt;statement-list&gt;:</strong>
+A statement list means a sequence of statements. It does not require many statements.
+For example, in:
+<pre>if age &gt;= 18:
+    print("Adult")</pre>
+the body of the <code>if</code> contains one statement, so in our simplified teaching grammar
+it can still be represented as a <code>&lt;statement-list&gt;</code> containing one <code>&lt;statement&gt;</code>.
+If another line were added to the same indented block, the same statement list would contain two statements.
+</div>
+<h3>Quick Example</h3>
+<pre>int age = 20;</pre>
+<p>A simplified grammar can describe this source statement as:</p>
+<pre>&lt;declaration&gt; ::= int &lt;identifier&gt; = &lt;number&gt; ;</pre>
+<p>Here, <code>&lt;declaration&gt;</code>, <code>&lt;identifier&gt;</code>, and <code>&lt;number&gt;</code> are <strong>non-terminals</strong>. The concrete source is ultimately built from terminals/tokens such as <code>int</code>, an identifier token with lexeme <code>age</code>, <code>=</code>, a numeric literal <code>20</code>, and <code>;</code>.</p>
+<div class="note"><strong>Important:</strong> The grammars in this activity are intentionally simplified teaching grammars. They are designed to help you recognize grammatical structure; they are not the complete official grammars of C, C#, or Python.</div>
+<h2>Part A — C</h2><p style="font-weight:bold;color:#234b84;">Record all answers for this part in the Canvas Text Entry area.</p>
+<pre>int main()
+{
+    int age = 20;
+    printf("%d", age);
+    return 0;
+}</pre>
+<p>For this activity, use these possible non-terminals:</p>
+<pre>&lt;program&gt;   &lt;main-function&gt;   &lt;statement-list&gt;   &lt;statement&gt;
+&lt;declaration&gt;   &lt;function-call&gt;   &lt;return-statement&gt;
+&lt;identifier&gt;   &lt;number&gt;</pre>
+<h3>Task 1 — Match Source Code to a Non-Terminal</h3>
+<table><tr><th>Source-code part</th><th>Most specific non-terminal</th></tr>
+<tr><td><code>age</code></td><td></td></tr><tr><td><code>20</code></td><td></td></tr>
+<tr><td><code>int age = 20;</code></td><td></td></tr><tr><td><code>printf("%d", age);</code></td><td></td></tr>
+<tr><td><code>return 0;</code></td><td></td></tr><tr><td>The entire <code>main()</code> construct</td><td></td></tr>
+<tr><td>The entire program</td><td></td></tr></table>
+<h3>Task 2 — Build the Structure</h3><p>In your Canvas Text Entry response, fill in the missing non-terminals.</p>
+<pre>&lt;program&gt;
+    ↓
+____________________
+    ↓
+&lt;statement-list&gt;
+    ├── ____________________  → int age = 20;
+    ├── ____________________  → printf("%d", age);
+    └── ____________________  → return 0;</pre>
+<h3>Task 3 — Terminal or Non-Terminal?</h3>
+<table><tr><th>Item</th><th>Terminal or Non-terminal?</th></tr>
+<tr><td><code>int</code></td><td></td></tr><tr><td><code>&lt;declaration&gt;</code></td><td></td></tr><tr><td><code>;</code></td><td></td></tr><tr><td><code>&lt;identifier&gt;</code></td><td></td></tr><tr><td><code>return</code></td><td></td></tr></table>
+<h2>Part B — C#</h2><p style="font-weight:bold;color:#234b84;">Record all answers for this part in the Canvas Text Entry area.</p>
+<pre>int age = 20;
+Console.WriteLine(age);</pre>
+<p>Use these possible non-terminals:</p>
+<pre>&lt;program&gt;   &lt;statement-list&gt;   &lt;statement&gt;
+&lt;declaration&gt;   &lt;method-call&gt;   &lt;identifier&gt;   &lt;number&gt;</pre>
+<h3>Task 1 — Match Source Code to a Non-Terminal</h3>
+<table><tr><th>Source-code part</th><th>Most specific non-terminal</th></tr>
+<tr><td><code>age</code></td><td></td></tr><tr><td><code>20</code></td><td></td></tr>
+<tr><td><code>int age = 20;</code></td><td></td></tr><tr><td><code>Console.WriteLine(age);</code></td><td></td></tr>
+<tr><td>Both statements together</td><td></td></tr><tr><td>The entire program</td><td></td></tr></table>
+<h3>Task 2 — Build the Structure</h3>
+<pre>&lt;program&gt;
+    ↓
+____________________
+    ├── &lt;statement&gt;
+    │      ↓
+    │   ____________________  → int age = 20;
+    │
+    └── &lt;statement&gt;
+           ↓
+        ____________________  → Console.WriteLine(age);</pre>
+<h2>Part C — Python</h2><p style="font-weight:bold;color:#234b84;">Record all answers for this part in the Canvas Text Entry area.</p>
+<pre>age = 20
+print(age)</pre>
+<p>Use these possible non-terminals:</p>
+<pre>&lt;program&gt;   &lt;statement-list&gt;   &lt;statement&gt;
+&lt;assignment&gt;   &lt;function-call&gt;   &lt;identifier&gt;   &lt;number&gt;</pre>
+<h3>Task 1 — Match Source Code to a Non-Terminal</h3>
+<table><tr><th>Source-code part</th><th>Most specific non-terminal</th></tr>
+<tr><td><code>age</code></td><td></td></tr><tr><td><code>20</code></td><td></td></tr>
+<tr><td><code>age = 20</code></td><td></td></tr><tr><td><code>print(age)</code></td><td></td></tr>
+<tr><td>Both statements together</td><td></td></tr><tr><td>The entire program</td><td></td></tr></table>
+<h3>Task 2 — Do Not Confuse Structural Tokens with Non-Terminals</h3>
+<p>In your Canvas Text Entry response, classify each item. Remember: in Python, NEWLINE, INDENT, and DEDENT can be tokens/terminals; writing angle brackets around a grammar category indicates a non-terminal in our notation.</p>
+<table><tr><th>Item</th><th>Terminal/token or Non-terminal?</th></tr>
+<tr><td><code>NEWLINE</code></td><td></td></tr><tr><td><code>&lt;statement&gt;</code></td><td></td></tr>
+<tr><td><code>=</code></td><td></td></tr><tr><td><code>&lt;assignment&gt;</code></td><td></td></tr>
+<tr><td><code>(</code></td><td></td></tr><tr><td><code>&lt;identifier&gt;</code></td><td></td></tr></table>
+<h2>Part D — Challenge: Recognize the Hierarchy</h2><p style="font-weight:bold;color:#234b84;">Record all answers for this part in the Canvas Text Entry area.</p>
+<p>Use the Python program below:</p>
+<pre>age = 20
+print(age)</pre>
+<p>Place these items in a logical grammar hierarchy:</p>
+<pre>&lt;program&gt;   &lt;statement-list&gt;   &lt;statement&gt;   &lt;assignment&gt;
+&lt;identifier&gt;   &lt;number&gt;</pre>
+<div class="blankbox"></div>
+<h3>Final Question</h3>
+<p>In your own words, explain the difference between a <strong>terminal</strong> and a <strong>non-terminal</strong>. Use one example of each.</p><div class="blankbox"></div>
+<div class="callout" style="margin-top:30px;">
+<strong>Before You Submit:</strong> Make sure your Canvas Text Entry response includes clearly labeled answers for Part A, Part B, Part C, and Part D. You do not need to upload or edit this HTML file.
+</div>
+<div class="footer">CSBS 315 · Individual In-Class Activity · Formal Grammars: Non-Terminals · Submit in Canvas Text Entry</div></main></body></html>
