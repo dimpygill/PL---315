@@ -1,0 +1,136 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CSBS 315 — In-Class Token Activity</title><style>
+:root{
+  --navy:#17325c; --blue:#2f66d0; --ink:#1f2937; --muted:#64748b;
+  --line:#cbd5e1; --paper:#ffffff; --bg:#f4f7fb; --soft:#eef4ff;
+  --green:#eaf7ef; --gold:#fff8df;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,Helvetica,sans-serif;line-height:1.55}
+.page{max-width:1000px;margin:30px auto;background:var(--paper);padding:42px 48px;border:1px solid #dbe3ee;border-radius:14px}
+h1{color:var(--navy);margin:0 0 4px;font-size:30px}
+h2{color:var(--navy);border-bottom:2px solid #dbe6f7;padding-bottom:7px;margin-top:34px}
+h3{color:#234b84;margin-top:25px}
+.subtitle{color:var(--muted);margin-bottom:24px}
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0}
+.blank{border-bottom:1px solid #777;display:inline-block;min-width:230px;height:1.2em}
+.callout{background:var(--soft);border-left:5px solid var(--blue);padding:14px 18px;margin:18px 0;border-radius:6px}
+.submitbox{background:#eef8f1;border-left:5px solid #2f855a;padding:16px 20px;margin:20px 0;border-radius:6px}
+.note{background:var(--gold);border-left:5px solid #d69e2e;padding:14px 18px;margin:18px 0;border-radius:6px}
+.solution{background:var(--green);border-left:5px solid #2f855a;padding:14px 18px;margin:18px 0;border-radius:6px}
+table{width:100%;border-collapse:collapse;margin:16px 0 24px}
+th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+th{background:#eaf0f8;color:var(--navy)}
+code,pre{font-family:Consolas,"Courier New",monospace}
+pre{background:#f7f9fc;border:1px solid #dbe3ee;border-radius:8px;padding:16px;overflow:auto;line-height:1.55}
+.answerbox{height:90px;border:1px solid var(--line);border-radius:8px;margin:10px 0 20px;background:#fff}
+.answerbox.small{height:55px}
+.tag{display:inline-block;background:#eaf0f8;color:var(--navy);padding:3px 9px;border-radius:14px;font-size:12px;font-weight:bold}
+.footer{margin-top:38px;padding-top:15px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+@media print{
+ body{background:#fff}
+ .page{max-width:none;margin:0;border:0;border-radius:0;padding:22px}
+ h2{break-after:avoid}
+ table,pre,.callout,.note,.solution{break-inside:avoid}
+}
+</style></head><body><main class="page">
+<span class="tag">STUDENT IN CLASS ACTIVITY</span>
+<h1>In-Class Activity: Identify and Classify Tokens</h1>
+<div class="subtitle">CSBS 315 · Syntax, Tokens &amp; Grammars · C, C#, and Python</div>
+
+<div class="callout"><strong>Purpose:</strong> Practice thinking like a lexer/tokenizer. For each program, identify the tokens in the order they occur and classify each token. Then compare how the three languages represent program structure.</div>
+<div class="submitbox"><h3 style="margin-top:0">How to Submit Your Work</h3>
+<p>This activity is provided as an HTML page for you to read. <strong>You will not enter your answers directly into this page.</strong></p>
+<p>In Canvas, open the <strong>Text Entry</strong> area for this assignment and type your answers there.</p>
+<p><strong>Clearly label each answer by Part and Task.</strong> For example:</p>
+<pre><strong>Part A — C</strong>
+<strong>Task 1 — Tokens:</strong> int, main, (, ), ...
+
+<strong>Task 2 — Token Categories:</strong>
+int → KEYWORD
+main → IDENTIFIER
+( → PUNCTUATION
+...
+
+<strong>Think About It #1:</strong> Your answer...</pre>
+<p>Then continue with <strong>Part B — C#</strong>, <strong>Part C — Python</strong>, and <strong>Part D — Comparison</strong> in the same way.</p>
+<p><strong>You do not need to copy the questions or programs into your submission.</strong> Just clearly label your answers so it is easy to identify which question you are answering.</p></div>
+
+<h2>Token Categories</h2>
+<p>Use the following categories. For this activity, numeric and string values are grouped under the general category <strong>LITERAL</strong>.</p>
+
+<table>
+<tr><th>Category</th><th>Meaning</th><th>Examples</th></tr>
+<tr><td><strong>KEYWORD</strong></td><td>Reserved word with a special meaning in the language.</td><td><code>int</code>, <code>if</code>, <code>return</code></td></tr>
+<tr><td><strong>IDENTIFIER</strong></td><td>Name used for a variable, function, method, class, etc.</td><td><code>age</code>, <code>main</code>, <code>printf</code></td></tr>
+<tr><td><strong>LITERAL</strong></td><td>A value written directly in source code.</td><td><code>20</code>, <code>18</code>, <code>"Adult"</code></td></tr>
+<tr><td><strong>OPERATOR</strong></td><td>Performs assignment, arithmetic, comparison, or another operation.</td><td><code>=</code>, <code>+</code>, <code>&gt;=</code></td></tr>
+<tr><td><strong>PUNCTUATION / DELIMITER</strong></td><td>Separates or structures parts of the program.</td><td><code>( ) { } ; , . :</code></td></tr>
+<tr><td><strong>NEWLINE</strong></td><td>In Python, a logical newline can terminate a simple statement.</td><td><code>NEWLINE</code></td></tr>
+<tr><td><strong>INDENT</strong></td><td>Python token marking the beginning of an indented block.</td><td><code>INDENT</code></td></tr>
+<tr><td><strong>DEDENT</strong></td><td>Python token marking the end of an indented block.</td><td><code>DEDENT</code></td></tr>
+</table>
+
+<h3>Quick Example</h3>
+<pre>int age = 20;</pre>
+<table><tr><th>Token</th><th>Category</th></tr>
+<tr><td><code>int</code></td><td>KEYWORD</td></tr><tr><td><code>age</code></td><td>IDENTIFIER</td></tr>
+<tr><td><code>=</code></td><td>OPERATOR</td></tr><tr><td><code>20</code></td><td>LITERAL</td></tr>
+<tr><td><code>;</code></td><td>PUNCTUATION</td></tr></table>
+
+<h2>Part A — C</h2>
+<pre>int main()
+{
+    int age = 20;
+
+    if (age &gt;= 18)
+    {
+        printf("Adult");
+    }
+
+    return 0;
+}</pre>
+<h3>Task 1 — Identify the Tokens</h3><p>In your Canvas Text Entry response, write the tokens in the order the lexer encounters them.</p><div class="answerbox"></div>
+<h3>Task 2 — Classify the Tokens</h3><p>In your Canvas Text Entry response, list each token and its category.</p><table><tr><th>Token</th><th>Category</th></tr><tr><td><code>int</code></td><td></td></tr><tr><td><code>main</code></td><td></td></tr><tr><td><code>(</code></td><td></td></tr><tr><td><code>)</code></td><td></td></tr><tr><td><code>{</code></td><td></td></tr><tr><td><code>int</code></td><td></td></tr><tr><td><code>age</code></td><td></td></tr><tr><td><code>=</code></td><td></td></tr><tr><td><code>20</code></td><td></td></tr><tr><td><code>;</code></td><td></td></tr><tr><td><code>if</code></td><td></td></tr><tr><td><code>(</code></td><td></td></tr><tr><td><code>age</code></td><td></td></tr><tr><td><code>&gt;=</code></td><td></td></tr><tr><td><code>18</code></td><td></td></tr><tr><td><code>)</code></td><td></td></tr><tr><td><code>{</code></td><td></td></tr><tr><td><code>printf</code></td><td></td></tr><tr><td><code>(</code></td><td></td></tr><tr><td><code>&quot;Adult&quot;</code></td><td></td></tr><tr><td><code>)</code></td><td></td></tr><tr><td><code>;</code></td><td></td></tr><tr><td><code>}</code></td><td></td></tr><tr><td><code>return</code></td><td></td></tr><tr><td><code>0</code></td><td></td></tr><tr><td><code>;</code></td><td></td></tr><tr><td><code>}</code></td><td></td></tr></table>
+<h3>Think About It</h3><p><em>Answer these questions in your Canvas Text Entry response and label each answer clearly.</em></p>
+<p>1. Do the physical line breaks become statement-terminating tokens in this C example?</p><div class="answerbox small"></div>
+<p>2. What token explicitly terminates the declaration, function-call, and return statements?</p><div class="answerbox small"></div>
+
+<h2>Part B — C#</h2>
+<pre>int age = 20;
+
+if (age &gt;= 18)
+{
+    Console.WriteLine("Adult");
+}</pre>
+<h3>Task 1 — Identify the Tokens</h3><p>In your Canvas Text Entry response, write the tokens in order.</p><div class="answerbox"></div>
+<h3>Task 2 — Classify the Tokens</h3><p>In your Canvas Text Entry response, list each token and its category.</p><table><tr><th>Token</th><th>Category</th></tr><tr><td><code>int</code></td><td></td></tr><tr><td><code>age</code></td><td></td></tr><tr><td><code>=</code></td><td></td></tr><tr><td><code>20</code></td><td></td></tr><tr><td><code>;</code></td><td></td></tr><tr><td><code>if</code></td><td></td></tr><tr><td><code>(</code></td><td></td></tr><tr><td><code>age</code></td><td></td></tr><tr><td><code>&gt;=</code></td><td></td></tr><tr><td><code>18</code></td><td></td></tr><tr><td><code>)</code></td><td></td></tr><tr><td><code>{</code></td><td></td></tr><tr><td><code>Console</code></td><td></td></tr><tr><td><code>.</code></td><td></td></tr><tr><td><code>WriteLine</code></td><td></td></tr><tr><td><code>(</code></td><td></td></tr><tr><td><code>&quot;Adult&quot;</code></td><td></td></tr><tr><td><code>)</code></td><td></td></tr><tr><td><code>;</code></td><td></td></tr><tr><td><code>}</code></td><td></td></tr></table>
+<h3>Think About It</h3><p><em>Answer these questions in your Canvas Text Entry response and label each answer clearly.</em></p>
+<p>1. What token explicitly terminates the declaration and method-call statements?</p><div class="answerbox small"></div>
+<p>2. Is the physical line break itself being used as the statement terminator here?</p><div class="answerbox small"></div>
+
+<h2>Part C — Python</h2>
+<pre>age = 20
+
+if age &gt;= 18:
+    print("Adult")
+
+print("Done")</pre>
+<div class="note"><strong>Important:</strong> Do not ignore Python's structural tokens. Include logical <code>NEWLINE</code>, <code>INDENT</code>, and <code>DEDENT</code> where appropriate. A blank physical line does not automatically mean an extra logical <code>NEWLINE</code> token for this exercise.</div>
+<h3>Task 1 — Identify the Tokens</h3><p>In your Canvas Text Entry response, write the tokens in order, including the structural tokens.</p><div class="answerbox"></div>
+<h3>Task 2 — Classify the Tokens</h3><p>In your Canvas Text Entry response, list each token and its category.</p><table><tr><th>Token</th><th>Category</th></tr><tr><td><code>age</code></td><td></td></tr><tr><td><code>=</code></td><td></td></tr><tr><td><code>20</code></td><td></td></tr><tr><td><code>NEWLINE</code></td><td></td></tr><tr><td><code>if</code></td><td></td></tr><tr><td><code>age</code></td><td></td></tr><tr><td><code>&gt;=</code></td><td></td></tr><tr><td><code>18</code></td><td></td></tr><tr><td><code>:</code></td><td></td></tr><tr><td><code>NEWLINE</code></td><td></td></tr><tr><td><code>INDENT</code></td><td></td></tr><tr><td><code>print</code></td><td></td></tr><tr><td><code>(</code></td><td></td></tr><tr><td><code>&quot;Adult&quot;</code></td><td></td></tr><tr><td><code>)</code></td><td></td></tr><tr><td><code>NEWLINE</code></td><td></td></tr><tr><td><code>DEDENT</code></td><td></td></tr><tr><td><code>print</code></td><td></td></tr><tr><td><code>(</code></td><td></td></tr><tr><td><code>&quot;Done&quot;</code></td><td></td></tr><tr><td><code>)</code></td><td></td></tr><tr><td><code>NEWLINE</code></td><td></td></tr></table>
+<h3>Think About It</h3><p><em>Answer these questions in your Canvas Text Entry response and label each answer clearly.</em></p>
+<p>Why does Python need <code>INDENT</code> and <code>DEDENT</code> tokens while C and C# use <code>{</code> and <code>}</code> to mark these blocks?</p><div class="answerbox"></div>
+
+<h2>Part D — Compare the Three Languages</h2>
+<p>In your Canvas Text Entry response, answer each comparison for C, C#, and Python. You may use a simple labeled list or table format.</p>
+<table><tr><th>Question</th><th>C</th><th>C#</th><th>Python</th></tr>
+<tr><td>Uses <code>;</code> in these examples to terminate simple statements?</td><td></td><td></td><td></td></tr>
+<tr><td>Uses <code>{ }</code> for blocks?</td><td></td><td></td><td></td></tr>
+<tr><td>Uses indentation to define blocks?</td><td></td><td></td><td></td></tr>
+<tr><td>Has meaningful logical <code>NEWLINE</code> tokens in these examples?</td><td></td><td></td><td></td></tr>
+<tr><td>Has <code>INDENT</code> / <code>DEDENT</code> tokens?</td><td></td><td></td><td></td></tr></table>
+<h3>Final Discussion Question</h3><p><em>Answer this question in your Canvas Text Entry response.</em></p>
+<p>All three programs perform approximately the same task. Why can their token streams still be different?</p><div class="answerbox"></div>
+<div class="footer">CSBS 315 · In-Class Activity · Tokenization and Token Categories</div>
+</main></body></html>
