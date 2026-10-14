@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mastering Mutability & Immutability: Python, C, & C#</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --accent-blue: #2563eb;
+            --accent-indigo: #4f46e5;
+            --accent-green: #16a34a;
+            --accent-orange: #d97706;
+            --accent-red: #dc2626;
+            --border-color: #cbd5e1;
+            --panel-bg: #f1f5f9;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: white;
+            padding: 2.5rem 1rem;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2.25rem;
+        }
+
+        header p {
+            margin: 0;
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        nav {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        nav a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        section {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        h2 {
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-top: 0;
+        }
+
+        h3 {
+            color: var(--accent-indigo);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f1f5f9;
+        }
+
+        .sandbox-container {
+            border: 2px dashed var(--accent-blue);
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .sandbox-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        button {
+            background-color: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: #1d4ed8;
+        }
+
+        button.secondary {
+            background-color: var(--text-secondary);
+        }
+        button.secondary:hover {
+            background-color: #334155;
+        }
+
+        .memory-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .memory-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .memory-panel {
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            min-height: 200px;
+            background: white;
+        }
+
+        .panel-title {
+            font-weight: bold;
+            margin-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            padding-bottom: 0.4rem;
+        }
+
+        .memory-slot {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+            margin-bottom: 0.5rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .log-box {
+            background: #1e293b;
+            color: #38bdf8;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Mastering Mutability & Immutability</h1>
+        <p>Interactive Tutorial & Language Sandboxes: Python, C, and C#</p>
+    </header>
+
+    <div class="container">
+        <nav>
+            <a href="#intro">1. Core Concepts</a>
+            <a href="#python-sec">2. Python Sandbox</a>
+            <a href="#c-sec">3. C Sandbox</a>
+            <a href="#csharp-sec">4. C# Sandbox</a>
+            <a href="#class-sec">5. C# Class Sandbox</a>
+        </nav>
+
+        <!-- INTRO SECTION -->
+        <section id="intro">
+            <h2>1. What is Mutability?</h2>
+            <p>An object is <strong>mutable</strong> if its internal state or value can be modified <em>after</em> it is created without changing its memory address. An object is <strong>immutable</strong> if its value cannot be changed once created; any modification results in a brand-new object allocation.</p>
+            
+            <table>
+                <tr>
+                    <th>Language</th>
+                    <th>Immutable Types</th>
+                    <th>Mutable Types</th>
+                </tr>
+                <tr>
+                    <td><strong>Python</strong></td>
+                    <td><code>int</code>, <code>float</code>, <code>str</code>, <code>tuple</code>, <code>bool</code></td>
+                    <td><code>list</code>, <code>dict</code>, <code>set</code></td>
+                </tr>
+                <tr>
+                    <td><strong>C</strong></td>
+                    <td>String literals (`const char*`)</td>
+                    <td>Arrays (`char arr[]`), heap allocations (`malloc`)</td>
+                </tr>
+                <tr>
+                    <td><strong>C#</strong></td>
+                    <td><code>string</code>, <code>readonly struct</code>, <code>record</code></td>
+                    <td>Classes, arrays, <code>int</code>, <code>struct</code>, <code>StringBuilder</code>, <code>List&lt;T&gt;</code></td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- PYTHON SANDBOX -->
+        <section id="python-sec">
+            <h2>2. Sandbox 1: Python Mutability & Object IDs</h2>
+            <p>In Python, use the built-in <code>id()</code> function to see memory addresses. Test lists (mutable) vs tuples/strings (immutable) — and what happens when you mix immutable objects <em>inside</em> a mutable container.</p>
+            <div class="sandbox-container">
+                <div class="sandbox-controls">
+                    <button onclick="pyStep(1)">1. Modify List (Mutable)</button>
+                    <button onclick="pyStep(2)">2. Modify String/Tuple (Immutable)</button>
+                    <button onclick="pyStep(3)">3. Immutable str Inside a List</button>
+                    <button onclick="pyStep(4)">4. Tuple Holding a Mutable List</button>
+                    <button onclick="pyStep(5)">5. Dict with Mixed Values</button>
+                    <button class="secondary" onclick="pyReset()">Reset Python Sandbox</button>
+                </div>
+                <div class="memory-grid">
+                    <div class="memory-panel">
+                        <div class="panel-title">Python Variable State</div>
+                        <div id="py-state"><em>(Not started)</em></div>
+                    </div>
+                    <div class="memory-panel">
+                        <div class="panel-title">Object Identity (id())</div>
+                        <div id="py-id"><em>(No objects tracked)</em></div>
+                    </div>
+                </div>
+                <div class="log-box" id="py-log">&gt; Click buttons above to test Python mutability.</div>
+            </div>
+        </section>
+
+        <!-- C SANDBOX -->
+        <section id="c-sec">
+            <h2>3. Sandbox 2: C Pointer Mutability & Const</h2>
+            <p>In C, pointers allow direct memory control. You can use <code>const</code> to make memory read-only or omit it for full read-write mutability — and you can mix both inside the same struct or scope.</p>
+            <div class="sandbox-container">
+                <div class="sandbox-controls">
+                    <button onclick="cStep(1)">1. Mutable Array Buffer</button>
+                    <button onclick="cStep(2)">2. Immutable String Literal (const)</button>
+                    <button onclick="cStep(3)">3. Struct with Mixed const/Mutable Fields</button>
+                    <button onclick="cStep(4)">4. const Pointer vs Mutable Buffer (Same Scope)</button>
+                    <button onclick="cStep(5)">5. Nested Struct — What Can You Mutate?</button>
+                    <button class="secondary" onclick="cReset()">Reset C Sandbox</button>
+                </div>
+                <div class="memory-grid">
+                    <div class="memory-panel">
+                        <div class="panel-title">C Memory Block</div>
+                        <div id="c-state"><em>(Not started)</em></div>
+                    </div>
+                    <div class="memory-panel">
+                        <div class="panel-title">Compiler Protection Check</div>
+                        <div id="c-check"><em>(Waiting for action)</em></div>
+                    </div>
+                </div>
+                <div class="log-box" id="c-log">&gt; Click buttons above to test C memory mutability.</div>
+            </div>
+        </section>
+
+        <!-- C# SANDBOX -->
+        <section id="csharp-sec">
+            <h2>4. Sandbox 3: C# Immutability vs. Mutable Builders</h2>
+            <p>In C#, strings are immutable. Appending to them creates new heap objects, whereas `StringBuilder` uses a mutable backing buffer.</p>
+            <div class="sandbox-container">
+                <div class="sandbox-controls">
+                    <button onclick="csStep(1)">1. String Concatenation (Immutable)</button>
+                    <button onclick="csStep(2)">2. StringBuilder (Mutable Buffer)</button>
+                    <button class="secondary" onclick="csReset()">Reset C# Sandbox</button>
+                </div>
+                <div class="memory-grid">
+                    <div class="memory-panel">
+                        <div class="panel-title">Heap Memory Allocation</div>
+                        <div id="cs-state"><em>(Not started)</em></div>
+                    </div>
+                    <div class="memory-panel">
+                        <div class="panel-title">Garbage / Performance Cost</div>
+                        <div id="cs-perf"><em>(None)</em></div>
+                    </div>
+                </div>
+                <div class="log-box" id="cs-log">&gt; Click buttons above to test C# string memory behavior.</div>
+            </div>
+        </section>
+
+        <!-- C# CLASS SANDBOX -->
+        <section id="class-sec">
+            <h2>5. Sandbox 4: C# Classes — Mutable vs Immutable Members</h2>
+            <p>A C# <strong>class</strong> is mutable by default. But you can mix mutable and immutable members inside the same class using <code>get; set;</code>, <code>get;</code> (readonly), <code>get; init;</code>, and <code>readonly</code> fields. The <strong>string reference</strong> can be mutable even though the string content is always immutable.</p>
+            <div class="sandbox-container">
+                <div class="sandbox-controls">
+                    <button onclick="clsStep(1)">1. Mutable Property (get; set;)</button>
+                    <button onclick="clsStep(2)">2. Readonly Property (get; only)</button>
+                    <button onclick="clsStep(3)">3. Init-Only Property (get; init;)</button>
+                    <button onclick="clsStep(4)">4. String Reference vs Content</button>
+                    <button onclick="clsStep(5)">5. record vs class</button>
+                    <button class="secondary" onclick="clsReset()">Reset Sandbox</button>
+                </div>
+                <div class="memory-grid">
+                    <div class="memory-panel">
+                        <div class="panel-title">Class Definition &amp; Code</div>
+                        <div id="cls-code"><em>(Not started)</em></div>
+                    </div>
+                    <div class="memory-panel">
+                        <div class="panel-title">Memory &amp; Mutation Result</div>
+                        <div id="cls-result"><em>(Waiting for action)</em></div>
+                    </div>
+                </div>
+                <div class="log-box" id="cls-log">&gt; Click a button above to explore C# class mutability.</div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        /* Python Sandbox Logic */
+        function pyStep(step) {
+            const state = document.getElementById('py-state');
+            const idBox = document.getElementById('py-id');
+            const log = document.getElementById('py-log');
+
+            if(step === 1) {
+                state.innerHTML = `<div class="memory-slot">my_list = [10, 20, 30]<br>my_list.append(40)</div>`;
+                idBox.innerHTML = `<div class="memory-slot" style="background:#dcfce7;">id(my_list) = 4391204800 (UNCHANGED!)</div>`;
+                log.innerHTML = `&gt; List is MUTABLE. Appending items modified the list in-place without changing its memory address.`;
+            } else if(step === 2) {
+                state.innerHTML = `<div class="memory-slot">my_str = "Hello"<br>my_str += " World"</div>`;
+                idBox.innerHTML = `<div class="memory-slot" style="background:#fee2e2;">id("Hello") = 140221<br>id("Hello World") = 998432 (NEW ADDRESS!)</div>`;
+                log.innerHTML = `&gt; String is IMMUTABLE. Modifying it abandoned the old object and allocated a brand new one in memory.`;
+            } else if(step === 3) {
+                state.innerHTML = `
+<div class="memory-slot"><strong>Container (mutable list):</strong><br>
+basket = ["apple", 42, (1, 2)]<br><br>
+basket.append("banana")  <span style="color:#16a34a">✔ list is mutable</span><br>
+basket[0] = "mango"      <span style="color:#16a34a">✔ replace the slot</span><br>
+basket[1] += 1           <span style="color:#16a34a">✔ rebinds slot to new int</span><br>
+basket[0][0] = "M"       <span style="color:#dc2626">✘ TypeError: str is immutable</span>
+</div>`;
+                idBox.innerHTML = `
+<div class="memory-slot">id(basket) before/after append:<br>
+  <span style="color:#16a34a">SAME address — list mutated in place</span><br><br>
+id(basket[1]) before: 4327681808  (int 42)<br>
+id(basket[1]) after:  4327681840  <span style="color:#dc2626">NEW address — new int 43</span><br><br>
+id(basket[0]) = always a new str object when re-bound
+</div>`;
+                log.innerHTML = `&gt; STEP 3 — The list (container) is mutable: you can add, remove, or REBIND any slot. But the objects stored inside — str, int, tuple — are immutable; you cannot change their content in place. "basket[1] += 1" looks like mutation but actually creates a new int and rebinds the slot.`;
+            } else if(step === 4) {
+                state.innerHTML = `
+<div class="memory-slot"><strong>Tuple holding a mutable list:</strong><br>
+t = (10, [20, 30], "hi")<br><br>
+t[1].append(40)     <span style="color:#16a34a">✔ the list inside mutated!</span><br>
+t[0] = 99           <span style="color:#dc2626">✘ TypeError: tuple is immutable</span><br>
+t[2] += "!"         <span style="color:#dc2626">✘ TypeError: tuple is immutable</span>
+</div>`;
+                idBox.innerHTML = `
+<div class="memory-slot">id(t) = 5581020224  (never changes)<br><br>
+id(t[1]) before: 4391204800<br>
+id(t[1]) after:  4391204800  <span style="color:#16a34a">SAME — list mutated in place</span><br><br>
+t is now: (10, [20, 30, 40], "hi")<br>
+<span style="color:#b45309">⚠ Tuple "immutability" means its slots cannot be rebound — but if a slot holds a mutable object, THAT object can still change.</span>
+</div>`;
+                log.innerHTML = `&gt; STEP 4 — A tuple cannot have its slots rebound, but the objects those slots POINT TO can still change if they are mutable. This is a subtle but important Python distinction: the tuple's references are frozen, not the objects themselves.`;
+            } else if(step === 5) {
+                state.innerHTML = `
+<div class="memory-slot"><strong>Dict with mixed-type values:</strong><br>
+data = {<br>
+&nbsp;&nbsp;"name":  "Alice",        <em># immutable str value</em><br>
+&nbsp;&nbsp;"score": 95,             <em># immutable int value</em><br>
+&nbsp;&nbsp;"tags":  ["python","cs"] <em># mutable list value</em><br>
+}<br><br>
+data["name"] = "Bob"         <span style="color:#16a34a">✔ rebinds the slot (new str)</span><br>
+data["score"] += 5           <span style="color:#16a34a">✔ rebinds to new int 100</span><br>
+data["tags"].append("java")  <span style="color:#16a34a">✔ mutates the list in place</span><br>
+data["name"][0] = "Z"        <span style="color:#dc2626">✘ TypeError: str immutable</span>
+</div>`;
+                idBox.innerHTML = `
+<div class="memory-slot">id(data) = 4485012736  <span style="color:#16a34a">SAME throughout</span><br><br>
+id(data["name"]) before: 140551  ("Alice")<br>
+id(data["name"]) after:  140888  <span style="color:#dc2626">NEW str "Bob"</span><br><br>
+id(data["tags"]) before/after append:<br>
+  <span style="color:#16a34a">SAME — list mutated in place</span><br><br>
+<span style="color:#b45309">⚠ Keys must be hashable (immutable). str, int, tuple ✔ — list ✘</span>
+</div>`;
+                log.innerHTML = `&gt; STEP 5 — The dict itself is mutable (slots can be added, removed, rebound). Values inside can be either mutable or immutable. Reassigning a slot creates a new binding (old immutable object abandoned). Calling a mutation method on a mutable value mutates that object in place — the dict slot still points to the same object.`;
+            }
+        }
+        function pyReset() {
+            document.getElementById('py-state').innerHTML = "<em>(Not started)</em>";
+            document.getElementById('py-id').innerHTML = "<em>(No objects tracked)</em>";
+            document.getElementById('py-log').innerHTML = "&gt; Python sandbox reset.";
+        }
+
+        /* C Sandbox Logic */
+        function cStep(step) {
+            const state = document.getElementById('c-state');
+            const check = document.getElementById('c-check');
+            const log = document.getElementById('c-log');
+
+            if(step === 1) {
+                state.innerHTML = `<div class="memory-slot">char arr[] = "Hello";<br>arr[0] = 'J'; // Becomes "Jello"</div>`;
+                check.innerHTML = `<div class="memory-slot" style="background:#dcfce7;">SUCCESS: Wrote directly to stack/heap memory block.</div>`;
+                log.innerHTML = `&gt; Standard arrays in C are fully mutable buffers. You can alter any index directly.`;
+            } else if(step === 2) {
+                state.innerHTML = `<div class="memory-slot">const char *msg = "Hello";<br>msg[0] = 'J'; // ERROR!</div>`;
+                check.innerHTML = `<div class="memory-slot" style="background:#fee2e2;">SEGMENTATION FAULT / COMPILER ERROR: Read-only memory segment!</div>`;
+                log.innerHTML = `&gt; Using 'const' pointer to string literal protects memory from accidental mutation. Attempting to write causes a crash.`;
+            } else if(step === 3) {
+                state.innerHTML = `
+<div class="memory-slot"><strong>Struct with mixed const and mutable fields:</strong><br><br>
+typedef struct {<br>
+&nbsp;&nbsp;int id;              <em>// mutable field</em><br>
+&nbsp;&nbsp;const char *label;   <em>// pointer to immutable literal</em><br>
+&nbsp;&nbsp;char name[32];       <em>// mutable buffer</em><br>
+&nbsp;&nbsp;float score;         <em>// mutable field</em><br>
+} Record;<br><br>
+Record r = {1, "fixed", "Alice", 95.5};<br><br>
+r.id = 2;                   <span style="color:#16a34a">✔ mutable int field</span><br>
+r.score = 100.0;            <span style="color:#16a34a">✔ mutable float field</span><br>
+strcpy(r.name, "Bob");      <span style="color:#16a34a">✔ mutable char[] buffer</span><br>
+r.label = "other";          <span style="color:#16a34a">✔ rebind the pointer itself</span><br>
+r.label[0] = 'O';           <span style="color:#dc2626">✘ UB/crash: pointed-to literal is read-only</span>
+</div>`;
+                check.innerHTML = `
+<div class="memory-slot" style="background:#dcfce7;"><strong>What const protects here:</strong><br><br>
+<code>const char *label</code> — the POINTER can be rebound to a new literal, but you cannot write through it to the literal's bytes.<br><br>
+<code>char name[32]</code> — the buffer itself lives inside the struct and is always writable via strcpy / direct index.<br><br>
+<span style="color:#16a34a">✔ id, score, name: fully mutable<br>
+✔ label pointer: rebindable<br>
+✘ *label content: read-only (literal in .rodata)</span>
+</div>`;
+                log.innerHTML = `&gt; STEP 3 — A struct is a mutable container by default. You control mutability field-by-field with const. A "const char *" pointer means the bytes it POINTS TO are immutable, not the pointer itself. Use "char * const p" to freeze the pointer but allow writing through it.`;
+            } else if(step === 4) {
+                state.innerHTML = `
+<div class="memory-slot"><strong>const pointer vs mutable buffer in the same scope:</strong><br><br>
+char buf[] = "Hello";         <em>// stack buffer — mutable</em><br>
+const char *lit = "World";    <em>// pointer to .rodata — immutable target</em><br>
+char *ptr = buf;              <em>// plain pointer to the mutable buffer</em><br><br>
+buf[0] = 'J';       <span style="color:#16a34a">✔  buf → "Jello"</span><br>
+ptr[1] = 'a';       <span style="color:#16a34a">✔  buf → "Jallo"  (ptr aliases buf)</span><br>
+lit[0] = 'w';       <span style="color:#dc2626">✘  UB / segfault: .rodata is read-only</span><br>
+lit = "Earth";      <span style="color:#16a34a">✔  pointer itself rebound — fine</span><br><br>
+// "const char * const frozen = lit;" would freeze BOTH<br>
+// frozen = "x";  ✘ pointer frozen<br>
+// frozen[0] = 'x'; ✘ target frozen
+</div>`;
+                check.innerHTML = `
+<div class="memory-slot" style="background:#dcfce7;"><strong>Four pointer flavours:</strong><br><br>
+<code>char *p</code> — pointer mutable, target mutable<br>
+<code>const char *p</code> — pointer mutable, TARGET immutable<br>
+<code>char * const p</code> — POINTER immutable, target mutable<br>
+<code>const char * const p</code> — both immutable<br><br>
+<span style="color:#b45309">⚠ A mutable buffer and an immutable literal can coexist in the same scope — the type of the POINTER decides the protection, not where the bytes live.</span>
+</div>`;
+                log.innerHTML = `&gt; STEP 4 — Two variables, same scope: one points at a mutable stack buffer, the other at an immutable string literal. Reading the pointer type tells you everything: "const char *" ⇒ treat target as read-only; plain "char *" ⇒ target is writable.`;
+            } else if(step === 5) {
+                state.innerHTML = `
+<div class="memory-slot"><strong>Nested struct — outer mutable, inner partially const:</strong><br><br>
+typedef struct {<br>
+&nbsp;&nbsp;int x, y;<br>
+} Point;<br><br>
+typedef struct {<br>
+&nbsp;&nbsp;Point origin;           <em>// embedded (not a pointer)</em><br>
+&nbsp;&nbsp;const char *label;      <em>// pointer to literal</em><br>
+&nbsp;&nbsp;int radius;<br>
+} Circle;<br><br>
+Circle c = {{0,0}, "center", 5};<br><br>
+c.origin.x = 10;    <span style="color:#16a34a">✔  nested struct field mutable</span><br>
+c.radius = 7;       <span style="color:#16a34a">✔  outer field mutable</span><br>
+c.label = "edge";   <span style="color:#16a34a">✔  pointer itself rebound</span><br>
+c.label[0] = 'E';   <span style="color:#dc2626">✘  UB: const target in .rodata</span><br><br>
+// Make the entire circle const-qualified:<br>
+const Circle frozen = {{1,1}, "fixed", 3};<br>
+frozen.radius = 9;  <span style="color:#dc2626">✘  compiler error: const aggregate</span>
+</div>`;
+                check.innerHTML = `
+<div class="memory-slot" style="background:#dcfce7;"><strong>Mutation rules for nested structs:</strong><br><br>
+• An <strong>embedded</strong> sub-struct inherits the mutability of its parent — if the parent is mutable, so is every field of the sub-struct.<br><br>
+• A <strong>pointer</strong> field inside the struct and its target are independent — <code>const char *label</code> freezes the pointed-to bytes but not the pointer slot.<br><br>
+• Qualifying the outer variable <code>const Circle c</code> makes the ENTIRE aggregate read-only — all fields, including nested ones.<br><br>
+<span style="color:#16a34a">✔ Embedded struct fields: follow parent mutability<br>
+✔ Pointer fields: pointer rebindable unless "char * const"<br>
+✘ const-qualified pointer target: read-only<br>
+✘ const outer variable: entire struct frozen</span>
+</div>`;
+                log.innerHTML = `&gt; STEP 5 — Nesting structs doesn't add any implicit const protection. Mutability flows from the outermost qualifier: a plain "Circle c" is fully mutable (including all nested fields). Only "const char *label" carves out read-only protection for the literal it points at. Declare "const Circle frozen" to freeze everything at once.`;
+            }
+        }
+        function cReset() {
+            document.getElementById('c-state').innerHTML = "<em>(Not started)</em>";
+            document.getElementById('c-check').innerHTML = "<em>(Waiting for action)</em>";
+            document.getElementById('c-log').innerHTML = "&gt; C sandbox reset.";
+        }
+
+        /* C# Sandbox Logic */
+        function csStep(step) {
+            const state = document.getElementById('cs-state');
+            const perf = document.getElementById('cs-perf');
+            const log = document.getElementById('cs-log');
+
+            if(step === 1) {
+                state.innerHTML = `<div class="memory-slot">string s = "A";<br>s += "B"; s += "C";</div>`;
+                perf.innerHTML = `<div class="memory-slot" style="background:#fee2e2;">HIGH OVERHEAD: 3 separate objects created on heap. 2 orphaned objects left for GC.</div>`;
+                log.innerHTML = `&gt; C# strings are immutable. Loop or repeated concatenations create heavy Garbage Collector pressure.`;
+            } else if(step === 2) {
+                state.innerHTML = `<div class="memory-slot">StringBuilder sb = new();<br>sb.Append("A"); sb.Append("B"); sb.Append("C");</div>`;
+                perf.innerHTML = `<div class="memory-slot" style="background:#dcfce7;">OPTIMIZED: Single mutable backing array resized only when full. Zero garbage.</div>`;
+                log.innerHTML = `&gt; StringBuilder provides a mutable buffer designed specifically for high-performance string manipulation.`;
+            }
+        }
+        function csReset() {
+            document.getElementById('cs-state').innerHTML = "<em>(Not started)</em>";
+            document.getElementById('cs-perf').innerHTML = "<em>(None)</em>";
+            document.getElementById('cs-log').innerHTML = "&gt; C# sandbox reset.";
+        }
+
+        /* C# Class Sandbox Logic */
+        function clsStep(step) {
+            const code = document.getElementById('cls-code');
+            const result = document.getElementById('cls-result');
+            const log = document.getElementById('cls-log');
+
+            if (step === 1) {
+                code.innerHTML = `
+                    <div class="memory-slot">class Student {<br>&nbsp;&nbsp;public string Name { get; <strong>set;</strong> }  // mutable<br>&nbsp;&nbsp;public int Age { get; <strong>set;</strong> }    // mutable<br>}<br><br>var s = new Student { Name = "Alice", Age = 20 };<br>s.Name = "Bob";   // ✅ allowed<br>s.Age = 21;       // ✅ allowed</div>`;
+                result.innerHTML = `
+                    <div class="memory-slot" style="background:#dcfce7;">BEFORE: Name = "Alice", Age = 20<br>AFTER:  Name = "Bob",   Age = 21<br><br>Reference updated → new string "Bob" on heap.<br>"Alice" orphaned → waiting for GC.</div>`;
+                log.innerHTML = `> get; set; makes the property fully mutable. The reference can point to a new string at any time. The string content itself is still never modified — a new object is always created.`;
+            } else if (step === 2) {
+                code.innerHTML = `
+                    <div class="memory-slot">class Student {<br>&nbsp;&nbsp;public string Name { get; }  // readonly property<br>&nbsp;&nbsp;public int Age { get; }<br><br>&nbsp;&nbsp;public Student(string name, int age) {<br>&nbsp;&nbsp;&nbsp;&nbsp;Name = name; Age = age;<br>&nbsp;&nbsp;}<br>}<br><br>var s = new Student("Alice", 20);<br>s.Name = "Bob"; // ❌ compile error!<br>s.Age = 21;     // ❌ compile error!</div>`;
+                result.innerHTML = `
+                    <div class="memory-slot" style="background:#fee2e2;">COMPILE ERROR: Property 'Name' has no setter.<br>COMPILE ERROR: Property 'Age' has no setter.<br><br>Once set in the constructor, these values<br>are locked for the lifetime of the object.</div>`;
+                log.innerHTML = `> get; with no setter creates a readonly property. It can only be assigned inside the constructor. Any attempt to change it afterward is caught at compile time — not runtime.`;
+            } else if (step === 3) {
+                code.innerHTML = `
+                    <div class="memory-slot">class Student {<br>&nbsp;&nbsp;public string Name { get; <strong>init;</strong> }  // init-only<br>&nbsp;&nbsp;public int Age { get; <strong>init;</strong> }<br>}<br><br>// ✅ OK during object initializer:<br>var s = new Student { Name = "Alice", Age = 20 };<br><br>// ❌ NOT OK after initialization:<br>s.Name = "Bob"; // compile error!<br><br>// ✅ Use 'with' to create modified copy:<br>var s2 = s with { Name = "Bob" };</div>`;
+                result.innerHTML = `
+                    <div class="memory-slot" style="background:#fef9c3; border-color:#fde047;">init-only: set once at object creation, locked after.<br><br>s  → Name="Alice", Age=20  (original, unchanged)<br>s2 → Name="Bob",   Age=20  (new copy via 'with')<br><br>Both objects exist independently on the heap.</div>`;
+                log.innerHTML = `> get; init; (C# 9+) allows setting during object initializer syntax only. After that the property is locked. Use the 'with' expression to produce a modified copy — the original is never touched.`;
+            } else if (step === 4) {
+                code.innerHTML = `
+                    <div class="memory-slot">class Student {<br>&nbsp;&nbsp;public string Name { get; set; } // ref is mutable<br>}<br><br>var s = new Student { Name = "Alice" };<br><br>// The REFERENCE changes — not the string:<br>s.Name = "Bob";<br>//  "Alice" ──✗──→ orphaned on heap<br>//  s.Name ────→ "Bob"  (new object)<br><br>// The string CONTENT is always immutable:<br>// s.Name[0] = 'Z';  ❌ string has no index setter</div>`;
+                result.innerHTML = `
+                    <div class="memory-slot" style="background:#eff6ff; border-color:#93c5fd;">HEAP BEFORE:<br>  s.Name ──→ [ "Alice" ]<br><br>HEAP AFTER s.Name = "Bob":<br>  s.Name ──→ [ "Bob"   ]  ← new string object<br>             [ "Alice" ]  ← orphaned, GC will collect<br><br>KEY: The reference moved. "Alice" was never mutated.</div>`;
+                log.innerHTML = `> This is the crucial distinction: the string REFERENCE inside a class can be mutable (you can re-point it), but the string CONTENT is always immutable. Every "change" to a string creates a fresh object on the heap.`;
+            } else if (step === 5) {
+                code.innerHTML = `
+                    <div class="memory-slot">// class — mutable by default<br>class MutableStudent {<br>&nbsp;&nbsp;public string Name { get; set; }<br>&nbsp;&nbsp;public int Age { get; set; }<br>}<br><br>// record — immutable by default<br>record ImmutableStudent(string Name, int Age);<br><br>var mc = new MutableStudent { Name="Alice", Age=20 };<br>var rc = new ImmutableStudent("Alice", 20);<br><br>mc.Name = "Bob";          // ✅ allowed (class)<br>// rc.Name = "Bob";        // ❌ compile error (record)<br>var rc2 = rc with { Name="Bob" }; // ✅ copy<br><br>// Equality:<br>var a = new MutableStudent { Name="Alice", Age=20 };<br>var b = new MutableStudent { Name="Alice", Age=20 };<br>Console.WriteLine(a == b); // FALSE (reference equality)<br><br>var r1 = new ImmutableStudent("Alice", 20);<br>var r2 = new ImmutableStudent("Alice", 20);<br>Console.WriteLine(r1 == r2); // TRUE (value equality)</div>`;
+                result.innerHTML = `
+                    <div class="memory-slot" style="background:#f3e8ff; border-color:#c084fc;"><strong>class:</strong> mutable · reference equality · manual immutability<br><strong>record:</strong> immutable · value equality · built-in 'with'<br><br>a == b → FALSE  (different heap objects)<br>r1 == r2 → TRUE  (same data = same identity)<br><br>Use class when you need mutable state over time.<br>Use record for snapshots, DTOs, config, responses.</div>`;
+                log.innerHTML = `> class vs record: both are reference types on the heap, but records bake in value-based equality and immutability. Two record instances with the same data are considered equal; two class instances are not, even with identical fields.`;
+            }
+        }
+
+        function clsReset() {
+            document.getElementById('cls-code').innerHTML = "<em>(Not started)</em>";
+            document.getElementById('cls-result').innerHTML = "<em>(Waiting for action)</em>";
+            document.getElementById('cls-log').innerHTML = "&gt; C# class sandbox reset.";
+        }
+    </script>
+</body>
+</html>
