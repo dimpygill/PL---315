@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stack vs Heap Memory: A Beginner's Visual Guide</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --accent-blue: #2563eb;
+            --accent-blue-light: #eff6ff;
+            --accent-green: #16a34a;
+            --accent-green-light: #f0fdf4;
+            --accent-orange: #d97706;
+            --accent-orange-light: #fffbeb;
+            --border-color: #e2e8f0;
+            --code-bg: #f1f5f9;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navigation */
+        nav.sidebar {
+            width: 280px;
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            overflow-y: auto;
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        nav.sidebar h2 {
+            font-size: 1.2rem;
+            color: var(--accent-blue);
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--accent-blue-light);
+        }
+
+        nav.sidebar ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        nav.sidebar a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-weight: 500;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            display: block;
+            transition: all 0.2s ease;
+        }
+
+        nav.sidebar a:hover, nav.sidebar a.active {
+            background-color: var(--accent-blue-light);
+            color: var(--accent-blue);
+        }
+
+        /* Main Content Container */
+        main.content {
+            margin-left: 280px;
+            padding: 2.5rem 3rem;
+            max-width: 1050px;
+            width: 100%;
+        }
+
+        header.hero {
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        header.hero h1 {
+            font-size: 2.5rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        header.hero p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+        }
+
+        section {
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        section h2 {
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        section h3 {
+            font-size: 1.25rem;
+            margin: 1.5rem 0 0.75rem 0;
+            color: var(--accent-blue);
+        }
+
+        p, li {
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+        }
+
+        ul, ol {
+            padding-left: 1.5rem;
+        }
+
+        .callout {
+            padding: 1rem 1.25rem;
+            border-left: 4px solid var(--accent-blue);
+            background-color: var(--accent-blue-light);
+            border-radius: 0 6px 6px 0;
+            margin: 1rem 0;
+        }
+
+        .analogy-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            nav.sidebar { width: 100%; position: relative; }
+            main.content { margin-left: 0; padding: 1.5rem; }
+            .analogy-box { grid-template-columns: 1fr; }
+        }
+
+        .analogy-card {
+            background-color: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.25rem;
+        }
+
+        .analogy-card h4 {
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+        }
+
+        /* Playground / Simulator Styles */
+        .playground {
+            background-color: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .memory-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .memory-container {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .memory-container h5 {
+            text-align: center;
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.25rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .stack-slot {
+            background-color: var(--accent-blue-light);
+            border: 1px dashed var(--accent-blue);
+            color: var(--accent-blue);
+            padding: 0.5rem;
+            margin: 0.25rem 0;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            text-align: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .heap-slot {
+            background-color: var(--accent-orange-light);
+            border: 1px dashed var(--accent-orange);
+            color: #b45309;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .controls {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            background-color: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn:hover {
+            background-color: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background-color: var(--text-secondary);
+        }
+        .btn-secondary:hover {
+            background-color: #334155;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Quiz Styles */
+        .quiz-option {
+            display: block;
+            padding: 0.75rem 1rem;
+            margin: 0.5rem 0;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .quiz-option:hover {
+            background-color: var(--accent-blue-light);
+        }
+
+        .quiz-option.correct {
+            background-color: #dcfce7;
+            border-color: var(--accent-green);
+            color: #14532d;
+        }
+
+        .quiz-option.incorrect {
+            background-color: #fee2e2;
+            border-color: #dc2626;
+            color: #7f1d1d;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <h2>Memory Guide</h2>
+        <ul>
+            <li><a href="#intro" class="active">1. What is Computer Memory?</a></li>
+            <li><a href="#stack">2. The Stack (Cafeteria Tray Analogy)</a></li>
+            <li><a href="#heap">3. The Heap (Warehouse Storage)</a></li>
+            <li><a href="#comparison">4. Value vs Reference Types</a></li>
+            <li><a href="#playground">5. Interactive Memory Sandbox</a></li>
+            <li><a href="#quiz">6. Knowledge Quiz</a></li>
+        </ul>
+    </nav>
+
+    <main class="content">
+        <header class="hero">
+            <h1>Stack & Heap Memory Explained</h1>
+            <p>A beginner-friendly, highly visual guide to how programs store and manage data.</p>
+        </header>
+
+        <!-- Section 1 -->
+        <section id="intro">
+            <h2>1. What is Computer Memory?</h2>
+            <p>When you write a program and declare variables (like storing a user's score or a list of items), your computer needs to temporarily save that information somewhere in RAM. Programs divide this workspace into two main areas: <strong>The Stack</strong> and <strong>The Heap</strong>.</p>
+            <div class="callout">
+                Think of RAM as a giant storage building, and the <strong>Stack</strong> and <strong>Heap</strong> as two different rooms inside that building with completely different organizational rules!
+            </div>
+        </section>
+
+        <!-- Section 2 -->
+        <section id="stack">
+            <h2>2. The Stack Memory (Organized & Fast)</h2>
+            <p>The stack is like a strict, orderly stack of cafeteria trays. Data is added and removed using the rule: <strong>LIFO (Last In, First Out)</strong>. The last item you put on top is always the first one taken off.</p>
+            
+            <div class="analogy-box">
+                <div class="analogy-card">
+                    <h4>How Stack Works</h4>
+                    <ul>
+                        <li>Strictly ordered sequence.</li>
+                        <li>Extremely fast access speed.</li>
+                        <li>Automatic cleanup (when a function ends, its variables vanish instantly).</li>
+                        <li>Fixed size known ahead of time.</li>
+                    </ul>
+                </div>
+                <div class="analogy-card" style="background-color: var(--accent-blue-light);">
+                    <h4>Cafeteria Analogy</h4>
+                    <p>You pile trays vertically. You can only pick up or put down the <em>top</em> tray. You can't pull a tray out from the middle without removing everything on top first!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3 -->
+        <section id="heap">
+            <h2>3. The Heap Memory (Flexible & Messy Storage)</h2>
+            <p>The heap is like a massive storage warehouse or a giant messy room. Items can be placed anywhere in random order. There is no strict order, so finding items requires keeping a map or a reference pointer.</p>
+
+            <div class="analogy-box">
+                <div class="analogy-card">
+                    <h4>How Heap Works</h4>
+                    <ul>
+                        <li>Unordered, dynamic allocation.</li>
+                        <li>Slower access speed compared to stack.</li>
+                        <li>Used for large data or objects that need to live longer than a single function.</li>
+                        <li>Requires cleanup (Garbage Collection or manual freeing).</li>
+                    </ul>
+                </div>
+                <div class="analogy-card" style="background-color: var(--accent-orange-light);">
+                    <h4>Warehouse Analogy</h4>
+                    <p>You store a giant couch in a large warehouse. Because it's too big for your desk (stack), you leave it in an open slot and write down the warehouse shelf number (reference address) on a sticky note.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4 -->
+        <section id="comparison">
+            <h2>4. Value Types vs. Reference Types</h2>
+            <p>How do programming languages decide whether to put something on the Stack or the Heap?</p>
+            <ul>
+                <li><strong>Value Types (Stack):</strong> Small, simple data with fixed sizes (e.g., numbers like integers, booleans). Stored directly on the stack.</li>
+                <li><strong>Reference Types (Heap):</strong> Complex or large objects (e.g., lists, strings, custom objects). The actual data goes on the <strong>Heap</strong>, but a tiny note with its address (the reference) is kept on the <strong>Stack</strong>.</li>
+            </ul>
+        </section>
+
+        <!-- Section 5 -->
+        <section id="playground">
+            <h2>5. Interactive Memory Sandbox</h2>
+            <p>Click the buttons below to simulate adding variables to your program and watch how the Stack and Heap update live!</p>
+            
+            <div class="playground">
+                <div class="controls">
+                    <button class="btn" onclick="addPrimitive()">Add Primitive (Stack)</button>
+                    <button class="btn" onclick="addObject()">Add Object (Heap + Stack Pointer)</button>
+                    <button class="btn btn-secondary" onclick="clearMemory()">Reset Memory</button>
+                </div>
+
+                <div class="memory-layout">
+                    <div class="memory-container" id="stackView">
+                        <h5>Stack Memory (LIFO)</h5>
+                        <div style="color: var(--text-secondary); font-size: 0.85rem; text-align: center; margin-top: auto; margin-bottom: auto;" id="stackEmpty">Stack is empty</div>
+                    </div>
+                    <div class="memory-container" id="heapView">
+                        <h5>Heap Memory (Random Access)</h5>
+                        <div style="color: var(--text-secondary); font-size: 0.85rem; text-align: center; margin-top: auto; margin-bottom: auto;" id="heapEmpty">Heap is empty</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6 -->
+        <section id="quiz">
+            <h2>6. Knowledge Check Quiz</h2>
+
+            <div style="margin-bottom: 1.5rem;">
+                <p><strong>Q1: Which memory structure follows the Last-In, First-Out (LIFO) rule?</strong></p>
+                <div class="quiz-option" onclick="checkQuiz(this, true)">A) The Stack</div>
+                <div class="quiz-option" onclick="checkQuiz(this, false)">B) The Heap</div>
+                <div class="quiz-option" onclick="checkQuiz(this, false)">C) Hard Disk Drive</div>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <p><strong>Q2: Where do large or dynamic objects typically store their core data?</strong></p>
+                <div class="quiz-option" onclick="checkQuiz(this, false)">A) CPU Registers</div>
+                <div class="quiz-option" onclick="checkQuiz(this, false)">B) The Stack</div>
+                <div class="quiz-option" onclick="checkQuiz(this, true)">C) The Heap</div>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <p><strong>Q3: What does the Stack store when dealing with a Heap object?</strong></p>
+                <div class="quiz-option" onclick="checkQuiz(this, true)">A) A reference address pointer pointing to the heap location</div>
+                <div class="quiz-option" onclick="checkQuiz(this, false)">B) A duplicate copy of the entire heap object</div>
+                <div class="quiz-option" onclick="checkQuiz(this, false)">C) Nothing at all</div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        let stackItems = [];
+        let heapItems = [];
+
+        function updatePlayground() {
+            const stackView = document.getElementById('stackView');
+            const heapView = document.getElementById('heapView');
+
+            // Render Stack
+            if (stackItems.length === 0) {
+                stackView.innerHTML = '<h5>Stack Memory (LIFO)</h5><div style="color: var(--text-secondary); font-size: 0.85rem; text-align: center; margin: auto;">Stack is empty</div>';
+            } else {
+                let html = '<h5>Stack Memory (LIFO)</h5>';
+                // Render from top to bottom
+                for (let i = stackItems.length - 1; i >= 0; i--) {
+                    html += `<div class="stack-slot">${stackItems[i]}</div>`;
+                }
+                stackView.innerHTML = html;
+            }
+
+            // Render Heap
+            if (heapItems.length === 0) {
+                heapView.innerHTML = '<h5>Heap Memory (Random Access)</h5><div style="color: var(--text-secondary); font-size: 0.85rem; text-align: center; margin: auto;">Heap is empty</div>';
+            } else {
+                let html = '<h5>Heap Memory (Random Access)</h5>';
+                heapItems.forEach(item => {
+                    html += `<div class="heap-slot">${item}</div>`;
+                });
+                heapView.innerHTML = html;
+            }
+        }
+
+        function addPrimitive() {
+            const valNum = Math.floor(Math.random() * 100);
+            stackItems.push(`int score = ${valNum}`);
+            updatePlayground();
+        }
+
+        function addObject() {
+            const address = '0x' + Math.floor(Math.random() * 8999 + 1000);
+            heapItems.push(`[Object Data @ ${address}] UserProfile { name: "Alex" }`);
+            stackItems.push(`ptr userObj = ${address}`);
+            updatePlayground();
+        }
+
+        function clearMemory() {
+            stackItems = [];
+            heapItems = [];
+            updatePlayground();
+        }
+
+        function checkQuiz(element, isCorrect) {
+            const siblings = element.parentElement.querySelectorAll('.quiz-option');
+            siblings.forEach(el => {
+                el.classList.remove('correct', 'incorrect');
+            });
+
+            if (isCorrect) {
+                element.classList.add('correct');
+            } else {
+                element.classList.add('incorrect');
+            }
+        }
+    </script>
+</body>
+</html>
