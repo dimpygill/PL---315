@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mastering Mutability & Immutability: Python, C, & C#</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --accent-blue: #2563eb;
+            --accent-indigo: #4f46e5;
+            --accent-green: #16a34a;
+            --accent-orange: #d97706;
+            --accent-red: #dc2626;
+            --border-color: #cbd5e1;
+            --panel-bg: #f1f5f9;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: white;
+            padding: 2.5rem 1rem;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2.25rem;
+        }
+
+        header p {
+            margin: 0;
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        nav {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        nav a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        section {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        h2 {
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-top: 0;
+        }
+
+        h3 {
+            color: var(--accent-indigo);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f1f5f9;
+        }
+
+        .sandbox-container {
+            border: 2px dashed var(--accent-blue);
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .sandbox-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        button {
+            background-color: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: #1d4ed8;
+        }
+
+        button.secondary {
+            background-color: var(--text-secondary);
+        }
+        button.secondary:hover {
+            background-color: #334155;
+        }
+
+        .memory-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .memory-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .memory-panel {
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            min-height: 200px;
+            background: white;
+        }
+
+        .panel-title {
+            font-weight: bold;
+            margin-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            padding-bottom: 0.4rem;
+        }
+
+        .memory-slot {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+            margin-bottom: 0.5rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .log-box {
+            background: #1e293b;
+            color: #38bdf8;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Mastering Mutability & Immutability</h1>
+        <p>Interactive Tutorial & Language Sandboxes: Python, C, and C#</p>
+    </header>
+
+    <div class="container">
+        <nav>
+            <a href="#intro">1. Core Concepts</a>
+            <a href="#python-sec">2. Python Sandbox</a>
+            <a href="#c-sec">3. C Sandbox</a>
+            <a href="#csharp-sec">4. C# Sandbox</a>
+        </nav>
+
+        <!-- INTRO SECTION -->
+        <section id="intro">
+            <h2>1. What is Mutability?</h2>
+            <p>An object is <strong>mutable</strong> if its internal state or value can be modified <em>after</em> it is created without changing its memory address. An object is <strong>immutable</strong> if its value cannot be changed once created; any modification results in a brand-new object allocation.</p>
+            
+            <table>
+                <tr>
+                    <th>Language</th>
+                    <th>Immutable Types</th>
+                    <th>Mutable Types</th>
+                </tr>
+                <tr>
+                    <td><strong>Python</strong></td>
+                    <td><code>int</code>, <code>float</code>, <code>str</code>, <code>tuple</code>, <code>bool</code></td>
+                    <td><code>list</code>, <code>dict</code>, <code>set</code></td>
+                </tr>
+                <tr>
+                    <td><strong>C</strong></td>
+                    <td>String literals (`const char*`)</td>
+                    <td>Arrays (`char arr[]`), heap allocations (`malloc`)</td>
+                </tr>
+                <tr>
+                    <td><strong>C#</strong></td>
+                    <td><code>string</code>, <code>readonly struct</code>, <code>record</code></td>
+                    <td>Classes, arrays, <code>int</code>, <code>struct</code>, <code>StringBuilder</code>, <code>List&lt;T&gt;</code></td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- PYTHON SANDBOX -->
+        <section id="python-sec">
+            <h2>2. Sandbox 1: Python Mutability & Object IDs</h2>
+            <p>In Python, use the built-in <code>id()</code> function to see memory addresses. Test lists (mutable) vs tuples/strings (immutable).</p>
+            <div class="sandbox-container">
+                <div class="sandbox-controls">
+                    <button onclick="pyStep(1)">1. Modify List (Mutable)</button>
+                    <button onclick="pyStep(2)">2. Modify String/Tuple (Immutable)</button>
+                    <button class="secondary" onclick="pyReset()">Reset Python Sandbox</button>
+                </div>
+                <div class="memory-grid">
+                    <div class="memory-panel">
+                        <div class="panel-title">Python Variable State</div>
+                        <div id="py-state"><em>(Not started)</em></div>
+                    </div>
+                    <div class="memory-panel">
+                        <div class="panel-title">Object Identity (id())</div>
+                        <div id="py-id"><em>(No objects tracked)</em></div>
+                    </div>
+                </div>
+                <div class="log-box" id="py-log">&gt; Click buttons above to test Python mutability.</div>
+            </div>
+        </section>
+
+        <!-- C SANDBOX -->
+        <section id="c-sec">
+            <h2>3. Sandbox 2: C Pointer Mutability & Const</h2>
+            <p>In C, pointers allow direct memory control. You can use `const` to make memory read-only or omit it for full read-write mutability.</p>
+            <div class="sandbox-container">
+                <div class="sandbox-controls">
+                    <button onclick="cStep(1)">1. Mutable Array Buffer</button>
+                    <button onclick="cStep(2)">2. Immutable String Literal (const)</button>
+                    <button class="secondary" onclick="cReset()">Reset C Sandbox</button>
+                </div>
+                <div class="memory-grid">
+                    <div class="memory-panel">
+                        <div class="panel-title">C Memory Block</div>
+                        <div id="c-state"><em>(Not started)</em></div>
+                    </div>
+                    <div class="memory-panel">
+                        <div class="panel-title">Compiler Protection Check</div>
+                        <div id="c-check"><em>(Waiting for action)</em></div>
+                    </div>
+                </div>
+                <div class="log-box" id="c-log">&gt; Click buttons above to test C memory mutability.</div>
+            </div>
+        </section>
+
+        <!-- C# SANDBOX -->
+        <section id="csharp-sec">
+            <h2>4. Sandbox 3: C# Immutability vs. Mutable Builders</h2>
+            <p>In C#, strings are immutable. Appending to them creates new heap objects, whereas `StringBuilder` uses a mutable backing buffer.</p>
+            <div class="sandbox-container">
+                <div class="sandbox-controls">
+                    <button onclick="csStep(1)">1. String Concatenation (Immutable)</button>
+                    <button onclick="csStep(2)">2. StringBuilder (Mutable Buffer)</button>
+                    <button class="secondary" onclick="csReset()">Reset C# Sandbox</button>
+                </div>
+                <div class="memory-grid">
+                    <div class="memory-panel">
+                        <div class="panel-title">Heap Memory Allocation</div>
+                        <div id="cs-state"><em>(Not started)</em></div>
+                    </div>
+                    <div class="memory-panel">
+                        <div class="panel-title">Garbage / Performance Cost</div>
+                        <div id="cs-perf"><em>(None)</em></div>
+                    </div>
+                </div>
+                <div class="log-box" id="cs-log">&gt; Click buttons above to test C# string memory behavior.</div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        /* Python Sandbox Logic */
+        function pyStep(step) {
+            const state = document.getElementById('py-state');
+            const idBox = document.getElementById('py-id');
+            const log = document.getElementById('py-log');
+
+            if(step === 1) {
+                state.innerHTML = `<div class="memory-slot">my_list = [10, 20, 30]<br>my_list.append(40)</div>`;
+                idBox.innerHTML = `<div class="memory-slot" style="background:#dcfce7;">id(my_list) = 4391204800 (UNCHANGED!)</div>`;
+                log.innerHTML = `&gt; List is MUTABLE. Appending items modified the list in-place without changing its memory address.`;
+            } else if(step === 2) {
+                state.innerHTML = `<div class="memory-slot">my_str = "Hello"<br>my_str += " World"</div>`;
+                idBox.innerHTML = `<div class="memory-slot" style="background:#fee2e2;">id("Hello") = 140221<br>id("Hello World") = 998432 (NEW ADDRESS!)</div>`;
+                log.innerHTML = `&gt; String is IMMUTABLE. Modifying it abandoned the old object and allocated a brand new one in memory.`;
+            }
+        }
+        function pyReset() {
+            document.getElementById('py-state').innerHTML = "<em>(Not started)</em>";
+            document.getElementById('py-id').innerHTML = "<em>(No objects tracked)</em>";
+            document.getElementById('py-log').innerHTML = "&gt; Python sandbox reset.";
+        }
+
+        /* C Sandbox Logic */
+        function cStep(step) {
+            const state = document.getElementById('c-state');
+            const check = document.getElementById('c-check');
+            const log = document.getElementById('c-log');
+
+            if(step === 1) {
+                state.innerHTML = `<div class="memory-slot">char arr[] = "Hello";<br>arr[0] = 'J'; // Becomes "Jello"</div>`;
+                check.innerHTML = `<div class="memory-slot" style="background:#dcfce7;">SUCCESS: Wrote directly to stack/heap memory block.</div>`;
+                log.innerHTML = `&gt; Standard arrays in C are fully mutable buffers. You can alter any index directly.`;
+            } else if(step === 2) {
+                state.innerHTML = `<div class="memory-slot">const char *msg = "Hello";<br>msg[0] = 'J'; // ERROR!</div>`;
+                check.innerHTML = `<div class="memory-slot" style="background:#fee2e2;">SEGMENTATION FAULT / COMPILER ERROR: Read-only memory segment!</div>`;
+                log.innerHTML = `&gt; Using 'const' pointer to string literal protects memory from accidental mutation. Attempting to write causes a crash.`;
+            }
+        }
+        function cReset() {
+            document.getElementById('c-state').innerHTML = "<em>(Not started)</em>";
+            document.getElementById('c-check').innerHTML = "<em>(Waiting for action)</em>";
+            document.getElementById('c-log').innerHTML = "&gt; C sandbox reset.";
+        }
+
+        /* C# Sandbox Logic */
+        function csStep(step) {
+            const state = document.getElementById('cs-state');
+            const perf = document.getElementById('cs-perf');
+            const log = document.getElementById('cs-log');
+
+            if(step === 1) {
+                state.innerHTML = `<div class="memory-slot">string s = "A";<br>s += "B"; s += "C";</div>`;
+                perf.innerHTML = `<div class="memory-slot" style="background:#fee2e2;">HIGH OVERHEAD: 3 separate objects created on heap. 2 orphaned objects left for GC.</div>`;
+                log.innerHTML = `&gt; C# strings are immutable. Loop or repeated concatenations create heavy Garbage Collector pressure.`;
+            } else if(step === 2) {
+                state.innerHTML = `<div class="memory-slot">StringBuilder sb = new();<br>sb.Append("A"); sb.Append("B"); sb.Append("C");</div>`;
+                perf.innerHTML = `<div class="memory-slot" style="background:#dcfce7;">OPTIMIZED: Single mutable backing array resized only when full. Zero garbage.</div>`;
+                log.innerHTML = `&gt; StringBuilder provides a mutable buffer designed specifically for high-performance string manipulation.`;
+            }
+        }
+        function csReset() {
+            document.getElementById('cs-state').innerHTML = "<em>(Not started)</em>";
+            document.getElementById('cs-perf').innerHTML = "<em>(None)</em>";
+            document.getElementById('cs-log').innerHTML = "&gt; C# sandbox reset.";
+        }
+    </script>
+</body>
+</html>
