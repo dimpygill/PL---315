@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mastering Stack, Heap, & Dynamic Memory</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --accent-blue: #2563eb;
+            --accent-indigo: #4f46e5;
+            --accent-green: #16a34a;
+            --accent-orange: #d97706;
+            --accent-red: #dc2626;
+            --border-color: #cbd5e1;
+            --stack-bg: #eff6ff;
+            --heap-bg: #fdf4ff;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: white;
+            padding: 2.5rem 1rem;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2.25rem;
+        }
+
+        header p {
+            margin: 0;
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        nav {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        nav a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+        }
+
+        section {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        h2 {
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-top: 0;
+        }
+
+        h3 {
+            color: var(--accent-indigo);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f1f5f9;
+        }
+
+        .sandbox-container {
+            border: 2px dashed var(--accent-blue);
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .sandbox-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        button {
+            background-color: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: #1d4ed8;
+        }
+
+        button.secondary {
+            background-color: var(--text-secondary);
+        }
+        button.secondary:hover {
+            background-color: #334155;
+        }
+
+        .memory-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .memory-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .memory-panel {
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            min-height: 250px;
+        }
+
+        .stack-panel {
+            background-color: var(--stack-bg);
+        }
+
+        .heap-panel {
+            background-color: var(--heap-bg);
+        }
+
+        .panel-title {
+            font-weight: bold;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            padding-bottom: 0.4rem;
+        }
+
+        .memory-slot {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+            margin-bottom: 0.5rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .log-box {
+            background: #1e293b;
+            color: #38bdf8;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .quiz-card {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+        .quiz-option {
+            background: white;
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: left;
+        }
+        .quiz-option:hover {
+            background: #e2e8f0;
+        }
+        .feedback {
+            margin-top: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Mastering Stack, Heap, & Dynamic Memory</h1>
+        <p>A Beginner-to-Intermediate Visual Tutorial with Interactive Sandboxes</p>
+    </header>
+
+    <div class="container">
+        <nav>
+            <a href="#intro">1. Introduction</a>
+            <a href="#values-refs">2. Value vs Reference</a>
+            <a href="#strings">3. String Handling</a>
+            <a href="#lists">4. Dynamic Lists & Arrays</a>
+            <a href="#sandbox1">Sandbox: Primitives & Objects</a>
+            <a href="#sandbox3">Sandbox: String Memory & Loops</a>
+            <a href="#sandbox2">Sandbox: Dynamic List Growth</a>
+            <a href="#quiz">Knowledge Quiz</a>
+        </nav>
+
+        <section id="intro">
+            <h2>1. Introduction: The Two Pillars of Memory</h2>
+            <p>When your program runs, the operating system gives it a chunk of RAM. To manage this space efficiently, runtime environments (like .NET, Java, or Node.js) split memory into two main areas: <strong>The Stack</strong> and <strong>The Heap</strong>.</p>
+            
+            <table>
+                <tr>
+                    <th>Feature</th>
+                    <th>Stack Memory</th>
+                    <th>Heap Memory</th>
+                </tr>
+                <tr>
+                    <td><strong>How it works</strong></td>
+                    <td>Last-In, First-Out (LIFO). Like a stack of cafeteria trays.</td>
+                    <td>Random access warehouse. Items can be placed anywhere.</td>
+                </tr>
+                <tr>
+                    <td><strong>Speed</strong></td>
+                    <td>Extremely fast (handled directly by CPU pointer).</td>
+                    <td>Slower (requires allocation tracking and pointers).</td>
+                </tr>
+                <tr>
+                    <td><strong>Lifetime</strong></td>
+                    <td>Automatically cleaned up when a function finishes.</td>
+                    <td>Managed by Garbage Collector (GC) when no pointers remain.</td>
+                </tr>
+                <tr>
+                    <td><strong>What lives here?</strong></td>
+                    <td>Local primitive variables, function parameters, and reference pointers.</td>
+                    <td>Objects, arrays, strings, and dynamic collections.</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="values-refs">
+            <h2>2. Value Types vs. Reference Types</h2>
+            <p><strong>Value Types</strong> hold their actual data directly where the variable is declared. If you copy a value type, you get an independent duplicate.</p>
+            <p><strong>Reference Types</strong> store a <em>pointer (address)</em> on the stack pointing to the actual data located on the heap. If you copy a reference variable, you only copy the address—both variables now point to the exact same object!</p>
+        </section>
+
+        <section id="strings">
+            <h2>3. String Handling & The Loop Performance Trap</h2>
+            <p>Strings are reference types stored on the heap, but they have a unique property: <strong>Immutability</strong>. Once a string object is created on the heap, its contents <strong>cannot be changed</strong>.</p>
+            
+            <h3>Why is `str += "a"` in a loop poor performance?</h3>
+            <p>If you concatenate characters inside a loop like `for(int i=0; i&lt;1000; i++) { text += "a"; }`, Python, C#, and Java cannot modify the original string in place. Instead:</p>
+            <ol>
+                <li>A brand new, larger string object is allocated on the heap.</li>
+                <li>All old characters and the new character are copied over.</li>
+                <li>The old string is abandoned, creating massive garbage collection overhead.</li>
+            </ol>
+        </section>
+
+        <section id="lists">
+            <h2>4. How Dynamic Lists & Arrays Work Under the Hood</h2>
+            <p>A list feels dynamic because it can grow infinitely, but memory requires fixed, contiguous blocks. Behind the scenes, a dynamic list consists of:</p>
+            <ul>
+                <li>A list metadata object on the heap keeping track of item count.</li>
+                <li>An internal backing array on the heap holding items side-by-side.</li>
+            </ul>
+            <p><strong>What happens when it overflows?</strong> When you exceed capacity, the list allocates a <strong>brand new array twice the size</strong> on the heap, copies all existing items over, and discards the old array.</p>
+        </section>
+
+        <section id="sandbox1">
+            <h2>Interactive Sandbox 1: Primitives vs. Reference Objects</h2>
+            <p>Step through execution to see how stack variables and heap references interact.</p>
+            <div class="sandbox-container">
+                <div class="sandbox-controls">
+                    <button onclick="sb1Step(1)">1. Declare Primitive</button>
+                    <button onclick="sb1Step(2)">2. Create Heap Object</button>
+                    <button onclick="sb1Step(3)">3. Copy Reference</button>
+                    <button onclick="sb1Step(4)">4. Mutate via Reference 2</button>
+                    <button class="secondary" onclick="sb1Reset()">Reset</button>
+                </div>
+                <div class="memory-grid">
+                    <div class="memory-panel stack-panel">
+                        <div class="panel-title">Stack Memory (LIFO)</div>
+                        <div id="sb1-stack"><em>(Empty Stack)</em></div>
+                    </div>
+                    <div class="memory-panel heap-panel">
+                        <div class="panel-title">Heap Memory (Objects)</div>
+                        <div id="sb1-heap"><em>(No Heap Allocations)</em></div>
+                    </div>
+                </div>
+                <div class="log-box" id="sb1-log">&gt; Sandbox ready. Click steps above.</div>
+            </div>
+        </section>
+
+        <section id="sandbox3">
+            <h2>Interactive Sandbox 2: String Immutability & Loop Concatenation</h2>
+            <p>Visualize why string concatenation in loops creates garbage objects.</p>
+            <div class="sandbox-container">
+                <div class="sandbox-controls">
+                    <button onclick="sb3Step(1)">1. Create string s = "Cat"</button>
+                    <button onclick="sb3Step(2)">2. Append s += "s" (Immutability Demo)</button>
+                    <button onclick="sb3Step(3)">3. Simulate Bad Loop (str += 'a' x3)</button>
+                    <button class="secondary" onclick="sb3Reset()">Reset</button>
+                </div>
+                <div class="memory-grid">
+                    <div class="memory-panel stack-panel">
+                        <div class="panel-title">Stack Pointer</div>
+                        <div id="sb3-stack"><em>(No variable)</em></div>
+                    </div>
+                    <div class="memory-panel heap-panel">
+                        <div class="panel-title">Heap Objects & Garbage Collector</div>
+                        <div id="sb3-heap"><em>(Empty Heap)</em></div>
+                    </div>
+                </div>
+                <div class="log-box" id="sb3-log">&gt; Click steps to test string behavior.</div>
+            </div>
+        </section>
+
+        <section id="sandbox2">
+            <h2>Interactive Sandbox 3: Dynamic List Backing Array Growth</h2>
+            <p>Add items to a list and watch capacity double when the backing array overflows!</p>
+            <div class="sandbox-container">
+                <div class="sandbox-controls">
+                    <button onclick="listAdd()">Add Item to List</button>
+                    <button onclick="listAutoAdd()">Auto-Add 6 Items</button>
+                    <button class="secondary" onclick="listReset()">Reset List</button>
+                </div>
+                <div style="margin-bottom: 1rem; font-weight: bold;" id="list-stats">
+                    Count: 0 | Capacity: 4 | Backing Array: [0x1000]
+                </div>
+                <div class="memory-panel heap-panel" style="background: white;">
+                    <div class="panel-title">Heap Backing Array Slots</div>
+                    <div id="list-slots" style="display: flex; gap: 0.5rem; flex-wrap: wrap;"></div>
+                </div>
+                <div class="log-box" id="list-log">&gt; List initialized with initial capacity of 4.</div>
+            </div>
+        </section>
+
+        <section id="quiz">
+            <h2>Knowledge Check Quiz</h2>
+            
+            <div class="quiz-card">
+                <p><strong>Q1: Where are local primitive variables (like `int x = 10`) stored?</strong></p>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, false, 'q1')">A) On the Heap</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, true, 'q1')">B) On the Stack</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, false, 'q1')">C) Directly in the CPU cache</div>
+                </div>
+                <div class="feedback" id="q1-feedback"></div>
+            </div>
+
+            <div class="quiz-card">
+                <p><strong>Q2: What happens when you assign an existing object to a new reference variable (`List b = a;`)?</strong></p>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, false, 'q2')">A) A brand new copy of the object is created on the heap</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, true, 'q2')">B) Only the memory address pointer on the stack is copied</div>
+                    <div class="quiz-option" onclick="checkAnswer(this, false, 'q2')">C) The program throws an out of memory error</div>
+                </div>
+                <div class="feedback" id="q2-feedback"></div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        function sb1Step(step) {
+            const stack = document.getElementById('sb1-stack');
+            const heap = document.getElementById('sb1-heap');
+            const log = document.getElementById('sb1-log');
+
+            if (step === 1) {
+                stack.innerHTML = `<div class="memory-slot">int score = 42 (Stack Value)</div>`;
+                log.innerHTML = "&gt; Step 1: Declared primitive value 'score' directly on stack.";
+            } else if (step === 2) {
+                stack.innerHTML += `<div class="memory-slot">Player player1 = 0x7FFF (Stack Pointer)</div>`;
+                heap.innerHTML = `<div class="memory-slot" style="background:#fef3c7;">[Object @ 0x7FFF] level: 1, hp: 100</div>`;
+                log.innerHTML = "&gt; Step 2: Created object on Heap. Stack pointer holds reference address 0x7FFF.";
+            } else if (step === 3) {
+                stack.innerHTML += `<div class="memory-slot">Player player2 = 0x7FFF (Stack Pointer)</div>`;
+                log.innerHTML = "&gt; Step 3: Copied reference pointer! player2 points to the exact same heap object as player1.";
+            } else if (step === 4) {
+                heap.innerHTML = `<div class="memory-slot" style="background:#fee2e2;">[Object @ 0x7FFF] level: 99 (MUTATED!), hp: 100</div>`;
+                log.innerHTML = "&gt; Step 4: Modified object via player2. Because player1 points to same address, player1 sees level 99 too!";
+            }
+        }
+        function sb1Reset() {
+            document.getElementById('sb1-stack').innerHTML = "<em>(Empty Stack)</em>";
+            document.getElementById('sb1-heap').innerHTML = "<em>(No Heap Allocations)</em>";
+            document.getElementById('sb1-log').innerHTML = "&gt; Sandbox reset.";
+        }
+
+        function sb3Step(step) {
+            const stack = document.getElementById('sb3-stack');
+            const heap = document.getElementById('sb3-heap');
+            const log = document.getElementById('sb3-log');
+
+            if (step === 1) {
+                stack.innerHTML = `<div class="memory-slot">string s = 0xAA10 (Stack Pointer)</div>`;
+                heap.innerHTML = `<div class="memory-slot" style="background:#e0f2fe;">[Heap @ 0xAA10] Value: "Cat"</div>`;
+                log.innerHTML = "&gt; Created string 'Cat' on the heap.";
+            } else if (step === 2) {
+                stack.innerHTML = `<div class="memory-slot">string s = 0xBB20 (Stack Pointer Updated)</div>`;
+                heap.innerHTML = `
+                    <div class="memory-slot" style="background:#fee2e2; text-decoration: line-through;">[Heap @ 0xAA10] "Cat" (Orphaned / Garbage)</div>
+                    <div class="memory-slot" style="background:#e0f2fe;">[Heap @ 0xBB20] Value: "Cats" (New Object!)</div>
+                `;
+                log.innerHTML = "&gt; Appended 's'. Because strings are immutable, a NEW object was created at 0xBB20! Old object is now garbage.";
+            } else if (step === 3) {
+                heap.innerHTML += `<div class="memory-slot" style="background:#fee2e2; text-decoration: line-through;">[Heap @ 0xBB20] "Cats" (Garbage)</div>
+                                   <div class="memory-slot" style="background:#fee2e2; text-decoration: line-through;">[Heap @ 0xCC30] "Catsa" (Garbage)</div>
+                                   <div class="memory-slot" style="background:#fee2e2; text-decoration: line-through;">[Heap @ 0xDD40] "Catsaa" (Garbage)</div>
+                                   <div class="memory-slot" style="background:#e0f2fe;">[Heap @ 0xEE50] Value: "Catsaaa" (Final)</div>`;
+                stack.innerHTML = `<div class="memory-slot">string s = 0xEE50 (Pointer)</div>`;
+                log.innerHTML = "&gt; Loop concatenation created multiple intermediate garbage strings! This stresses the Garbage Collector.";
+            }
+        }
+        function sb3Reset() {
+            document.getElementById('sb3-stack').innerHTML = "<em>(No variable)</em>";
+            document.getElementById('sb3-heap').innerHTML = "<em>(Empty Heap)</em>";
+            document.getElementById('sb3-log').innerHTML = "&gt; Reset string sandbox.";
+        }
+
+        let listCount = 0;
+        let listCapacity = 4;
+        let backingAddr = "0x1000";
+        let items = [];
+
+        function renderList() {
+            const slotsContainer = document.getElementById('list-slots');
+            const stats = document.getElementById('list-stats');
+            stats.innerHTML = `Count: ${listCount} | Capacity: ${listCapacity} | Backing Array Address: [${backingAddr}]`;
+
+            let html = '';
+            for (let i = 0; i < listCapacity; i++) {
+                let val = i < items.length ? items[i] : '<em>empty</em>';
+                let bg = i < items.length ? '#dcfce7' : '#f1f5f9';
+                html += `<div style="border:1px solid #cbd5e1; padding:0.5rem; min-width:45px; text-align:center; background:${bg}; border-radius:4px; font-family:monospace;">
+                    <div style="font-size:0.75rem; color:#64748b;">[${i}]</div>
+                    <div>${val}</div>
+                </div>`;
+            }
+            slotsContainer.innerHTML = html;
+        }
+
+        function listAdd() {
+            const log = document.getElementById('list-log');
+            if (listCount >= listCapacity) {
+                let oldAddr = backingAddr;
+                listCapacity *= 2;
+                backingAddr = "0x" + Math.floor(Math.random() * 8000 + 2000).toString(16).toUpperCase();
+                log.innerHTML = `&gt; Backing array full! Allocated NEW array at ${backingAddr} with doubled capacity (${listCapacity}). Copied old items over and discarded ${oldAddr} to GC!`;
+            } else {
+                log.innerHTML = `&gt; Added item '${listCount * 10}' to slot [${listCount}] in existing backing array.`;
+            }
+            items.push(listCount * 10 + 5);
+            listCount++;
+            renderList();
+        }
+
+        function listAutoAdd() {
+            for(let i=0; i<5; i++) {
+                setTimeout(listAdd, i * 300);
+            }
+        }
+
+        function listReset() {
+            listCount = 0;
+            listCapacity = 4;
+            backingAddr = "0x1000";
+            items = [];
+            renderList();
+            document.getElementById('list-log').innerHTML = "&gt; List reset to initial capacity 4.";
+        }
+
+        renderList();
+
+        function checkAnswer(element, isCorrect, qId) {
+            const feedback = document.getElementById(qId + '-feedback');
+            const options = element.parentElement.children;
+            for(let opt of options) {
+                opt.style.background = "white";
+            }
+            if(isCorrect) {
+                element.style.background = "#dcfce7";
+                feedback.style.color = "var(--accent-green)";
+                feedback.innerHTML = "Correct! Great job.";
+            } else {
+                element.style.background = "#fee2e2";
+                feedback.style.color = "var(--accent-red)";
+                feedback.innerHTML = "Incorrect. Try again!";
+            }
+        }
+    </script>
+</body>
+</html>
