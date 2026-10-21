@@ -1,0 +1,139 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SQL Server & HR Database — Beginner Tutorial</title><style>:root{--ink:#203047;--blue:#1766a2;--light:#f4f8fc;--line:#dbe6f0;--green:#eaf8f0}*{box-sizing:border-box}body{margin:0;background:#f5f8fc;color:var(--ink);font:16px/1.65 system-ui,Segoe UI,Arial,sans-serif}.wrap{max-width:1040px;margin:28px auto;background:white;padding:42px 52px;border:1px solid var(--line);border-radius:18px;box-shadow:0 6px 28px #2341  }h1{font-size:2.1rem;color:#123e67;line-height:1.2}h2{margin-top:42px;border-bottom:2px solid #d9e9f6;padding-bottom:8px;color:#174c79}h3{color:#185c8e;margin-top:27px}p,li{max-width:95ch}.lead{font-size:1.12rem;color:#52657b}.note{background:#eaf5ff;border-left:4px solid #3583b8;padding:13px 18px;margin:18px 0;border-radius:6px}.tip{background:var(--green);border-left:4px solid #33956c;padding:13px 18px;margin:18px 0;border-radius:6px}pre{background:#eef4fa;color:#172c42;padding:17px 20px;border-radius:10px;overflow-x:auto;border:1px solid #d9e4ee;line-height:1.55}code{font-family:Consolas,Monaco,monospace;font-size:.93em}table{border-collapse:collapse;width:100%;margin:14px 0 23px;font-size:.96em}th{background:#dcecf9;text-align:left}th,td{border:1px solid #d3e0eb;padding:9px 12px}tr:nth-child(even){background:#f7fbfe}.small{color:#52677c;font-size:.91em}.toc{background:#f1f7fc;padding:18px 24px;border-radius:12px}.toc a{color:#175f98;text-decoration:none}.toc ul{columns:2}.example{border:1px solid #d8e6f0;border-radius:12px;padding:0 18px 12px;margin:18px 0}.example h4{color:#174f7a;margin-bottom:7px}.tag{display:inline-block;background:#dceefc;color:#145580;padding:2px 9px;border-radius:99px;font-size:.78em;font-weight:700}.exercise{background:#fffaf0;border:1px solid #f0dca9;padding:18px;border-radius:10px;margin:14px 0}details{margin:9px 0}summary{cursor:pointer;color:#185f93;font-weight:650}@media(max-width:700px){.wrap{margin:0;padding:22px 17px;border-radius:0}.toc ul{columns:1}h1{font-size:1.7rem}}</style></head><body><main class="wrap"><span class="tag">BEGINNER • HANDS-ON • MICROSOFT SQL SERVER</span><h1>Understanding SQL Server with an HR Database</h1><p class="lead">A step-by-step introduction to relational databases, SQL, T-SQL, tables and keys, followed by many practical <strong>SELECT</strong> queries using a small Human Resources (HR) database.</p><div class="toc"><strong>Contents</strong><ul><li><a href="#basics">1. Databases and relational tables</a></li><li><a href="#server">2. SQL Server, SQL and T-SQL</a></li><li><a href="#types">3. DDL, DML and DQL</a></li><li><a href="#keys">4. Primary and foreign keys</a></li><li><a href="#setup">5. Build the HR database</a></li><li><a href="#select">6. SELECT and FROM</a></li><li><a href="#where">7. WHERE and filtering</a></li><li><a href="#order">8. ORDER BY</a></li><li><a href="#alias">9. Column aliases</a></li><li><a href="#practice">10. Practice with solutions</a></li></ul></div>
+<h2 id="basics">1. What is a database? What is a relational database?</h2><p>A <strong>database</strong> is an organized collection of data. A college might store students and courses; a store might store products and orders; an HR department might store employees and departments.</p><p>A <strong>relational database</strong> organizes data into <strong>tables</strong>. Each table contains <strong>rows</strong> (individual records) and <strong>columns</strong> (properties of each record). Tables can be connected through matching key values.</p><h3>Imagine an HR department</h3><table><caption>Employees table</caption><tr><th>EmployeeID</th><th>FirstName</th><th>DepartmentID</th><th>Salary</th></tr><tr><td>101</td><td>Ana</td><td>10</td><td>65000</td></tr><tr><td>102</td><td>Ben</td><td>20</td><td>72000</td></tr><tr><td>103</td><td>Cara</td><td>10</td><td>80000</td></tr></table><table><caption>Departments table</caption><tr><th>DepartmentID</th><th>DepartmentName</th></tr><tr><td>10</td><td>IT</td></tr><tr><td>20</td><td>HR</td></tr><tr><td>30</td><td>Finance</td></tr></table><p>DepartmentID 10 means <strong>IT</strong>. Instead of repeating the text “IT” for every employee, the Employees table stores a reference to the Departments table. This relationship reduces repeated data and helps keep department names consistent.</p><div class="note"><strong>Vocabulary:</strong> Table = collection of records; row = one record; column = one property; schema = the structure of the tables, including their columns, types, and constraints.</div>
+<h2 id="server">2. Microsoft SQL Server, SQL and T-SQL</h2><h3>Microsoft SQL Server</h3><p><strong>Microsoft SQL Server</strong> is a relational database management system (RDBMS): software that stores data, enforces rules, handles access, and runs queries. You send a query to SQL Server; its database engine processes the request and returns a result. SQL Server is the <em>database software</em>, not the programming language.</p><h3>SQL</h3><p><strong>SQL</strong> means <strong>Structured Query Language</strong>. It is a largely declarative language: you describe <em>what</em> data you want, not the detailed algorithm for retrieving it.</p><pre><code>SELECT FirstName, Salary
+FROM Employees
+WHERE Salary &gt; 70000;</code></pre><p>This asks for employee names and salaries above 70,000. You do not write a loop to inspect every row; SQL Server decides how to execute the query.</p><h3>T-SQL</h3><p><strong>T-SQL (Transact-SQL)</strong> is Microsoft's extension of SQL, used by SQL Server. It includes standard-style SQL queries plus Microsoft-specific features such as variables, procedural control flow, and <code>TOP</code>.</p><pre><code>-- T-SQL: show the two highest-paid employees
+SELECT TOP (2) FirstName, Salary
+FROM Employees
+ORDER BY Salary DESC;</code></pre><table><tr><th>Term</th><th>What it means</th><th>Example</th></tr><tr><td>Relational database</td><td>Data organized in related tables</td><td>HR database</td></tr><tr><td>SQL Server</td><td>Software that manages and queries databases</td><td>Microsoft SQL Server</td></tr><tr><td>SQL</td><td>Language for defining and querying relational data</td><td>SELECT ... FROM ...</td></tr><tr><td>T-SQL</td><td>SQL Server's SQL dialect and extensions</td><td>SELECT TOP (2) ...</td></tr></table><div class="note"><strong>How a query works (simplified):</strong> SQL Server parses the text (checks the query's grammar), validates names and types (such as whether Employees exists), optimizes the query (chooses an efficient execution plan), executes that plan (reads the needed data), and returns result rows. You describe the result; the database engine handles the retrieval steps.</div>
+<h2 id="types">3. Three important groups of SQL statements</h2><table><tr><th>Group</th><th>Full name</th><th>Purpose</th><th>Typical statements</th></tr><tr><td><strong>DDL</strong></td><td>Data Definition Language</td><td>Create or change database structure</td><td>CREATE, ALTER, DROP</td></tr><tr><td><strong>DML</strong></td><td>Data Manipulation Language</td><td>Add, modify, or remove stored rows</td><td>INSERT, UPDATE, DELETE</td></tr><tr><td><strong>DQL</strong></td><td>Data Query Language</td><td>Retrieve information</td><td>SELECT</td></tr></table><p>For introductory teaching, <code>SELECT</code> is often placed under DQL. Some references classify <code>SELECT</code> within DML instead; these categories are teaching conventions rather than different SQL engines.</p><div class="example"><h4>DDL example — define a table</h4><pre><code>CREATE TABLE Departments (
+    DepartmentID INT PRIMARY KEY,
+    DepartmentName VARCHAR(50) NOT NULL
+);</code></pre><p><code>INT</code> means whole number; <code>VARCHAR(50)</code> means text up to 50 characters; <code>NOT NULL</code> means a value is required.</p></div><div class="example"><h4>DML example — add a row</h4><pre><code>INSERT INTO Departments (DepartmentID, DepartmentName)
+VALUES (10, 'IT');</code></pre><p>Text values are enclosed in single quotes. The statement inserts one department record.</p></div><div class="example"><h4>DQL example — read rows</h4><pre><code>SELECT DepartmentID, DepartmentName
+FROM Departments;</code></pre><p>This retrieves two columns from the Departments table without changing the stored data.</p></div>
+<h2 id="keys">4. Primary keys and foreign keys</h2><h3>Primary key (PK)</h3><p>A <strong>primary key</strong> uniquely identifies each row in a table. Primary-key values cannot be duplicated or NULL. In Employees, <code>EmployeeID</code> is the primary key: two employees cannot both have EmployeeID 101.</p><h3>Foreign key (FK)</h3><p>A <strong>foreign key</strong> is a column (or set of columns) whose values refer to a key in another table. <code>Employees.DepartmentID</code> refers to <code>Departments.DepartmentID</code>. This prevents an employee from referencing a department that does not exist, provided the foreign key constraint is enforced.</p><pre><code>Departments                             Employees
+--------------------                    -------------------------
+DepartmentID (PK)  10  &lt;-------------- DepartmentID (FK)  10
+DepartmentName     IT                   EmployeeID (PK)    101
+                                        FirstName          Ana</code></pre><p>One department can have many employees. This is a <strong>one-to-many relationship</strong>. A foreign key does <em>not</em> need to be unique: multiple employees can share DepartmentID 10.</p><div class="tip"><strong>Remember:</strong> Primary key answers “Which exact row?” Foreign key answers “Which related row in another table?”</div>
+<h2 id="setup">5. Create a small HR database (run this once)</h2><p>Open a query editor connected to Microsoft SQL Server (for example, SQL Server Management Studio or Visual Studio Code with a SQL Server connection). Run the following script in order. It creates a database called <code>HR</code>, two tables, and eight sample employees. The examples below assume this exact dataset.</p><div class="note"><strong>Before running:</strong> This script creates a new database. If a database named <code>HR</code> already exists, do not run the CREATE DATABASE line against it; use a different practice database name and adjust <code>USE</code>. You need permission to create databases. <code>GO</code> is a batch separator recognized by common SQL Server query tools, not a SQL statement itself.</div><pre><code>CREATE DATABASE HR;
+GO
+USE HR;
+GO
+
+CREATE TABLE Departments (
+    DepartmentID INT PRIMARY KEY,
+    DepartmentName VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE Employees (
+    EmployeeID INT PRIMARY KEY,
+    FirstName VARCHAR(50) NOT NULL,
+    LastName VARCHAR(50) NOT NULL,
+    DepartmentID INT NOT NULL,
+    JobTitle VARCHAR(80) NOT NULL,
+    Salary DECIMAL(10,2) NOT NULL,
+    HireDate DATE NOT NULL,
+    City VARCHAR(50) NOT NULL,
+    FOREIGN KEY (DepartmentID)
+        REFERENCES Departments(DepartmentID)
+);
+
+INSERT INTO Departments (DepartmentID, DepartmentName)
+VALUES (10, 'IT'), (20, 'HR'), (30, 'Finance');
+
+INSERT INTO Employees
+    (EmployeeID, FirstName, LastName, DepartmentID,
+     JobTitle, Salary, HireDate, City)
+VALUES
+(101, 'Ana',   'Lopez', 10, 'Developer',   65000, '2022-03-14', 'Portland'),
+(102, 'Ben',   'Carter',20, 'Recruiter',   72000, '2021-07-01', 'Seattle'),
+(103, 'Cara',  'Singh', 10, 'Developer',   80000, '2020-01-20', 'Portland'),
+(104, 'David', 'Kim',   30, 'Accountant',  61000, '2023-11-06', 'Tacoma'),
+(105, 'Ella',  'Brown', 20, 'HR Manager',  95000, '2019-05-15', 'Portland'),
+(106, 'Farah', 'Ali',   10, 'IT Support',  55000, '2024-02-12', 'Seattle'),
+(107, 'Gabe',  'Miller',30, 'Analyst',     72000, '2022-09-19', 'Portland'),
+(108, 'Hana',  'Chen',  10, 'Developer',   88000, '2021-12-03', 'Tacoma');</code></pre><p><strong>Check your data:</strong></p><pre><code>USE HR;
+SELECT * FROM Departments;
+SELECT * FROM Employees;</code></pre><p>You should see <strong>3 departments</strong> and <strong>8 employees</strong>. If your query editor is already set to HR, you do not need to repeat <code>USE HR</code> for each query.</p>
+<h2 id="select">6. DQL basics: SELECT and FROM</h2><p><code>SELECT</code> specifies which columns to show; <code>FROM</code> specifies which table to read. Each query below is independent.</p><div class="example"><h4>Example 1 — Show all employee columns</h4><pre><code>SELECT *
+FROM Employees;</code></pre><p><code>*</code> means “all columns.” Result: eight employee rows, with every column.</p></div><div class="example"><h4>Example 2 — Show only first names</h4><pre><code>SELECT FirstName
+FROM Employees;</code></pre><p>Result: Ana, Ben, Cara, David, Ella, Farah, Gabe, Hana.</p></div><div class="example"><h4>Example 3 — Show three selected columns</h4><pre><code>SELECT FirstName, LastName, Salary
+FROM Employees;</code></pre><p>Only the three listed columns appear. The underlying table is unchanged.</p></div><div class="example"><h4>Example 4 — Show unique cities</h4><pre><code>SELECT DISTINCT City
+FROM Employees;</code></pre><p>Result: Portland, Seattle, Tacoma (one row per unique city). <code>DISTINCT</code> removes duplicates from the returned result.</p></div><div class="example"><h4>Example 5 — Find the names of departments</h4><pre><code>SELECT DepartmentName
+FROM Departments;</code></pre><p>Result: IT, HR, Finance. Notice that <code>FROM</code> changes which table the query reads.</p></div><div class="note"><strong>Tip:</strong> SQL keywords are usually written in uppercase for readability, but <code>select</code> and <code>SELECT</code> mean the same thing. A semicolon marks the end of a statement and is recommended.</div>
+<h2 id="where">7. WHERE: filtering rows</h2><p><strong>Filtering</strong> means keeping only rows that satisfy a condition. <code>WHERE</code> performs row filtering; it does not change the database.</p><pre><code>SELECT column1, column2
+FROM TableName
+WHERE condition;</code></pre><div class="example"><h4>Example 6 — Employees in Portland</h4><pre><code>SELECT FirstName, City
+FROM Employees
+WHERE City = 'Portland';</code></pre><p>Result: Ana, Cara, Ella, Gabe. Text uses single quotes; <code>=</code> means equality.</p></div><div class="example"><h4>Example 7 — Salary greater than 70,000</h4><pre><code>SELECT FirstName, Salary
+FROM Employees
+WHERE Salary &gt; 70000;</code></pre><p>Result: Ben (72,000), Cara (80,000), Ella (95,000), Gabe (72,000), Hana (88,000).</p></div><div class="example"><h4>Example 8 — Salary at least 72,000</h4><pre><code>SELECT FirstName, Salary
+FROM Employees
+WHERE Salary &gt;= 72000;</code></pre><p>Includes 72,000 itself. This returns the same five employees as Example 7 for this dataset.</p></div><div class="example"><h4>Example 9 — Employees not in IT</h4><pre><code>SELECT FirstName, DepartmentID
+FROM Employees
+WHERE DepartmentID &lt;&gt; 10;</code></pre><p><code>&lt;&gt;</code> means “not equal.” Result: Ben, David, Ella, Gabe.</p></div><div class="example"><h4>Example 10 — Two conditions using AND</h4><pre><code>SELECT FirstName, Salary, City
+FROM Employees
+WHERE City = 'Portland' AND Salary &gt; 70000;</code></pre><p>Both conditions must be true. Result: Cara, Ella, Gabe.</p></div><div class="example"><h4>Example 11 — Either condition using OR</h4><pre><code>SELECT FirstName, City
+FROM Employees
+WHERE City = 'Seattle' OR City = 'Tacoma';</code></pre><p>At least one condition must be true. Result: Ben, David, Farah, Hana.</p></div><div class="example"><h4>Example 12 — Match a list with IN</h4><pre><code>SELECT FirstName, DepartmentID
+FROM Employees
+WHERE DepartmentID IN (10, 30);</code></pre><p>Returns employees in IT (10) or Finance (30): Ana, Cara, David, Farah, Gabe, Hana.</p></div><div class="example"><h4>Example 13 — Salary range using BETWEEN</h4><pre><code>SELECT FirstName, Salary
+FROM Employees
+WHERE Salary BETWEEN 60000 AND 80000;</code></pre><p><code>BETWEEN</code> includes both endpoints. Result: Ana, Ben, Cara, David, Gabe.</p></div><div class="example"><h4>Example 14 — Names beginning with A</h4><pre><code>SELECT FirstName
+FROM Employees
+WHERE FirstName LIKE 'A%';</code></pre><p><code>LIKE</code> matches text patterns; <code>%</code> means zero or more characters. Result: Ana.</p></div><div class="example"><h4>Example 15 — Job titles containing 'Manager'</h4><pre><code>SELECT FirstName, JobTitle
+FROM Employees
+WHERE JobTitle LIKE '%Manager%';</code></pre><p>Result: Ella — HR Manager.</p></div><div class="example"><h4>Example 16 — Hired on or after January 1, 2022</h4><pre><code>SELECT FirstName, HireDate
+FROM Employees
+WHERE HireDate &gt;= '2022-01-01';</code></pre><p>Result: Ana, David, Farah, Gabe. SQL Server recognizes this ISO-style date string in the DATE comparison.</p></div><div class="example"><h4>Example 17 — Group AND/OR with parentheses</h4><pre><code>SELECT FirstName, City, Salary
+FROM Employees
+WHERE (City = 'Portland' OR City = 'Seattle')
+  AND Salary &gt;= 80000;</code></pre><p>Result: Cara and Ella. Parentheses make the intended logic clear.</p></div><table><tr><th>Operator</th><th>Meaning</th><th>Example</th></tr><tr><td><code>=</code></td><td>Equal</td><td><code>City = 'Portland'</code></td></tr><tr><td><code>&lt;&gt;</code></td><td>Not equal</td><td><code>DepartmentID &lt;&gt; 10</code></td></tr><tr><td><code>&gt;</code>, <code>&lt;</code></td><td>Greater, less</td><td><code>Salary &gt; 70000</code></td></tr><tr><td><code>&gt;=</code>, <code>&lt;=</code></td><td>Greater/less or equal</td><td><code>Salary &lt;= 80000</code></td></tr><tr><td><code>AND</code>, <code>OR</code></td><td>Combine conditions</td><td><code>City = 'Portland' AND Salary &gt; 70000</code></td></tr><tr><td><code>IN</code></td><td>Any value in a list</td><td><code>DepartmentID IN (10,20)</code></td></tr><tr><td><code>BETWEEN</code></td><td>Inclusive range</td><td><code>Salary BETWEEN 60000 AND 80000</code></td></tr><tr><td><code>LIKE</code></td><td>Text pattern</td><td><code>FirstName LIKE 'A%'</code></td></tr></table><div class="note"><strong>About NULL:</strong> <code>NULL</code> means missing/unknown data. Use <code>IS NULL</code> or <code>IS NOT NULL</code>, not <code>= NULL</code>. The required fields in this small HR dataset contain no NULL values.</div>
+<h2 id="order">8. ORDER BY: sorting the result</h2><p><code>ORDER BY</code> controls the order in which results are displayed. <code>ASC</code> means ascending (small to large, A to Z); <code>DESC</code> means descending (large to small, Z to A). Ascending is the default.</p><div class="example"><h4>Example 18 — Alphabetical by first name</h4><pre><code>SELECT FirstName, LastName
+FROM Employees
+ORDER BY FirstName ASC;</code></pre><p>Starts Ana, Ben, Cara ...</p></div><div class="example"><h4>Example 19 — Highest salary first</h4><pre><code>SELECT FirstName, Salary
+FROM Employees
+ORDER BY Salary DESC;</code></pre><p>Starts Ella (95,000), Hana (88,000), Cara (80,000). Ben and Gabe tie at 72,000; their relative order is not guaranteed without another sort column.</p></div><div class="example"><h4>Example 20 — Sort by city, then salary</h4><pre><code>SELECT FirstName, City, Salary
+FROM Employees
+ORDER BY City ASC, Salary DESC;</code></pre><p>Cities appear alphabetically; within each city, the highest salary appears first.</p></div><div class="example"><h4>Example 21 — Filter, then sort</h4><pre><code>SELECT FirstName, Salary
+FROM Employees
+WHERE DepartmentID = 10
+ORDER BY Salary DESC;</code></pre><p>IT employees, highest paid first: Hana (88,000), Cara (80,000), Ana (65,000), Farah (55,000).</p></div><div class="note"><strong>Important:</strong> Without <code>ORDER BY</code>, SQL Server does not guarantee row order—even if rows appear sorted in one execution.</div>
+<h2 id="alias">9. Column aliases: clearer result headings</h2><p>A <strong>column alias</strong> is a temporary label for a column in the query result. Use <code>AS</code> to give a column a more readable heading. Aliases do <strong>not</strong> rename the actual table columns.</p><div class="example"><h4>Example 22 — Rename result headings</h4><pre><code>SELECT FirstName AS GivenName,
+       Salary AS AnnualSalary
+FROM Employees;</code></pre><p>Output column headings are <strong>GivenName</strong> and <strong>AnnualSalary</strong>.</p></div><div class="example"><h4>Example 23 — Alias containing spaces</h4><pre><code>SELECT FirstName AS [First Name],
+       JobTitle AS [Job Title],
+       Salary AS [Annual Salary]
+FROM Employees;</code></pre><p>Square brackets let T-SQL use spaces in the displayed headings.</p></div><div class="example"><h4>Example 24 — Calculated column and alias</h4><pre><code>SELECT FirstName,
+       Salary,
+       Salary / 12.0 AS [Approx Monthly Salary]
+FROM Employees;</code></pre><p>Calculates salary divided by 12 and gives that expression a readable name. Using <code>12.0</code> helps avoid integer-only arithmetic.</p></div><div class="example"><h4>Example 25 — Put everything together</h4><pre><code>SELECT FirstName AS [Employee Name],
+       City,
+       Salary AS [Annual Salary]
+FROM Employees
+WHERE City = 'Portland' AND Salary &gt;= 70000
+ORDER BY Salary DESC;</code></pre><table><tr><th>Employee Name</th><th>City</th><th>Annual Salary</th></tr><tr><td>Ella</td><td>Portland</td><td>95000.00</td></tr><tr><td>Cara</td><td>Portland</td><td>80000.00</td></tr><tr><td>Gabe</td><td>Portland</td><td>72000.00</td></tr></table><p><strong>Read it in plain English:</strong> “Show the names, cities, and salaries of Portland employees earning at least 70,000, sorted from highest to lowest salary.”</p></div><h3>The standard beginner query pattern</h3><pre><code>SELECT column1 AS [Friendly Heading], column2
+FROM TableName
+WHERE condition
+ORDER BY column2 DESC;</code></pre><p><strong>Written order:</strong> SELECT → FROM → WHERE → ORDER BY. Conceptually, the table is identified first (FROM), rows are filtered (WHERE), result expressions/columns are selected (SELECT), and results are sorted (ORDER BY). The actual execution plan is determined by SQL Server's optimizer.</p>
+<h2 id="practice">10. Practice questions with worked solutions</h2><p>Try each task in your SQL Server query editor before opening its answer. All solutions use the HR database created above.</p><div class="exercise"><strong>Practice 1:</strong> Show first and last names of every employee.<details><summary>Show solution</summary><pre><code>SELECT FirstName, LastName
+FROM Employees;</code></pre><p>SELECT specifies the two columns; FROM identifies the table. Eight rows are returned.</p></details></div><div class="exercise"><strong>Practice 2:</strong> Find employees who live in Seattle.<details><summary>Show solution</summary><pre><code>SELECT FirstName, City
+FROM Employees
+WHERE City = 'Seattle';</code></pre><p>Ben and Farah. WHERE keeps only matching rows.</p></details></div><div class="exercise"><strong>Practice 3:</strong> Show employees who earn less than 65,000.<details><summary>Show solution</summary><pre><code>SELECT FirstName, Salary
+FROM Employees
+WHERE Salary &lt; 65000;</code></pre><p>David (61,000) and Farah (55,000). Ana earns exactly 65,000, so she is excluded.</p></details></div><div class="exercise"><strong>Practice 4:</strong> Show employee names and salaries from lowest to highest salary.<details><summary>Show solution</summary><pre><code>SELECT FirstName, Salary
+FROM Employees
+ORDER BY Salary ASC, FirstName ASC;</code></pre><p>Farah is first, followed by David. The second sort column provides a predictable order when salaries tie.</p></details></div><div class="exercise"><strong>Practice 5:</strong> Show all IT employees (DepartmentID 10) whose salary is at least 70,000, highest salary first.<details><summary>Show solution</summary><pre><code>SELECT FirstName, DepartmentID, Salary
+FROM Employees
+WHERE DepartmentID = 10 AND Salary &gt;= 70000
+ORDER BY Salary DESC;</code></pre><p>Hana (88,000), Cara (80,000). Both filters must be true.</p></details></div><div class="exercise"><strong>Practice 6:</strong> Display first name as “Employee” and salary as “Pay” for Portland employees.<details><summary>Show solution</summary><pre><code>SELECT FirstName AS [Employee],
+       Salary AS [Pay]
+FROM Employees
+WHERE City = 'Portland';</code></pre><p>Four rows. AS changes the result headings only.</p></details></div><div class="exercise"><strong>Practice 7:</strong> Show employees hired in 2023 or later, newest hire first.<details><summary>Show solution</summary><pre><code>SELECT FirstName, HireDate
+FROM Employees
+WHERE HireDate &gt;= '2023-01-01'
+ORDER BY HireDate DESC;</code></pre><p>Farah (2024-02-12), then David (2023-11-06).</p></details></div><div class="exercise"><strong>Practice 8:</strong> Show the three highest-paid employees using T-SQL.<details><summary>Show solution</summary><pre><code>SELECT TOP (3) FirstName, Salary
+FROM Employees
+ORDER BY Salary DESC;</code></pre><p>Ella, Hana, Cara. <code>TOP (3)</code> is a SQL Server/T-SQL feature; ORDER BY makes “highest” meaningful.</p></details></div><div class="exercise"><strong>Practice 9:</strong> Which column is the primary key of Employees? Which column is the foreign key, and what does it reference?<details><summary>Show solution</summary><p><code>EmployeeID</code> is the primary key. <code>DepartmentID</code> is the foreign key and references <code>Departments(DepartmentID)</code>. The relationship links each employee to an existing department.</p></details></div><div class="exercise"><strong>Practice 10:</strong> Why is SELECT called declarative? Explain in one or two sentences.<details><summary>Show solution</summary><p>A SELECT query states which data the user wants. SQL Server chooses the physical steps and access methods used to produce the result, rather than requiring the programmer to write the row-by-row retrieval algorithm.</p></details></div><h2>Quick reference</h2><table><tr><th>Goal</th><th>SQL element</th></tr><tr><td>Choose output columns</td><td><code>SELECT</code></td></tr><tr><td>Choose source table</td><td><code>FROM</code></td></tr><tr><td>Keep matching rows</td><td><code>WHERE</code></td></tr><tr><td>Sort results</td><td><code>ORDER BY</code></td></tr><tr><td>Rename a result heading</td><td><code>AS</code></td></tr><tr><td>Remove duplicate result values</td><td><code>DISTINCT</code></td></tr><tr><td>Limit rows in SQL Server</td><td><code>TOP (n)</code></td></tr><tr><td>Identify a row uniquely</td><td>Primary key</td></tr><tr><td>Reference a related table</td><td>Foreign key</td></tr></table></main></body></html>
