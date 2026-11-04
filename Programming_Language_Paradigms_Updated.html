@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en"><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1" name="viewport"/><title>Programming Language Paradigms: C, C#, Python, and SQL</title><style>body{font:17px/1.65 system-ui,Arial;max-width:1050px;margin:auto;padding:24px;color:#172235;background:#f7f9fc}header{background:#17365c;color:white;padding:28px;border-radius:14px}h1{margin:0}h2{color:#17365c;border-bottom:2px solid #b6c8df;padding-bottom:8px}h3{color:#245789}.card{background:white;padding:24px;margin:20px 0;border:1px solid #dce4ed;border-radius:12px}pre{background:#10243b;color:#f4f7fb;padding:18px;overflow:auto;border-radius:9px;font-size:15px}code{font-family:Consolas,monospace}.note{background:#eaf3ff;border-left:4px solid #3674c1;padding:12px 16px;margin:14px 0}table{border-collapse:collapse;width:100%}td,th{border:1px solid #c9d5e3;padding:10px;text-align:left}th{background:#eaf1f9}details{padding:12px;background:#edf5ff;margin:12px 0;border-radius:8px}summary{cursor:pointer;font-weight:bold}button{background:#245789;color:white;border:0;border-radius:6px;padding:10px 16px;cursor:pointer}.cells{display:flex;gap:10px;flex-wrap:wrap}.cell{padding:15px;border:2px solid #8daac9;border-radius:8px;background:#fff;min-width:65px;text-align:center}.active{background:#ffe2a8;border-color:#d17b00}.found{background:#b8f1ca;border-color:#25814b}nav a{display:inline-block;margin:7px 10px 7px 0;color:#174d80}</style><header><h1>Programming Language Paradigms: C, C#, Python, and SQL</h1><p>Learning goal: explain procedural, object-oriented, multi-paradigm, and declarative styles with small, comparable examples.</p></header>
+<section class="card" id="s1"><h2>1. What Is a Programming Paradigm?</h2><p>A programming paradigm is a style of organizing instructions. A language can support more than one paradigm. We will compare how we express a task, not claim that each language supports only one style.</p><p><b>Example task:</b> Find a student whose ID is 104. A procedural solution might say “check each ID, one by one.” A declarative solution says “return the row whose ID is 104.”</p><table><tr><th>Term</th><th>Meaning</th></tr><tr><td>Procedural</td><td>Write the sequence of steps.</td></tr><tr><td>Object-oriented</td><td>Organize related data and behavior into objects.</td></tr><tr><td>Functional</td><td>Express transformations using functions.</td></tr><tr><td>Declarative</td><td>Describe the desired result rather than the full algorithm.</td></tr></table><div class="note">Important: “procedural” and “object-oriented” describe programming styles, not mutually exclusive language categories.</div></section>
+<section class="card" id="s2"><h2>2. C — Primarily Procedural Programming</h2><p>Procedural programming organizes a solution as a sequence of instructions, often grouped into functions. The programmer explicitly specifies the steps.</p><h3>C example 1 — Calculate a total</h3><pre><code>#include &lt;stdio.h&gt;
+int main(void) {
+    int a = 10, b = 20;
+    int total = a + b;
+    printf("Total: %d\n", total);
+    return 0;
+}
+// Output: Total: 30</code></pre><p><b>Steps:</b> Declare values → add them → print the result. The order is explicit.</p><h3>C example 2 — Linear search with a loop</h3><pre><code>#include &lt;stdio.h&gt;
+int main(void) {
+    int ids[] = {101, 102, 103, 104, 105};
+    int target = 104;
+    int found = 0;
+    for (int i = 0; i &lt; 5; i++) {
+        if (ids[i] == target) {
+            found = 1;
+            break;
+        }
+    }
+    printf("%s\n", found ? "Found" : "Not found");
+    return 0;
+}
+// Output: Found</code></pre><p><b>Steps:</b> Start at index 0 → compare → advance → stop when found. The <code>for</code> loop explicitly controls the search.</p></section>
+<section class="card" id="s3"><h2>3. C# — Object-Oriented and Multi-Paradigm</h2><p>C# supports object-oriented programming (classes and objects), but it also supports procedural, functional, and declarative-style features such as LINQ.</p><h3>C# example 1 — Class and object</h3><pre><code>using System;
+class Student {
+    public string Name = "";
+    public void SayHello() {
+        Console.WriteLine("Hello, " + Name);
+    }
+}
+class Program {
+    static void Main() {
+        Student s = new Student();
+        s.Name = "Asha";
+        s.SayHello();
+    }
+}
+// Output: Hello, Asha</code></pre><p><b>Object-oriented idea:</b> The <code>Student</code> object stores <code>Name</code> and provides <code>SayHello()</code>. A class is a blueprint; an object is an instance.</p><h3>C# example 2 — Procedural-style loop is also possible</h3><pre><code>using System;
+int[] ids = {101, 102, 103, 104, 105};
+foreach (int id in ids) {
+    if (id == 104) {
+        Console.WriteLine("Found");
+        break;
+    }
+}
+// Output: Found</code></pre><p>C# can express the same explicit search steps without creating a custom class.</p><h3>C# example 3 — LINQ expresses the result more directly</h3><pre><code>using System;
+using System.Linq;
+int[] ids = {101, 102, 103, 104, 105};
+bool found = ids.Contains(104);
+Console.WriteLine(found);
+// Output: True</code></pre><p><code>Contains</code> hides the iteration inside a library method. This is a higher-level expression, but it does not mean C# automatically uses a database index.</p></section>
+<section class="card" id="s4"><h2>4. Python — Multi-Paradigm</h2><p>Python supports procedural, object-oriented, and functional styles. Python is not exclusively object-oriented.</p><h3>Python example 1 — Procedural style</h3><pre><code>a = 10
+b = 20
+total = a + b
+print("Total:", total)
+# Output: Total: 30</code></pre><h3>Python example 2 — Explicit linear search</h3><pre><code>ids = [101, 102, 103, 104, 105]
+for student_id in ids:
+    if student_id == 104:
+        print("Found")
+        break
+# Output: Found</code></pre><h3>Python example 3 — Object-oriented style</h3><pre><code>class Student:
+    def __init__(self, name):
+        self.name = name
+
+    def say_hello(self):
+        print("Hello,", self.name)
+
+s = Student("Asha")
+s.say_hello()
+# Output: Hello, Asha</code></pre><h3>Python example 4 — Concise membership test</h3><pre><code>ids = [101, 102, 103, 104, 105]
+print(104 in ids)
+# Output: True</code></pre><p><code>in</code> makes the code shorter; for a Python list, membership testing still normally checks elements sequentially. The programming language supports several styles.</p></section>
+<section class="card" id="s5"><h2>5. SQL — Declarative Query Language</h2><p>SQL describes WHAT result is wanted. SQL Server decides HOW to retrieve it using a physical execution plan. SQL is declarative, though SQL Server also provides procedural extensions such as T-SQL control flow.</p><h3>SQL Server example 1 — Return every student</h3><pre><code>SELECT StudentID, Name
+FROM Students;</code></pre><p><b>SELECT:</b> columns wanted. <b>FROM:</b> source table.</p><h3>SQL Server example 2 — Filter for one student</h3><pre><code>SELECT Name
+FROM Students
+WHERE StudentID = 104;</code></pre><p><b>WHERE:</b> the condition rows must satisfy. There is no explicit loop in the query.</p><h3>SQL Server example 3 — Filter by score</h3><pre><code>SELECT Name, Score
+FROM Students
+WHERE Score &gt;= 80;</code></pre><p>SQL Server decides whether to scan rows or use an index. SQL has a logical processing model; the physical execution order can differ from the written clause order.</p></section>
+<section class="card" id="s6"><h2>6. Same Task in All Four Languages</h2><p>Find student ID 104 in a small collection. In C, C#, and Python we can explicitly iterate. In SQL, we specify a predicate and let the database choose a plan.</p><p>Use the same data everywhere: <code>101, 102, 103, 104, 105</code>. Target: <code>104</code>.</p><div class="cells" id="cells"></div><p aria-live="polite" id="status">Press Next comparison to simulate a linear search.</p><button onclick="nextStep()">Next comparison</button> <button onclick="resetSteps()">Reset</button><h3>C — Explicit loop</h3><pre><code>for (int i = 0; i &lt; 5; i++) {
+    if (ids[i] == 104) { /* found */ break; }
+}</code></pre><h3>Python — Explicit loop</h3><pre><code>for student_id in ids:
+    if student_id == 104:
+        break</code></pre><h3>C# — Explicit loop</h3><pre><code>foreach (int id in ids) {
+    if (id == 104) break;
+}</code></pre><h3>SQL Server — Desired result</h3><pre><code>SELECT Name FROM Students WHERE StudentID = 104;</code></pre><div class="note">The visualization models the explicit loops, not the guaranteed behavior of SQL Server. SQL Server may use a scan, an index seek, or another access path.</div></section>
+<section class="card" id="s7"><h2>7. SQL Indexes and Optimization Connection</h2><p>A query such as SELECT Name FROM Students WHERE StudentID = 104; expresses a logical request. SQL Server may choose a scan or an index seek based on indexes, estimated row counts, and costs. An index is not always faster, especially for tiny tables or queries returning many rows.</p><table><tr><th>Physical access</th><th>Simple meaning</th><th>When it can be useful</th></tr><tr><td>Table/clustered index scan</td><td>Read many or all rows and evaluate conditions.</td><td>Small tables; large portions of a table needed.</td></tr><tr><td>Index seek</td><td>Use an index to navigate to matching key range(s).</td><td>Selective predicates and suitable indexes.</td></tr></table><h3>Create table and test in SQL Server</h3><pre><code>CREATE TABLE Students (
+    StudentID INT PRIMARY KEY,
+    Name VARCHAR(30),
+    Score INT
+);
+INSERT INTO Students (StudentID, Name, Score) VALUES
+(101, 'Asha', 90),
+(102, 'Ben', 72),
+(103, 'Cara', 85),
+(104, 'Dev', 88),
+(105, 'Eli', 65);
+
+SELECT Name FROM Students WHERE StudentID = 104;</code></pre><p><b>Note:</b> In SQL Server, a primary key commonly creates an index automatically. With five rows, the optimizer may still choose a scan. To inspect the real plan in SQL Server Management Studio, enable <b>Include Actual Execution Plan</b> (Ctrl+M), run the SELECT, and inspect the plan. Do not promise that a seek will appear.</p><p><b>Logical request:</b> “Return the name for ID 104.” <b>Physical plan:</b> SQL Server's chosen operators to produce that result.</p></section>
+<section class="card" id="s8"><h2>8. Guided Comparison and Check Your Understanding</h2><p>Use the questions and revealed answers to discuss what the programmer controls and what the runtime or database engine controls.</p><details><summary>Question 1: Is Python only object-oriented?</summary><p>No. Python supports procedural, object-oriented, and functional programming. A simple loop is procedural-style Python.</p></details><details><summary>Question 2: Does C# require a class for every search?</summary><p>No. C# can use a foreach loop or a higher-level method such as Contains. C# is multi-paradigm.</p></details><details><summary>Question 3: What is the key distinction between a loop and SQL WHERE?</summary><p>The loop explicitly describes iteration; SQL WHERE states a filtering condition and leaves the physical access method to the optimizer.</p></details><details><summary>Question 5: Is SQL always declarative?</summary><p>SQL queries are predominantly declarative. SQL Server's T-SQL also includes procedural constructs such as IF and WHILE.</p></details></section>
+<script>const ids=[101,102,103,104,105];let pos=-1;function draw(){document.getElementById('cells').innerHTML=ids.map((v,i)=>`<div class="cell ${i===pos?(v===104?'found':'active'):''}">Index ${i}<br><b>${v}</b></div>`).join('')}function nextStep(){if(pos>=3)return;pos++;draw();document.getElementById('status').textContent=`Comparison ${pos+1}: ${ids[pos]} ${ids[pos]===104?'= 104 → Found! Stop.':'≠ 104 → Continue.'}`}function resetSteps(){pos=-1;draw();document.getElementById('status').textContent='Press Next comparison to simulate a linear search.'}draw();</script></html>
