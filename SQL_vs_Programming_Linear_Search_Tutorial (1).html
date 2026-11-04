@@ -1,0 +1,74 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>SQL Queries vs Linear Search in C, Python and C#</title><style>body{font:16px/1.55 system-ui,Arial;max-width:1050px;margin:30px auto;padding:0 22px;color:#172235;background:#f7f9fc}h1,h2,h3{color:#123b65}section{background:white;border:1px solid #dce4ef;border-radius:12px;padding:20px 25px;margin:18px 0}pre{background:#142238;color:#eef5ff;padding:16px;border-radius:8px;overflow:auto;white-space:pre}table{border-collapse:collapse;width:100%;margin:12px 0}th,td{border:1px solid #ccd8e5;padding:9px;text-align:left}th{background:#e9f1fb}.note{background:#eaf6ef;border-left:4px solid #24855c;padding:12px}.warn{background:#fff4dc;border-left:4px solid #d69a22;padding:12px}button{background:#175d9c;color:white;border:0;border-radius:7px;padding:9px 14px;cursor:pointer;margin:4px}input{padding:8px;width:100px} .cells{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.cell{border:2px solid #b7c8dd;border-radius:8px;min-width:85px;padding:12px;text-align:center;background:#f1f5fa}.cell.active{background:#ffe7aa;border-color:#dd9400}.cell.found{background:#b8f1c9;border-color:#1b8b48}.small{font-size:13px;color:#52647a}details{border:1px solid #d8e1ec;padding:12px;border-radius:8px;margin:10px 0}summary{cursor:pointer;font-weight:600}.cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:720px){.cols{grid-template-columns:1fr}}@media print{button,input{display:none}section{break-inside:avoid}body{background:white}}</style></head><body><h1>Linear Search vs SQL Server Queries</h1><p><strong>Programming Language Design</strong></p><p>One small student dataset connects explicit search loops in C, Python, and C# to declarative SQL queries, indexes, and execution plans.</p><section><h2>Learning objectives</h2><ol><li>Review <code>SELECT</code>, <code>FROM</code>, and <code>WHERE</code>.</li><li>Trace linear search in C, Python, and C#.</li><li>Distinguish <em>what result to retrieve</em> from <em>how to retrieve it</em>.</li><li>Explain table scans, index scans, index seeks, and the optimizer's role.</li><li>Read a basic SQL Server execution plan and test an index.</li></ol></section><section><h2>1. One dataset, one question</h2><p>Suppose a college maintains these student records:</p><table><thead><tr><th>Position</th><th>StudentID</th><th>Name</th><th>Major</th></tr></thead><tbody><tr><td>0</td><td>101</td><td>Ana</td><td>CS</td></tr><tr><td>1</td><td>102</td><td>Ben</td><td>Math</td></tr><tr><td>2</td><td>103</td><td>Cara</td><td>CS</td></tr><tr><td>3</td><td>104</td><td>Dev</td><td>Physics</td></tr><tr><td>4</td><td>105</td><td>Eva</td><td>CS</td></tr></tbody></table><p><strong>Question:</strong> Find the student whose ID is <strong>104</strong>. Expected result: <strong>Dev</strong>.</p><p class="note">The data is intentionally small. The purpose is to compare language design and search behavior, not to benchmark performance.</p></section><section><h2>2. Interactive linear search: trace each comparison</h2><p>Linear search examines elements in sequence until it finds a match or reaches the end.</p><label>Target StudentID: <input type="number" id="target" value="104"></label><button onclick="resetTrace()">Reset</button><button onclick="nextStep()">Next comparison</button><button onclick="runAll()">Run to completion</button><div class="cells" id="cells"></div><p id="status" aria-live="polite"></p><p class="small">Change the target to 101, 105, or 999 and reset to compare best-case, last-position, and missing-record searches.</p></section><section><h2>3. C: write the search steps explicitly</h2><pre><code>#include &lt;stdio.h&gt;
+
+int main(void) {
+    int ids[] = {101, 102, 103, 104, 105};
+    const char *names[] = {"Ana", "Ben", "Cara", "Dev", "Eva"};
+    int target = 104;
+    int found = 0;
+
+    for (int i = 0; i &lt; 5; i++) {
+        if (ids[i] == target) {
+            printf("Found: %s\n", names[i]);
+            found = 1;
+            break;
+        }
+    }
+    if (!found) printf("Student not found\n");
+    return 0;
+}</code></pre><p><strong>Trace:</strong> Compare 101 → 102 → 103 → 104; stop on the fourth comparison. The programmer specifies the loop, condition, and stopping rule.</p></section><section><h2>4. Python: the same algorithm with shorter syntax</h2><pre><code>students = [
+    (101, "Ana"), (102, "Ben"), (103, "Cara"),
+    (104, "Dev"), (105, "Eva")
+]
+target = 104
+found = False
+
+for student_id, name in students:
+    if student_id == target:
+        print("Found:", name)
+        found = True
+        break
+
+if not found:
+    print("Student not found")</code></pre><p><strong>Trace:</strong> Python still checks records in order. The syntax changes, but the explicit algorithm is the same.</p></section><section><h2>5. C#: the same explicit loop</h2><pre><code>using System;
+
+class Program {
+    static void Main() {
+        int[] ids = {101, 102, 103, 104, 105};
+        string[] names = {"Ana", "Ben", "Cara", "Dev", "Eva"};
+        int target = 104;
+        bool found = false;
+
+        for (int i = 0; i &lt; ids.Length; i++) {
+            if (ids[i] == target) {
+                Console.WriteLine("Found: " + names[i]);
+                found = true;
+                break;
+            }
+        }
+        if (!found) Console.WriteLine("Student not found");
+    }
+}</code></pre><p><strong>Trace:</strong> The loop controls the search order, the condition checks equality, and <code>break</code> ends the search when the record is found.</p></section><section><h2>6. SQL Server: describe the result, not the loop</h2><p>Create the same records in SQL Server Management Studio (SSMS):</p><pre><code>DROP TABLE IF EXISTS dbo.StudentDemo;
+CREATE TABLE dbo.StudentDemo (
+    StudentID INT NOT NULL,
+    StudentName VARCHAR(40) NOT NULL,
+    Major VARCHAR(40) NOT NULL
+);
+
+INSERT INTO dbo.StudentDemo (StudentID, StudentName, Major)
+VALUES (101, 'Ana', 'CS'),
+       (102, 'Ben', 'Math'),
+       (103, 'Cara', 'CS'),
+       (104, 'Dev', 'Physics'),
+       (105, 'Eva', 'CS');
+
+SELECT StudentID, StudentName
+FROM dbo.StudentDemo
+WHERE StudentID = 104;</code></pre><table><tr><th>SQL clause</th><th>Meaning</th></tr><tr><td><code>SELECT StudentID, StudentName</code></td><td>Which columns should be returned?</td></tr><tr><td><code>FROM dbo.StudentDemo</code></td><td>Which table contains the data?</td></tr><tr><td><code>WHERE StudentID = 104</code></td><td>Which rows qualify?</td></tr></table><p><strong>Result:</strong> <code>104 | Dev</code>.</p><p class="note"><strong>Important:</strong> SQL does not promise to check rows in insertion order. It describes the required result; SQL Server chooses a physical method. Without <code>ORDER BY</code>, result ordering is not guaranteed.</p></section><section><h2>7. Side-by-side comparison</h2><table><tr><th>Question</th><th>C / Python / C# explicit loop</th><th>SQL Server</th></tr><tr><td>What do you specify?</td><td>Iteration and comparisons</td><td>Desired rows and columns</td></tr><tr><td>Who decides search strategy?</td><td>Programmer, for this loop</td><td>Query optimizer</td></tr><tr><td>How does it stop?</td><td><code>break</code> on first match</td><td>Depends on plan and query semantics</td></tr><tr><td>Is ordering implied?</td><td>Array/list iteration follows element order</td><td>No output order without <code>ORDER BY</code></td></tr><tr><td>Can multiple records match?</td><td>This example stops at the first</td><td>All qualifying rows are returned unless restricted</td></tr></table><p class="warn">A table scan is conceptually similar to checking records one by one, but it is <strong>not identical</strong> to a source-code linear search loop. SQL Server uses pages, operators, parallelism, and other engine mechanisms.</p></section><section><h2>8. SQL Server indexes: why the physical method can change</h2><div class="cols"><div><h3>Without a suitable index</h3><div class="cells"><div class="cell">101</div><div class="cell">102</div><div class="cell">103</div><div class="cell found">104</div><div class="cell">105</div></div><p>The engine may choose a <strong>Table Scan</strong> for a heap, or a <strong>Clustered Index Scan</strong> if the table has a clustered index.</p></div><div><h3>With a useful index</h3><p style="text-align:center;border:2px solid #aac7e2;border-radius:8px;padding:15px">Index on StudentID<br>101 · 102 · 103 · <strong>104 → Dev</strong> · 105</p><p>An <strong>Index Seek</strong> may navigate to the matching key instead of scanning all entries.</p></div></div><p>Run this SQL to create a nonclustered index:</p><pre><code>CREATE NONCLUSTERED INDEX IX_StudentDemo_StudentID
+ON dbo.StudentDemo (StudentID);
+
+SELECT StudentID, StudentName
+FROM dbo.StudentDemo
+WHERE StudentID = 104;</code></pre><p>The optimizer may use an Index Seek plus a lookup for <code>StudentName</code>, or it may choose a scan. A five-row table is too small to reliably demonstrate a seek.</p><p><strong>Covering-index option:</strong> For a larger experiment, an index with <code>INCLUDE (StudentName)</code> can provide the name directly from the index.</p><pre><code>DROP INDEX IX_StudentDemo_StudentID ON dbo.StudentDemo;
+CREATE NONCLUSTERED INDEX IX_StudentDemo_StudentID
+ON dbo.StudentDemo (StudentID)
+INCLUDE (StudentName);</code></pre><p><strong>Why not always seek?</strong> A scan can be cheaper for tiny tables, queries that return many rows, or situations where a seek would require many expensive lookups. Indexes also have storage and update costs.</p></section><section><h2>9. Query optimizer: logical request vs physical execution plan</h2><p><strong>Logical request:</strong> “Return the ID and name of students with StudentID = 104.”</p><p><strong>Optimizer:</strong> Estimates candidate plan costs using available indexes, statistics, and other information.</p><p><strong>Physical plan:</strong> The actual operators selected to produce the rows, such as Table Scan, Index Scan, Index Seek, or Key Lookup.</p><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="cell">SELECT / FROM / WHERE</span><strong>→</strong><span class="cell">Query optimizer</span><strong>→</strong><span class="cell">Execution plan</span><strong>→</strong><span class="cell found">Result: Dev</span></div><h3>View the execution plan in SSMS</h3><ol><li>Open a new query window and run the setup script.</li><li>Click <strong>Include Actual Execution Plan</strong> (or press Ctrl+M).</li><li>Execute the SELECT statement.</li><li>Open the <strong>Execution Plan</strong> tab and inspect the operator names.</li><li>Compare the plan before and after adding the index.</li></ol><p class="warn">Do not require a specific operator in this tiny example. Execution plans are cost-based and can vary with SQL Server version, statistics, row counts, and schema.</p></section><script>const ids=[101,102,103,104,105];let pos=0,done=false;function render(active=-1,found=false){document.getElementById('cells').innerHTML=ids.map((id,i)=>`<div class="cell ${i===active?(found?'found':'active'):''}"><div class="small">index ${i}</div><strong>${id}</strong></div>`).join('')}function resetTrace(){pos=0;done=false;render();document.getElementById('status').textContent='Ready. Click Next comparison.'}function nextStep(){if(done)return;const t=Number(document.getElementById('target').value);if(pos>=ids.length){done=true;document.getElementById('status').textContent='Not found after 5 comparisons.';return}let match=ids[pos]===t;render(pos,match);document.getElementById('status').textContent=`Comparison ${pos+1}: ${ids[pos]} ${match?'=':'≠'} ${t}. ${match?'Match found!':'Continue searching.'}`;pos++;if(match){done=true}else if(pos===ids.length){done=true;document.getElementById('status').textContent+=' End of list: not found.'}}function runAll(){while(!done)nextStep()}resetTrace();</script></body></html>
