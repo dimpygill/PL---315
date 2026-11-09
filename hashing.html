@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Understanding Hash Tables & Dictionaries</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              900: '#1e3a8a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    
+    .tab-active {
+      border-bottom: 3px solid #2563eb;
+      color: #2563eb;
+      font-weight: 600;
+    }
+
+    /* Pulse & Highlight animations for Visualizer */
+    @keyframes highlightPulse {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+      50% { transform: scale(1.03); box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+    }
+    .slot-highlight {
+      animation: highlightPulse 1.2s ease-in-out infinite;
+    }
+
+    @keyframes insertPop {
+      0% { opacity: 0; transform: translateY(-10px) scale(0.9); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .item-inserted {
+      animation: insertPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+
+  <!-- Header / Navigation -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center text-white shadow-md">
+          <i class="fa-solid fa-[#fa-hashtag] fa-hashtag text-xl"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold text-slate-900 leading-tight">Hash Tables & Dictionaries</h1>
+        </div>
+      </div>
+
+      <!-- Nav Links -->
+      <nav class="hidden md:flex space-x-1 text-sm font-medium">
+        <button onclick="scrollToSection('analogy')" class="px-3 py-2 text-slate-600 hover:text-brand-600 rounded-lg transition-colors">Analogy</button>
+        <button onclick="scrollToSection('hashing')" class="px-3 py-2 text-slate-600 hover:text-brand-600 rounded-lg transition-colors">Hash Functions</button>
+        <button onclick="scrollToSection('collisions')" class="px-3 py-2 text-slate-600 hover:text-brand-600 rounded-lg transition-colors">Collisions</button>
+        <button onclick="scrollToSection('resizing')" class="px-3 py-2 text-slate-600 hover:text-brand-600 rounded-lg transition-colors">Resizing</button>
+        <button onclick="scrollToSection('languages')" class="px-3 py-2 text-slate-600 hover:text-brand-600 rounded-lg transition-colors">Languages Code</button>
+      </nav>
+
+      <a href="#visualizer" class="inline-flex items-center space-x-2 px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold transition-all shadow-sm">
+        <i class="fa-solid fa-[#fa-play] fa-play text-xs"></i>
+        <span>Try Visualizer</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-b from-white to-slate-100 border-b border-slate-200 py-12 lg:py-16">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 text-center">
+      <span class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-brand-50 text-brand-700 text-xs font-semibold uppercase tracking-wider mb-4 border border-brand-100">
+        <i class="fa-solid fa-[#fa-graduation-cap] fa-graduation-cap"></i> Data Structures 101
+      </span>
+      <h1 class="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
+        Hash Tables & Dictionaries
+      </h1>
+
+      <div class="mt-8 flex flex-wrap justify-center gap-4 text-sm font-medium">
+        <div class="flex items-center space-x-2 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm">
+          <i class="fa-solid fa-[#fa-bolt] fa-bolt text-amber-500"></i>
+          <span><b>Instant Lookup:</b> O(1) Speed</span>
+        </div>
+        <div class="flex items-center space-x-2 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm">
+          <i class="fa-solid fa-[#fa-key] fa-key text-brand-600"></i>
+          <span><b>Key-Value Pairs:</b> Name → Phone</span>
+        </div>
+        <div class="flex items-center space-x-2 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm">
+          <i class="fa-solid fa-[#fa-code-branch] fa-code-branch text-emerald-600"></i>
+          <span><b>4 Languages:</b> C, Python, C#, SQL</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Layout -->
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
+
+    <!-- 1. Real-World Analogy -->
+    <section id="analogy" class="scroll-mt-20">
+      <div class="border-l-4 border-brand-600 pl-4 mb-6">
+        <h2 class="text-2xl font-bold text-slate-900">1. What is a Hash Table? (Real-World Analogy)</h2>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8">
+        <!-- Text Explanation -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div>
+            <h3 class="text-lg font-semibold text-slate-900 mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-[#fa-box-archive] fa-box-archive text-brand-600"></i> The Mailbox / Gym Locker System
+            </h3>
+            <p class="text-slate-600 text-sm leading-relaxed mb-4">
+              Imagine a post office with 10 numbered mailboxes (0 through 9). Instead of searching every mailbox one by one to find your package, a smart machine takes your <b>Name</b> and instantly tells you: <i>"Your package belongs in Box #4!"</i>
+            </p>
+            <p class="text-slate-600 text-sm leading-relaxed">
+              That's exactly what a <b>Hash Table</b> does:
+            </p>
+            <ul class="mt-3 space-y-2 text-sm text-slate-700">
+              <li class="flex items-start gap-2">
+                <span class="inline-block px-2 py-0.5 rounded bg-brand-100 text-brand-700 font-mono text-xs mt-0.5">Key</span>
+                <span><b>The label you look up with</b> (e.g., student name <code>"Alice"</code>, username, or word).</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="inline-block px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 font-mono text-xs mt-0.5">Value</span>
+                <span><b>The actual data stored</b> (e.g., phone number <code>555-0199</code> or score <code>95</code>).</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="inline-block px-2 py-0.5 rounded bg-amber-100 text-amber-700 font-mono text-xs mt-0.5">Hash Function</span>
+                <span><b>The formula machine</b> that calculates which box number (index) to place the data in.</span>
+              </li>
+            </ul>
+          </div>
+          <div class="mt-6 p-3 bg-amber-50 rounded-xl border border-amber-200 text-amber-800 text-xs flex items-center gap-2">
+            <i class="fa-solid fa-[#fa-lightbulb] fa-lightbulb text-amber-600 text-base"></i>
+            <span><b>Why is it fast?</b> Searching a normal list takes time (O(n)). A hash table jumps directly to the right box in 1 step (O(1) average time)!</span>
+          </div>
+        </div>
+
+        <!-- Interactive Analogy Graphic -->
+        <div class="bg-slate-900 text-white p-6 rounded-2xl shadow-md flex flex-col justify-center">
+          <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">Visualizing the Lookup Process</h4>
+          <div class="space-y-4">
+            <!-- Step 1 -->
+            <div class="flex items-center justify-between p-3 bg-slate-800/80 rounded-xl border border-slate-700">
+              <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 font-bold flex items-center justify-center text-xs">KEY</span>
+                <span class="font-mono text-sm text-emerald-400">"Alice"</span>
+              </div>
+              <i class="fa-solid fa-[#fa-arrow-right] fa-arrow-right text-slate-500"></i>
+              <div class="text-right">
+                <span class="text-xs text-slate-400 block">Input String</span>
+              </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="flex items-center justify-between p-3 bg-slate-800/80 rounded-xl border border-slate-700">
+              <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center text-xs">HASH</span>
+                <span class="font-mono text-xs text-amber-300">hash("Alice") % 5</span>
+              </div>
+              <i class="fa-solid fa-[#fa-arrow-right] fa-arrow-right text-slate-500"></i>
+              <div class="text-right">
+                <span class="font-mono text-sm font-bold text-amber-400">Index = 2</span>
+              </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="flex items-center justify-between p-3 bg-slate-800/80 rounded-xl border border-slate-700">
+              <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 font-bold flex items-center justify-center text-xs">ARRAY</span>
+                <span class="font-mono text-sm text-white">Box [2]</span>
+              </div>
+              <i class="fa-solid fa-[#fa-check] fa-check text-emerald-400"></i>
+              <div class="text-right">
+                <span class="font-mono text-xs text-emerald-300 font-semibold">Stores: "Alice": 95</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Hash Functions & Lookup -->
+    <section id="hashing" class="scroll-mt-20">
+      <div class="border-l-4 border-brand-600 pl-4 mb-6">
+        <h2 class="text-2xl font-bold text-slate-900">2. How Hash Functions Work</h2>
+        <p class="text-slate-600 text-sm">Converting text into a valid array index step-by-step.</p>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+        <p class="text-slate-600 text-sm leading-relaxed">
+          An array only understands numerical indexes like <code>0, 1, 2, 3</code>. Since keys can be text like <code>"banana"</code> or <code>"user_99"</code>, we use a <b>Hash Function</b> to convert text into numbers.
+        </p>
+
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <div class="w-7 h-7 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center font-bold text-xs mb-2">1</div>
+            <h4 class="font-semibold text-slate-800 text-sm">Convert Characters to ASCII</h4>
+            <p class="text-xs text-slate-500 mt-1">Each character has a hidden number value. E.g., 'C' = 67, 'a' = 97, 't' = 116.</p>
+          </div>
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <div class="w-7 h-7 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center font-bold text-xs mb-2">2</div>
+            <h4 class="font-semibold text-slate-800 text-sm">Sum/Mix the Numbers</h4>
+            <p class="text-xs text-slate-500 mt-1">Add or multiply character values together to produce a big total integer (Hash Code).</p>
+          </div>
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <div class="w-7 h-7 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center font-bold text-xs mb-2">3</div>
+            <h4 class="font-semibold text-slate-800 text-sm">Fit Inside Array Size (%)</h4>
+            <p class="text-xs text-slate-500 mt-1">Use Modulo operator <code>% Capacity</code> so the number fits within array bounds.</p>
+          </div>
+        </div>
+
+        <!-- Formula Box -->
+        <div class="p-4 bg-slate-900 rounded-xl text-center font-mono text-sm text-slate-200">
+          <span class="text-slate-400">Array Index = </span>
+          <span class="text-amber-400 font-semibold">( Hash Code of Key )</span> 
+          <span class="text-slate-400"> % </span> 
+          <span class="text-emerald-400 font-semibold">( Total Table Capacity )</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Collisions & Solutions -->
+    <section id="collisions" class="scroll-mt-20">
+      <div class="border-l-4 border-brand-600 pl-4 mb-6">
+        <h2 class="text-2xl font-bold text-slate-900">3. What is a Collision & How Do We Fix It?</h2>
+        <p class="text-slate-600 text-sm">When two different keys land in the exact same array slot.</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <!-- Separate Chaining -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-bold text-slate-900">1. Separate Chaining (Linked Lists)</h3>
+              <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-semibold">Used by C & C#</span>
+            </div>
+            <p class="text-slate-600 text-xs leading-relaxed mb-4">
+              Instead of holding just 1 item, every slot in the array points to a <b>Linked List</b> (a chain of items). If two items hash to Slot #2, they are simply chained together!
+            </p>
+            <div class="bg-slate-100 p-3 rounded-xl space-y-2">
+              <div class="flex items-center gap-2 text-xs font-mono">
+                <span class="w-12 text-slate-500">Slot [2]:</span>
+                <span class="bg-white px-2 py-1 rounded border border-slate-300 text-brand-700 shadow-sm font-semibold">"Cat": 5</span>
+                <span class="text-slate-400">➜</span>
+                <span class="bg-white px-2 py-1 rounded border border-slate-300 text-brand-700 shadow-sm font-semibold">"Dog": 8</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 text-xs text-slate-500">
+            <b>Pros:</b> Easy to grow, handles many collisions.<br>
+            <b>Cons:</b> Uses extra memory for list pointers.
+          </div>
+        </div>
+
+        <!-- Open Addressing -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-bold text-slate-900">2. Open Addressing (Linear Probing)</h3>
+              <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-semibold">Used by Python</span>
+            </div>
+            <p class="text-slate-600 text-xs leading-relaxed mb-4">
+              If your assigned slot is already taken by another item, look for the <b>next available empty slot</b> (Slot + 1, Slot + 2, etc.) right in the main array.
+            </p>
+            <div class="bg-slate-100 p-3 rounded-xl space-y-2">
+              <div class="flex items-center gap-2 text-xs font-mono">
+                <span class="w-12 text-slate-500">Slot [2]:</span>
+                <span class="bg-emerald-100 px-2 py-1 rounded text-emerald-800 border border-emerald-300 font-semibold">"Cat": 5</span>
+                <span class="text-xs text-slate-400">(Occupied!)</span>
+              </div>
+              <div class="flex items-center gap-2 text-xs font-mono">
+                <span class="w-12 text-slate-500">Slot [3]:</span>
+                <span class="bg-purple-100 px-2 py-1 rounded text-purple-800 border border-purple-300 font-semibold">"Dog": 8</span>
+                <span class="text-xs text-slate-400">(Placed in next open slot)</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 text-xs text-slate-500">
+            <b>Pros:</b> Great CPU cache efficiency, no linked list pointers.<br>
+            <b>Cons:</b> Array can get crowded quickly if full.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Resizing & Capacity -->
+    <section id="resizing" class="scroll-mt-20">
+      <div class="border-l-4 border-brand-600 pl-4 mb-6">
+        <h2 class="text-2xl font-bold text-slate-900">4. Resizing & Load Factor</h2>
+        <p class="text-slate-600 text-sm">What happens when the Hash Table gets full?</p>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <div>
+            <h3 class="font-bold text-slate-800 text-sm">Load Factor ($\alpha$) Formula</h3>
+            <p class="text-xs text-slate-500">Measures how "crowded" the hash table is.</p>
+          </div>
+          <div class="font-mono bg-white px-4 py-2 rounded-lg border border-slate-300 text-brand-700 font-bold text-sm">
+            Load Factor = ( Number of Elements ) / ( Total Array Capacity )
+          </div>
+        </div>
+
+        <p class="text-slate-600 text-sm leading-relaxed">
+          When the Load Factor exceeds a threshold (typically <b>0.70 or 70%</b>), search speeds begin to slow down because collisions become frequent.
+        </p>
+
+        <div class="grid sm:grid-cols-3 gap-4 text-center">
+          <div class="p-4 bg-amber-50 rounded-xl border border-amber-200">
+            <span class="text-xs text-amber-700 font-semibold uppercase">Trigger Step 1</span>
+            <p class="text-sm font-bold text-amber-900 mt-1">Table reaches 70% full</p>
+          </div>
+          <div class="p-4 bg-blue-50 rounded-xl border border-blue-200">
+            <span class="text-xs text-blue-700 font-semibold uppercase">Trigger Step 2</span>
+            <p class="text-sm font-bold text-blue-900 mt-1">Double Capacity (e.g. 4 → 8)</p>
+          </div>
+          <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+            <span class="text-xs text-emerald-700 font-semibold uppercase">Trigger Step 3</span>
+            <p class="text-sm font-bold text-emerald-900 mt-1">Rehash all old keys into new table</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INTERACTIVE VISUALIZER SECTION -->
+    <section id="visualizer" class="scroll-mt-20">
+      <div class="border-l-4 border-brand-600 pl-4 mb-6">
+        <h2 class="text-2xl font-bold text-slate-900">5. Interactive Hash Table Simulator</h2>
+        <p class="text-slate-600 text-sm">Add items, watch hashing steps, trigger collisions, and inspect buckets live!</p>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden">
+        <!-- Visualizer Top Control Bar -->
+        <div class="p-6 bg-slate-900 text-white space-y-4">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+            <div>
+              <h3 class="text-lg font-bold text-white">Live Simulator Controls</h3>
+              <p class="text-xs text-slate-400">Choose a collision strategy and add key-value pairs.</p>
+            </div>
+            
+            <!-- Strategy Selector -->
+            <div class="flex items-center space-x-2 bg-slate-800 p-1.5 rounded-xl border border-slate-700">
+              <label class="text-xs text-slate-400 font-medium px-2">Collision Mode:</label>
+              <select id="strategySelect" onchange="resetSimulator()" class="bg-slate-900 text-white text-xs font-semibold py-1.5 px-3 rounded-lg border border-slate-700 focus:outline-none focus:border-brand-500">
+                <option value="chaining">Separate Chaining (Lists)</option>
+                <option value="open">Open Addressing (Linear Probing)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Input Controls -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1">Key (Text)</label>
+              <input type="text" id="inputKey" placeholder="e.g. Alice" value="Alice" class="w-full bg-slate-800 text-white text-sm px-3 py-2 rounded-xl border border-slate-700 focus:outline-none focus:border-brand-500 font-mono">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-400 mb-1">Value (Data)</label>
+              <input type="text" id="inputValue" placeholder="e.g. 95" value="95" class="w-full bg-slate-800 text-white text-sm px-3 py-2 rounded-xl border border-slate-700 focus:outline-none focus:border-brand-500 font-mono">
+            </div>
+            <div class="flex items-end gap-2">
+              <button onclick="insertItem()" class="flex-1 bg-brand-600 hover:bg-brand-500 text-white font-semibold text-sm py-2 px-4 rounded-xl transition-all shadow-md">
+                <i class="fa-solid fa-[#fa-plus] fa-plus mr-1"></i> Insert
+              </button>
+              <button onclick="resetSimulator()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm py-2 px-3 rounded-xl border border-slate-700 transition-all" title="Reset Table">
+                <i class="fa-solid fa-[#fa-rotate-right] fa-rotate-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status & Stats Banner -->
+        <div class="bg-slate-100 border-b border-slate-200 px-6 py-3 flex flex-wrap items-center justify-between gap-4 text-xs font-medium">
+          <div class="flex items-center space-x-4">
+            <div><span class="text-slate-500">Total Capacity:</span> <b id="statCapacity" class="text-slate-900 font-mono">5</b></div>
+            <div><span class="text-slate-500">Items Count:</span> <b id="statCount" class="text-slate-900 font-mono">0</b></div>
+            <div><span class="text-slate-500">Load Factor:</span> <b id="statLoad" class="text-slate-900 font-mono">0.00</b></div>
+          </div>
+
+          <!-- Hash Formula Display -->
+          <div id="stepExplanation" class="bg-white px-3 py-1.5 rounded-lg border border-slate-300 text-brand-700 font-mono">
+            Ready to insert items.
+          </div>
+        </div>
+
+        <!-- Bucket Array Container -->
+        <div class="p-6 bg-slate-50">
+          <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">Array Storage Buckets</h4>
+          
+          <div id="bucketContainer" class="grid grid-cols-1 sm:grid-cols-5 gap-4">
+            <!-- Dynamically populated buckets will render here -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. Language Implementation Comparison (Code Snippets) -->
+    <section id="languages" class="scroll-mt-20">
+      <div class="border-l-4 border-brand-600 pl-4 mb-6">
+        <h2 class="text-2xl font-bold text-slate-900">6. Language Implementations (C, Python, C#, SQL)</h2>
+        <p class="text-slate-600 text-sm">Compare syntax and underlying mechanics across languages.</p>
+      </div>
+
+      <!-- Language Tabs Header -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="flex border-b border-slate-200 bg-slate-50 overflow-x-auto">
+          <button onclick="switchTab('c-code')" id="tab-c-code" class="tab-btn px-6 py-3 text-sm font-medium text-slate-600 hover:text-brand-600 tab-active flex items-center gap-2 whitespace-nowrap">
+            <i class="fa-solid fa-[#fa-c] fa-c text-blue-600"></i> C Language
+          </button>
+          <button onclick="switchTab('python-code')" id="tab-python-code" class="tab-btn px-6 py-3 text-sm font-medium text-slate-600 hover:text-brand-600 flex items-center gap-2 whitespace-nowrap">
+            <i class="fa-brands fa-[#fa-python] fa-python text-amber-500"></i> Python (dict)
+          </button>
+          <button onclick="switchTab('csharp-code')" id="tab-csharp-code" class="tab-btn px-6 py-3 text-sm font-medium text-slate-600 hover:text-brand-600 flex items-center gap-2 whitespace-nowrap">
+            <i class="fa-solid fa-[#fa-code] fa-code text-purple-600"></i> C# (Dictionary)
+          </button>
+          <button onclick="switchTab('sql-code')" id="tab-sql-code" class="tab-btn px-6 py-3 text-sm font-medium text-slate-600 hover:text-brand-600 flex items-center gap-2 whitespace-nowrap">
+            <i class="fa-solid fa-[#fa-database] fa-database text-emerald-600"></i> MS SQL (In-Memory Hash Index)
+          </button>
+        </div>
+
+        <!-- Code Content Sections -->
+        <div class="p-6 bg-slate-900 text-white">
+
+          <!-- C Code -->
+          <div id="c-code" class="tab-content">
+            <div class="flex items-center justify-between mb-3 text-xs text-slate-400">
+              <span><b>C:</b> Low-level manual hash table with Separate Chaining struct nodes.</span>
+              <button onclick="copyCode('c-snippet')" class="hover:text-white transition-colors bg-slate-800 px-3 py-1 rounded border border-slate-700">
+                <i class="fa-regular fa-[#fa-copy] fa-copy"></i> Copy
+              </button>
+            </div>
+            <pre class="font-mono text-xs overflow-x-auto text-slate-200 leading-relaxed bg-slate-950 p-4 rounded-xl"><code id="c-snippet">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+
+// Linked List Node for Chaining
+typedef struct Node {
+    char *key;
+    int value;
+    struct Node *next;
+} Node;
+
+// Hash Table Structure
+typedef struct {
+    Node **buckets;
+    int capacity;
+} HashTable;
+
+// Simple Hash Function: Sum of character ASCII codes
+int hash(const char *key, int capacity) {
+    int sum = 0;
+    for (int i = 0; key[i] != '\0'; i++) {
+        sum += key[i];
+    }
+    return sum % capacity; // Fit within capacity
+}
+
+// Insert Key-Value Pair
+void insert(HashTable *table, const char *key, int value) {
+    int index = hash(key, table->capacity);
+    Node *newNode = malloc(sizeof(Node));
+    newNode->key = strdup(key);
+    newNode->value = value;
+    newNode->next = table->buckets[index];
+    table->buckets[index] = newNode; // Put at head of linked list
+}</code></pre>
+          </div>
+
+          <!-- Python Code -->
+          <div id="python-code" class="tab-content hidden">
+            <div class="flex items-center justify-between mb-3 text-xs text-slate-400">
+              <span><b>Python:</b> Built-in <code>dict</code> uses high-performance compact array open addressing.</span>
+              <button onclick="copyCode('python-snippet')" class="hover:text-white transition-colors bg-slate-800 px-3 py-1 rounded border border-slate-700">
+                <i class="fa-regular fa-[#fa-copy] fa-copy"></i> Copy
+              </button>
+            </div>
+            <pre class="font-mono text-xs overflow-x-auto text-slate-200 leading-relaxed bg-slate-950 p-4 rounded-xl"><code id="python-snippet"># Standard Python Dictionary (Hash Table under the hood)
+user_scores = {}
+
+# Insert Key-Value Pairs - O(1)
+user_scores["Alice"] = 95
+user_scores["Bob"] = 87
+
+# Lookup Value - O(1)
+print(user_scores.get("Alice"))  # Output: 95
+
+# Python dict preserves insertion order (Python 3.7+)
+for key, value in user_scores.items():
+    print(f"{key}: {value}")</code></pre>
+          </div>
+
+          <!-- C# Code -->
+          <div id="csharp-code" class="tab-content hidden">
+            <div class="flex items-center justify-between mb-3 text-xs text-slate-400">
+              <span><b>C#:</b> <code>Dictionary&lt;TKey, TValue&gt;</code> uses strongly typed parallel arrays.</span>
+              <button onclick="copyCode('csharp-snippet')" class="hover:text-white transition-colors bg-slate-800 px-3 py-1 rounded border border-slate-700">
+                <i class="fa-regular fa-[#fa-copy] fa-copy"></i> Copy
+              </button>
+            </div>
+            <pre class="font-mono text-xs overflow-x-auto text-slate-200 leading-relaxed bg-slate-950 p-4 rounded-xl"><code id="csharp-snippet">using System;
+using System.Collections.Generic;
+
+class Program {
+    static void Main() {
+        // Create strongly typed Hash Table
+        Dictionary&lt;string, int&gt; scores = new Dictionary&lt;string, int&gt;();
+
+        // Add elements
+        scores["Alice"] = 95;
+        scores.Add("Bob", 87);
+
+        // Safe lookup
+        if (scores.TryGetValue("Alice", out int score)) {
+            Console.WriteLine($"Alice's score: {score}");
+        }
+    }
+}</code></pre>
+          </div>
+
+          <!-- SQL Code -->
+          <div id="sql-code" class="tab-content hidden">
+            <div class="flex items-center justify-between mb-3 text-xs text-slate-400">
+              <span><b>MS SQL:</b> Uses <code>HASH INDEX</code> for In-Memory OLTP lookup tables.</span>
+              <button onclick="copyCode('sql-snippet')" class="hover:text-white transition-colors bg-slate-800 px-3 py-1 rounded border border-slate-700">
+                <i class="fa-regular fa-[#fa-copy] fa-copy"></i> Copy
+              </button>
+            </div>
+            <pre class="font-mono text-xs overflow-x-auto text-slate-200 leading-relaxed bg-slate-950 p-4 rounded-xl"><code id="sql-snippet">-- In-Memory Hash Index table creation in MS SQL Server
+CREATE TABLE dbo.UserScores
+(
+    UserId INT NOT NULL PRIMARY KEY NONCLUSTERED,
+    UserName NVARCHAR(50) NOT NULL,
+    Score INT NOT NULL,
+
+    -- Create Hash Index on UserName with fixed bucket count
+    INDEX IX_UserName_Hash NONCLUSTERED HASH (UserName)
+    WITH (BUCKET_COUNT = 1048576)
+)
+WITH (MEMORY_OPTIMIZED = ON, DURABILITY = SCHEMA_AND_DATA);</code></pre>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Quick Comparison Summary Table -->
+    <section class="scroll-mt-20">
+      <div class="border-l-4 border-brand-600 pl-4 mb-6">
+        <h2 class="text-2xl font-bold text-slate-900">7. Summary Comparison Matrix</h2>
+        <p class="text-slate-600 text-sm">Quick reference guide for students.</p>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-x-auto">
+        <table class="w-full text-left text-xs sm:text-sm">
+          <thead class="bg-slate-100 text-slate-700 font-semibold uppercase tracking-wider border-b border-slate-200">
+            <tr>
+              <th class="p-4">Language / Tool</th>
+              <th class="p-4">Structure Name</th>
+              <th class="p-4">Collision Strategy</th>
+              <th class="p-4">Average Search Speed</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 text-slate-600 font-medium">
+            <tr>
+              <td class="p-4 font-bold text-slate-900">C Language</td>
+              <td class="p-4 font-mono">Custom Struct Array</td>
+              <td class="p-4">Separate Chaining (Linked List)</td>
+              <td class="p-4 text-emerald-600 font-bold">O(1)</td>
+            </tr>
+            <tr>
+              <td class="p-4 font-bold text-slate-900">Python</td>
+              <td class="p-4 font-mono text-brand-600">dict</td>
+              <td class="p-4">Open Addressing (Compact Array)</td>
+              <td class="p-4 text-emerald-600 font-bold">O(1)</td>
+            </tr>
+            <tr>
+              <td class="p-4 font-bold text-slate-900">C# (.NET)</td>
+              <td class="p-4 font-mono text-purple-600">Dictionary&lt;K,V&gt;</td>
+              <td class="p-4">Array-backed Chaining</td>
+              <td class="p-4 text-emerald-600 font-bold">O(1)</td>
+            </tr>
+            <tr>
+              <td class="p-4 font-bold text-slate-900">MS SQL</td>
+              <td class="p-4 font-mono text-emerald-600">HASH INDEX</td>
+              <td class="p-4">Bucket Hashing (In-Memory Table)</td>
+              <td class="p-4 text-emerald-600 font-bold">O(1)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+
+    <!-- ADDITIONAL SQL SERVER INDEX VISUALIZER: original tutorial preserved -->
+    <section id="sql-index-comparison" class="scroll-mt-20">
+      <div class="border-l-4 border-brand-600 pl-4 mb-6">
+        <h2 class="text-2xl font-bold text-slate-900">8. SQL Server: B+ Tree Index vs. Hash Index — Interactive Visualizer</h2>
+        <p class="text-slate-600 text-sm">Compare how SQL Server finds usernames using an ordered nonclustered index or a memory-optimized nonclustered hash index.</p>
+      </div>
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-7 space-y-5">
+        <p class="text-sm text-slate-700">A regular <strong>nonclustered index</strong> keeps keys in sorted B+ Tree order. A <strong>nonclustered HASH index</strong> on a memory-optimized table maps keys to numbered buckets. Both support equality lookups; an ordered index also supports efficient range searches.</p>
+        <div class="overflow-x-auto"><table class="w-full text-sm text-left border-collapse"><thead><tr class="bg-blue-50"><th class="p-3 border">Feature</th><th class="p-3 border">B+ Tree</th><th class="p-3 border">Hash index</th></tr></thead><tbody><tr><td class="p-3 border">Organization</td><td class="p-3 border">Sorted keys in linked leaf pages</td><td class="p-3 border">Buckets with entry chains</td></tr><tr><td class="p-3 border">WHERE UserName = 'Cara'</td><td class="p-3 border">Seek to matching key</td><td class="p-3 border">Hash key, inspect bucket</td></tr><tr><td class="p-3 border">BETWEEN / ORDER BY</td><td class="p-3 border">Can use key order</td><td class="p-3 border">No key ordering benefit</td></tr><tr><td class="p-3 border">SQL Server storage</td><td class="p-3 border">Disk-based or memory-optimized</td><td class="p-3 border">Memory-optimized only</td></tr></tbody></table></div>
+        <div class="bg-slate-50 border rounded-xl p-4 space-y-3">
+          <div class="flex flex-wrap gap-3 items-end">
+            <label class="text-sm font-semibold">Query type<select id="sqlviz-mode" class="block mt-1 border rounded-lg px-3 py-2 bg-white"><option value="exact">Equality (=)</option><option value="range">Range (BETWEEN)</option></select></label>
+            <label class="text-sm font-semibold" id="sqlviz-target-wrap">Username<select id="sqlviz-target" class="block mt-1 border rounded-lg px-3 py-2 bg-white"><option>Ana</option><option>Ben</option><option selected>Cara</option><option>Dev</option><option>Eva</option><option>Mia</option><option>Sam</option><option>Zoe</option></select></label>
+            <label class="text-sm font-semibold hidden" id="sqlviz-from-wrap">From<select id="sqlviz-from" class="block mt-1 border rounded-lg px-3 py-2 bg-white"><option>Ana</option><option selected>Ben</option><option>Cara</option><option>Dev</option><option>Eva</option><option>Mia</option><option>Sam</option><option>Zoe</option></select></label>
+            <label class="text-sm font-semibold hidden" id="sqlviz-to-wrap">To<select id="sqlviz-to" class="block mt-1 border rounded-lg px-3 py-2 bg-white"><option>Ana</option><option>Ben</option><option>Cara</option><option>Dev</option><option>Eva</option><option selected>Mia</option><option>Sam</option><option>Zoe</option></select></label>
+            <button id="sqlviz-next" type="button" class="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded-lg text-sm font-semibold">Next step →</button>
+            <button id="sqlviz-reset" type="button" class="bg-slate-200 text-slate-800 px-4 py-2 rounded-lg text-sm font-semibold">Reset</button>
+          </div>
+          <pre id="sqlviz-query" class="bg-slate-900 text-green-200 text-xs p-3 rounded-lg overflow-x-auto"></pre>
+          <div id="sqlviz-status" aria-live="polite" class="bg-blue-50 border-l-4 border-blue-500 p-3 text-sm"></div>
+        </div>
+        <div class="grid md:grid-cols-2 gap-5">
+          <div class="border border-blue-200 bg-blue-50/40 rounded-xl p-4 space-y-3"><h3 class="font-bold text-blue-900">A. Ordered nonclustered index (B+ Tree)</h3><div id="sqlviz-tree" class="space-y-2"></div><p id="sqlviz-tree-note" class="text-xs text-slate-600"></p></div>
+          <div class="border border-emerald-200 bg-emerald-50/40 rounded-xl p-4 space-y-3"><h3 class="font-bold text-emerald-900">B. Nonclustered HASH index</h3><p class="text-xs text-slate-600">Eight buckets in this teaching example. SQL Server's actual hash function is different.</p><div id="sqlviz-hash" class="space-y-1"></div><p id="sqlviz-hash-note" class="text-xs text-slate-600"></p></div>
+        </div>
+        <div id="sqlviz-result" class="hidden bg-green-50 border border-green-200 rounded-xl p-4 text-sm"></div>
+        <div class="border-t pt-4 space-y-2"><h3 class="font-semibold">What is a bucket? Is it a page?</h3><p class="text-sm text-slate-700">A <strong>bucket</strong> is a slot in a hash index that references zero or more entries. A <strong>page</strong> is an 8 KB storage unit used in traditional SQL Server disk-based indexes. A memory-optimized hash index uses buckets in memory rather than traditional 8 KB index pages. When two keys map to the same bucket, SQL Server follows a chain and checks the actual key values.</p><p class="text-sm text-slate-700"><strong>BUCKET_COUNT = 1048576</strong> requests 1,048,576 hash buckets; it does not create 1,048,576 database pages. Unlike many application-level hash tables, a SQL Server memory-optimized hash index does not automatically resize its bucket array as rows are inserted.</p></div>
+        <details class="border rounded-lg p-3 text-sm"><summary class="font-semibold cursor-pointer">SQL Server example: create a memory-optimized hash index</summary><pre class="bg-slate-900 text-slate-100 rounded-lg p-4 mt-3 overflow-x-auto text-xs"><code>CREATE TABLE dbo.UserScores (
+    UserId INT NOT NULL PRIMARY KEY NONCLUSTERED,
+    UserName NVARCHAR(50) NOT NULL,
+    Score INT NOT NULL,
+    INDEX IX_UserName_Hash NONCLUSTERED HASH (UserName)
+        WITH (BUCKET_COUNT = 1048576)
+) WITH (MEMORY_OPTIMIZED = ON, DURABILITY = SCHEMA_AND_DATA);
+
+SELECT * FROM dbo.UserScores WHERE UserName = 'Cara';</code></pre><p class="mt-2 text-slate-600">Memory-optimized tables require the appropriate database configuration, including a MEMORY_OPTIMIZED_DATA filegroup for applicable SQL Server deployments. The optimizer determines the actual access path.</p></details>
+        <p class="text-xs text-slate-500">The diagram is conceptual, not a literal SQL Server execution plan. B+ Tree pages, hash buckets, search costs, and collisions are simplified. In practice the query optimizer can select different plans.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-8 mt-16 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4">
+    </div>
+  </footer>
+
+  <!-- Visualizer Logic JavaScript -->
+  <script>
+    // State of Simulator
+    let capacity = 5;
+    let itemsCount = 0;
+    let buckets = Array.from({ length: capacity }, () => []);
+
+    // Simple deterministic hash function for demo
+    function hashFunction(keyStr, cap) {
+      let sum = 0;
+      for (let i = 0; i < keyStr.length; i++) {
+        sum += keyStr.charCodeAt(i);
+      }
+      return sum % cap;
+    }
+
+    // Smooth Scroll function
+    function scrollToSection(id) {
+      document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Render the visualizer UI
+    function renderBuckets(highlightIndex = -1) {
+      const container = document.getElementById('bucketContainer');
+      const strategy = document.getElementById('strategySelect').value;
+      container.innerHTML = '';
+
+      for (let i = 0; i < capacity; i++) {
+        const bucket = buckets[i];
+        const isHighlighted = (i === highlightIndex);
+
+        const bucketCard = document.createElement('div');
+        bucketCard.className = `bg-white p-4 rounded-xl border ${isHighlighted ? 'border-brand-500 ring-2 ring-brand-200 slot-highlight' : 'border-slate-200'} flex flex-col justify-between transition-all`;
+
+        let bucketContentHTML = '';
+        if (bucket.length === 0) {
+          bucketContentHTML = `<span class="text-xs text-slate-400 italic">Empty Slot</span>`;
+        } else if (strategy === 'chaining') {
+          // Render linked list items
+          bucketContentHTML = bucket.map((item, idx) => `
+            <div class="bg-brand-50 border border-brand-200 text-brand-900 text-xs p-2 rounded-lg mb-1.5 item-inserted flex items-center justify-between font-mono">
+              <span><b>${item.key}:</b> ${item.value}</span>
+              ${idx < bucket.length - 1 ? '<i class="fa-solid fa-[#fa-link] fa-link text-brand-400 text-xs" title="Chained"></i>' : ''}
+            </div>
+          `).join('');
+        } else {
+          // Open Addressing item
+          const item = bucket[0];
+          bucketContentHTML = `
+            <div class="bg-purple-50 border border-purple-200 text-purple-900 text-xs p-2 rounded-lg font-mono item-inserted">
+              <b>${item.key}:</b> ${item.value}
+            </div>
+          `;
+        }
+
+        bucketCard.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2 mb-2">
+              <span class="text-xs font-bold text-slate-500 font-mono">Index [${i}]</span>
+              <span class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">${bucket.length} item(s)</span>
+            </div>
+            ${bucketContentHTML}
+          </div>
+        `;
+
+        container.appendChild(bucketCard);
+      }
+
+      // Update statistics UI
+      document.getElementById('statCapacity').innerText = capacity;
+      document.getElementById('statCount').innerText = itemsCount;
+      const loadFactor = (itemsCount / capacity).toFixed(2);
+      document.getElementById('statLoad').innerText = loadFactor;
+    }
+
+    // Insert Item handler
+    function insertItem() {
+      const keyInput = document.getElementById('inputKey');
+      const valueInput = document.getElementById('inputValue');
+      const key = keyInput.value.trim();
+      const value = valueInput.value.trim();
+      const strategy = document.getElementById('strategySelect').value;
+
+      if (!key || !value) {
+        alert('Please provide both a Key and a Value!');
+        return;
+      }
+
+      const initialIndex = hashFunction(key, capacity);
+      let targetIndex = initialIndex;
+
+      if (strategy === 'chaining') {
+        // Separate chaining collision
+        buckets[targetIndex].push({ key, value });
+        itemsCount++;
+        document.getElementById('stepExplanation').innerHTML = 
+          `Hashed <span class="font-bold text-brand-800">"${key}"</span> ➜ ASCII Sum % ${capacity} = Index <span class="font-bold text-amber-600">[${targetIndex}]</span>`;
+      } else {
+        // Open Addressing (Linear Probing)
+        let probed = 0;
+        while (buckets[targetIndex].length > 0 && probed < capacity) {
+          targetIndex = (targetIndex + 1) % capacity;
+          probed++;
+        }
+
+        if (probed >= capacity) {
+          alert('Table is completely full! Resizing automatically...');
+          resizeTable();
+          insertItem();
+          return;
+        }
+
+        buckets[targetIndex].push({ key, value });
+        itemsCount++;
+
+        if (targetIndex !== initialIndex) {
+          document.getElementById('stepExplanation').innerHTML = 
+            `Collision at Index [${initialIndex}]! Linear Probed ➜ Placed at Index <span class="font-bold text-purple-600">[${targetIndex}]</span>`;
+        } else {
+          document.getElementById('stepExplanation').innerHTML = 
+            `Hashed <span class="font-bold text-brand-800">"${key}"</span> ➜ Placed at Index <span class="font-bold text-amber-600">[${targetIndex}]</span>`;
+        }
+      }
+
+      renderBuckets(targetIndex);
+
+      // Trigger automatic resizing if Load Factor exceeds 0.75
+      if (itemsCount / capacity >= 0.75) {
+        setTimeout(() => {
+          alert('Load factor exceeded 0.75! Doubling table capacity and Rehashing all items...');
+          resizeTable();
+        }, 500);
+      }
+
+      // Reset inputs
+      keyInput.value = '';
+      valueInput.value = '';
+    }
+
+    // Resize Table logic
+    function resizeTable() {
+      const oldBuckets = buckets;
+      capacity = capacity * 2;
+      buckets = Array.from({ length: capacity }, () => []);
+      itemsCount = 0;
+
+      // Rehash existing items
+      oldBuckets.forEach(bucket => {
+        bucket.forEach(item => {
+          const newIdx = hashFunction(item.key, capacity);
+          buckets[newIdx].push(item);
+          itemsCount++;
+        });
+      });
+
+      document.getElementById('stepExplanation').innerHTML = `<b>Resized!</b> New Capacity: ${capacity}. All keys re-hashed.`;
+      renderBuckets();
+    }
+
+    // Reset Simulator
+    function resetSimulator() {
+      capacity = 5;
+      itemsCount = 0;
+      buckets = Array.from({ length: capacity }, () => []);
+      document.getElementById('stepExplanation').innerText = 'Simulator reset to original state.';
+      renderBuckets();
+    }
+
+    // Code Copy Helper
+    function copyCode(elementId) {
+      const codeText = document.getElementById(elementId).innerText;
+      const textArea = document.createElement('textarea');
+      textArea.value = codeText;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      alert('Code copied to clipboard!');
+    }
+
+    // Switch Language Tabs
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('tab-active'));
+
+      document.getElementById(tabId).classList.remove('hidden');
+      document.getElementById('tab-' + tabId).classList.add('tab-active');
+    }
+
+    // Initialize initial visualizer state on load
+    window.onload = function() {
+      renderBuckets();
+    };
+  </script>
+
+  <!-- Additional self-contained SQL index visualizer logic -->
+  <script>
+  (() => {
+    const names=['Ana','Ben','Cara','Dev','Eva','Mia','Sam','Zoe'];
+    const scores={Ana:90,Ben:85,Cara:95,Dev:80,Eva:88,Mia:92,Sam:76,Zoe:99};
+    const $=id=>document.getElementById(id);
+    const hash=name=>[...name].reduce((n,ch)=>n+ch.charCodeAt(0),0)%8;
+    const mode=$('sqlviz-mode'),target=$('sqlviz-target'),from=$('sqlviz-from'),to=$('sqlviz-to');
+    let step=0;
+    const matches=()=>mode.value==='exact'?[target.value]:names.filter(n=>n>=from.value&&n<=to.value);
+    const box=(label,active,found)=>`<span style="display:inline-block;padding:6px 9px;margin:3px;border-radius:7px;border:1px solid ${found?'#16a34a':active?'#d97706':'#cbd5e1'};background:${found?'#bbf7d0':active?'#fde68a':'#f1f5f9'};font-size:12px;font-weight:600">${label}</span>`;
+    function render(){
+      const range=mode.value==='range', key=target.value, chosen=matches(), idx=hash(key), branch=names.indexOf(key)<4?0:1;
+      $('sqlviz-target-wrap').classList.toggle('hidden',range);
+      $('sqlviz-from-wrap').classList.toggle('hidden',!range);
+      $('sqlviz-to-wrap').classList.toggle('hidden',!range);
+      $('sqlviz-query').textContent=range?`SELECT * FROM dbo.UserScores WHERE UserName BETWEEN '${from.value}' AND '${to.value}';`:`SELECT * FROM dbo.UserScores WHERE UserName = '${key}';`;
+      $('sqlviz-tree').innerHTML=`<div class="text-center">${box('ROOT: Ana–Dev | Eva–Zoe',step>=1,false)}</div><div class="text-center text-slate-500">↙ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↘</div><div class="grid grid-cols-2 gap-2">${[names.slice(0,4),names.slice(4)].map((part,i)=>`<div class="rounded-lg border p-2 bg-white"><div class="text-xs font-semibold text-slate-500 mb-2">Leaf ${i+1} (sorted)</div>${part.map(n=>box(n,step>=2&&(range||branch===i),step>=3&&chosen.includes(n))).join('')}</div>`).join('')}</div>`;
+      $('sqlviz-hash').innerHTML=Array.from({length:8},(_,i)=>`<div style="display:flex;gap:8px;align-items:center"><span style="font-size:12px;width:66px;flex-shrink:0">Bucket ${i}</span><div style="flex:1;min-height:30px;padding:3px;border:1px solid ${step>=2&&!range&&idx===i?'#16a34a':'#cbd5e1'};background:${step>=2&&!range&&idx===i?'#dcfce7':'white'};border-radius:6px">${names.filter(n=>hash(n)===i).map(n=>box(n,step>=2&&!range&&idx===i,step>=3&&chosen.includes(n))).join('')||'<span style="color:#94a3b8;font-size:12px">Empty</span>'}</div></div>`).join('');
+      const msgs=range?['Select a range and press Next step.','B+ Tree: inspect the ordered root to locate the starting range. Hash buckets are not sorted.','B+ Tree: navigate to the first matching leaf and read consecutive keys. A hash index has no single bucket for a range.','B+ Tree: return keys in the selected range. A hash-only access path cannot perform an efficient ordered range seek.']:['Select a username and press Next step.','B+ Tree: inspect root key boundaries. Hash index: calculate the hash code.','B+ Tree: navigate to the appropriate leaf. Hash index: jump to bucket '+idx+'.','Compare the full key with the entries found. Both structures locate '+key+'.'];
+      $('sqlviz-status').textContent=`Step ${step} of 3 — ${msgs[step]}`;
+      $('sqlviz-tree-note').textContent=step===3?(range?'Sorted leaf entries support a range scan.':'A B+ Tree navigates to the selected key in sorted order.'):'Keys are maintained in sorted order; the root points to leaf ranges.';
+      $('sqlviz-hash-note').textContent=range?'Buckets are unordered, so a range query cannot efficiently seek through a hash index.':`Example hash: sum of character codes mod 8. ${key} maps to bucket ${idx}. ${names.filter(n=>hash(n)===idx).length>1?'This bucket has a collision: compare keys along the chain.':'This bucket has one matching entry.'}`;
+      $('sqlviz-result').classList.toggle('hidden',step!==3);
+      if(step===3){$('sqlviz-result').textContent=chosen.length?`Matching rows: ${chosen.map(n=>n+' (Score '+scores[n]+')').join(', ')}.`:'No usernames match the selected range.';}
+      $('sqlviz-next').disabled=step===3;
+      $('sqlviz-next').style.opacity=step===3?'.5':'1';
+    }
+    $('sqlviz-next').addEventListener('click',()=>{step=Math.min(3,step+1);render()});
+    $('sqlviz-reset').addEventListener('click',()=>{step=0;render()});
+    [mode,target,from,to].forEach(e=>e.addEventListener('change',()=>{step=0;render()}));
+    render();
+  })();
+  </script>
+
+</body>
+</html>
