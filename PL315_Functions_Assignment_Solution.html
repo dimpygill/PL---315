@@ -1,0 +1,61 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Assignment Solution: One Problem, Four Languages</title><style>body{font-family:Arial,sans-serif;line-height:1.65;max-width:920px;margin:40px auto;padding:0 22px;color:#243044;background:#fff}h1{color:#163b65}h2{color:#17618a;border-bottom:1px solid #ddd;padding-bottom:8px}h3{color:#27527a}pre{background:#f2f5f8;padding:16px;overflow-x:auto;border-radius:8px}code{font-family:Consolas,monospace}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccd5df;padding:10px;text-align:left}th{background:#eaf2f9}.note{background:#f1f6fa;padding:14px;border-left:4px solid #3175a4}</style></head><body><h1>Assignment Solution: One Problem, Four Languages</h1><p><b>Course:</b> Programming Language Design (PL-315)</p><p class="note">The expected updated salary for an original salary of $6,000 is $6,600 (salary × 1.10).</p>
+<h2>Part 1: Working Function Examples</h2>
+<h3>C</h3><pre><code>#include &lt;stdio.h&gt;
+
+double addBonus(double salary) {
+    return salary * 1.10;
+}
+
+int main(void) {
+    double result = addBonus(6000);
+    printf("%.2f\n", result);
+    return 0;
+}</code></pre><p><b>Output:</b> 6600.00. C requires explicit parameter and return types. The function is called from main.</p>
+<h3>C#</h3><pre><code>using System;
+
+class Program {
+    static double AddBonus(double salary) {
+        return salary * 1.10;
+    }
+
+    static void Main() {
+        double result = AddBonus(6000);
+        Console.WriteLine(result.ToString("F2"));
+    }
+}</code></pre><p><b>Output:</b> 6600.00. C# is statically typed; this example uses a static method defined in a class.</p>
+<h3>Python</h3><pre><code>def add_bonus(salary):
+    return salary * 1.10
+
+result = add_bonus(6000)
+print(f"{result:.2f}")</code></pre><p><b>Output:</b> 6600.00. Python does not require type declarations. Formatting to two decimal places avoids displaying floating-point artifacts.</p>
+<h3>Microsoft SQL Server</h3><pre><code>CREATE FUNCTION dbo.AddBonus
+(
+    @Salary DECIMAL(12,2)
+)
+RETURNS DECIMAL(12,2)
+AS
+BEGIN
+    RETURN @Salary * 1.10;
+END;
+GO
+
+SELECT dbo.AddBonus(6000) AS NewSalary;</code></pre><p><b>Output:</b> 6600.00. A scalar SQL function declares parameter and return types and can be invoked in SELECT expressions.</p>
+<h2>Part 2: Language Design Comparison</h2><table><tr><th>Feature</th><th>C</th><th>C#</th><th>Python</th><th>SQL Server</th></tr><tr><td>Typing</td><td>Static</td><td>Static</td><td>Dynamic</td><td>Static</td></tr><tr><td>Parameter types declared?</td><td>Yes</td><td>Yes</td><td>Optional annotations</td><td>Yes</td></tr><tr><td>Return type declared?</td><td>Yes</td><td>Yes</td><td>Optional annotation</td><td>Yes</td></tr><tr><td>Function call</td><td>addBonus(6000)</td><td>AddBonus(6000)</td><td>add_bonus(6000)</td><td>SELECT dbo.AddBonus(6000)</td></tr></table>
+<p>C and C# check many type constraints at compile time. Python's runtime checks allow a function to accept different kinds of values, though unsupported operations can fail at runtime. SQL Server scalar functions use declared SQL types and can be evaluated as part of queries. SQL's set-based approach describes the desired result rather than explicitly looping over each row.</p>
+<h2>Part 3: 10,000 Employees</h2><p>An application in C, C#, or Python could retrieve salaries from the database, loop through the records, and call the bonus function for each salary. For example:</p><pre><code>def add_bonus(salary):
+    return salary * 1.10
+
+salaries = [5000, 6000, 7000]
+for salary in salaries:
+    print(f"{add_bonus(salary):.2f}")</code></pre><p><b>Output:</b> 5500.00, 6600.00, 7700.00 (one per line).</p>
+<p>When salaries already reside in SQL Server, a single set-based query can calculate bonuses:</p><pre><code>SELECT EmployeeID, Salary,
+       Salary * 1.10 AS NewSalary
+FROM Employees;</code></pre><p>Alternatively, the previously defined scalar function can be used:</p><pre><code>SELECT EmployeeID, Salary,
+       dbo.AddBonus(Salary) AS NewSalary
+FROM Employees;</code></pre><p><b>Recommended approach:</b> For this simple calculation, a direct SQL expression is generally preferable because it avoids transferring 10,000 records to application code solely for arithmetic. Scalar UDF performance can depend on the execution plan and whether SQL Server can inline the function. Application code remains appropriate when additional business logic or integration is required. The SELECT statements calculate displayed results; they do not permanently update stored salaries.</p>
+<h2>Part 4: Sample Discussion Responses</h2>
+<h3>Do explicit types improve readability?</h3><p>Explicit types make function contracts clear and help catch many errors before execution. Python provides concise, flexible definitions, and optional type hints can improve documentation and tooling without making Python statically typed by default.</p>
+<h3>How is SQL function calling different?</h3><p>A SQL scalar function can appear in a SELECT expression evaluated for rows returned by a query. Unlike an explicit application loop, the SQL query specifies the desired set of results and lets the database engine choose an execution strategy.</p>
+<h3>Which approach is best for 10,000 employees?</h3><p>Use a set-based SQL expression when the data is in SQL Server and the computation is simple. Use application code when workflow, external services, or complex application-specific behavior warrants it.</p>
+<h2>Part 5: Example Reflection</h2><p>Comparing functions across four languages shows that language design affects more than syntax. C and C# emphasize declared types, while Python allows flexible runtime typing. SQL Server integrates functions with set-oriented data queries. The best solution depends on where the data lives and what processing is needed.</p>
+</body></html>
